@@ -1,0 +1,707 @@
+openapi: "3.0.0"
+info:
+  title: New Groups API
+  description: |
+    The new Groups API
+
+    ### Pagination
+      Requests that return multiple items will be paginated to 20 items by default. You can specify
+      further pages with the `page` parameter. You can also set a custom page
+      size up to 100 with the `perPage` parameter.
+
+      Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
+  version: "v5"
+
+servers:
+  - url: api.topcoder.com/v5
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /groups/{groupId}/members:
+    get:
+      description: |
+        Get members by group id
+
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - group membership
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+      responses:
+        200:
+          $ref: '#/components/responses/GroupMembershipArrayResponse'
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: |
+        Add a member to the specified group
+        
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - group membership
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewGroupMembershipBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupMembershipResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /groups/{groupId}/members/{memberId}:
+    get:
+      description: Get membership by group id and member id
+      tags:
+        - group membership
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/memberId'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupMembershipResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"  
+    delete:
+      description: |
+        Remove a member from specified group
+        
+        The user has to have admin role and the group allows self registration.
+      tags:
+        - group membership
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/memberId'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupMembershipResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"  
+
+  /groups/{groupId}/membersCount:
+    get:
+      description: Get members count by group id
+      tags:
+        - group membership
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/includeSubGroups'
+      responses:
+        200:
+          description: OK. Response will contain count of members.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"  
+
+  /groups/{groupId}:
+    get:
+      description: |
+        Fetch a particular group
+        
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/includeSubGroups'
+        - $ref: '#/components/parameters/includeParentGroups'
+        - $ref: '#/components/parameters/oneLevel'
+        - name: fields
+          in: query
+          required: false
+          description: |
+            fields=fieldName1,fieldName2,...,fieldN  - parameter for
+            choosing which fields of group that will be included in response.
+
+            + id
+            + createdAt
+            + createdBy
+            + updatedAt
+            + updatedBy
+            + name
+            + description
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"  
+    delete:
+      description: |
+        Delete a group
+        
+        The user has to have admin role.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+                
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"  
+    put:
+      description: |
+        Update group
+        
+        The user has to have admin role.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /groups:
+    get:
+      description: |
+        Fetch groups by user or group. Omit the query parameters to fetch all groups.
+        
+        The user has to have admin role.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: memberId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: id of membership
+        - name: membershipType
+          in: query
+          required: false
+          schema:
+            type: string
+          description: membership type. Use 'group' if memberId is an id of a group, otherwise 'user'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupArrayResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: |
+        Creation of new group
+        
+        The user has to have admin role.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/NewGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /groups/securityGroups:
+    post:
+      description: |
+        Creation of new security group
+        
+        The user has to have admin role.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/SecurityGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/SecurityGroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  parameters:
+    groupId:
+      name: groupId
+      in: path
+      description: The group id.
+      required: true
+      schema:
+        type: string
+      example: '1234'
+    memberId:
+      name: memberId
+      in: path
+      description: The member id.
+      required: true
+      schema:
+        type: string
+      example: '1234'
+    includeSubGroups:
+      name: includeSubGroups
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: |
+        a flag to indicate whether or not include the sub groups, default to false
+        includeSubGroups and includeParentGroups could not be true at the same time
+    includeParentGroups:
+      name: includeParentGroup
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: |
+        a flag to indicate whether to include parent groups, default to false
+        includeSubGroups and includeParentGroups could not be true at the same time
+    oneLevel:
+      name: oneLevel
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: |
+        when includeSubGroups is true, it's a flag to indicate whether or not get one level of sub groups or all the sub groups recursively, default to false
+        when includeParentGroups is true, it's a flag to indicate whether or not get one level of parent groups or all the parent groups recursively, default to true
+        includeSubGroups and includeParentGroups could not be true at the same time
+    page:
+      name: page
+      in: query
+      description: The page number.
+      required: false
+      schema:
+        type: integer
+        default: 1
+    perPage:
+      name: perPage
+      in: query
+      description: The number of entities shown in one page.
+      required: false
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+  responses:
+    BadRequest:
+      description: BAD REQUEST - if there was problem with the request (e.g. malformed or some parameters are missing).
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The bad request error message.
+                example: Invalid input.
+    NotFound:
+      description: NOT FOUND - if the resource in request did not exist
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The not found error message.
+                example: A resource with the name could not be found.
+    Unauthenticated:
+      description: UNAUTHENTICATED - if user is unauthenticated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The unauthorized error message.
+                example: Unable to authenticate the user.
+    Forbidden:
+      description: FORBIDDEN - if it's forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The forbidden error message.
+                example: You are not allowed to access the request.
+    InternalServerError:
+      description: INTERNAL SERVER ERROR - if the request was properly formatted, but the operation failed on the server side
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The server error message.
+                example: Something went wrong while processing your request. We’re sorry for the trouble. We’ve been notified of the error and will correct it as soon as possible. Please try your request again in a moment.
+
+
+    GroupMembershipArrayResponse:
+      description: The group members response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GroupMembership"
+      headers:
+        X-Next-Page:
+          schema:
+            type: integer
+          description: The index of the next page
+        X-Page:
+          schema:
+            type: integer
+          description: The index of the current page (starting at 1)
+        X-Per-Page:
+          schema:
+            type: integer
+          description: The number of items to list per page
+        X-Total:
+          schema:
+            type: integer
+          description: The total number of items
+        X-Total-Pages:
+          schema:
+            type: integer
+          description: The total number of pages
+        Link:
+          schema:
+            type: string
+          description: Pagination link header
+
+    GroupMembershipResponse:
+      description: The group member response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: '#/components/schemas/GroupMembership'
+    GroupArrayResponse:
+      description: The group response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+      headers:
+        X-Next-Page:
+          schema:
+            type: integer
+          description: The index of the next page
+        X-Page:
+          schema:
+            type: integer
+          description: The index of the current page (starting at 1)
+        X-Per-Page:
+          schema:
+            type: integer
+          description: The number of items to list per page
+        X-Total:
+          schema:
+            type: integer
+          description: The total number of items
+        X-Total-Pages:
+          schema:
+            type: integer
+          description: The total number of pages
+        Link:
+          schema:
+            type: string
+          description: Pagination link header
+                    
+    GroupResponse:
+      description: The group response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: '#/components/schemas/Group'
+
+    SecurityGroupResponse:
+      description: The security group response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                properties:
+                  id:
+                    type: number
+                    format: long
+                    description: The security group id
+                  createUserId:
+                    type: number
+                    format: long
+                    description: The id of the user who created the security group
+                  name:
+                    type: string
+                    description: The security group name
+
+  schemas:
+    GroupMembership:
+      description: The group membership entity
+      properties:   
+        id:
+          type: integer
+          description: The group membership id
+        groupId:
+          type: integer
+          description: The group id
+        groupName:
+          type: string
+          description: The group name
+        createdAt:
+          type: string
+          format: date-time
+          description: The time the group membership created at
+        createdBy:
+          type: string
+          format: integer
+          description: The id of the user who created the group membership
+        updatedAt:
+          type: string
+          format: date-time
+          description: The time the group membership updated at
+        updatedBy:
+          type: string
+          description: The id of the user who updated the group membership
+        memberId:
+          type: integer
+          description: The user id
+        membershipType:
+          type: string
+          enum: ['user', 'group']
+          description: The membership type
+  
+    Group:
+      description: The group entity
+      properties:
+        id:
+          type: integer
+          description: The group id
+        createdAt:
+          type: string
+          format: date-time
+          description: The time the group created at
+        createdBy:
+          type: string
+          format: integer
+          description: The id of the user who created the group
+        updatedAt:
+          type: string
+          format: date-time
+          description: The time the group updated at
+        updatedBy:
+          type: string
+          description: The id of the user who updated the group
+        name:
+          type: string
+          description: The group name
+        description:
+          type: string
+          description: The group description
+        privateGroup:
+          type: boolean
+          description: Flag indicates if the group is private
+        selfRegister:
+          type: boolean
+          description: Flag indicates if the group allows self register
+        subGroups:
+          description: Subgroup array
+          type: array
+          items:
+              $ref: '#/components/schemas/Group' 
+        parentGroup:
+          $ref: '#/components/schemas/Group'
+
+  requestBodies:
+    NewGroupMembershipBodyParam:
+      description: A JSON object containing group membership body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              param:
+                type: object
+                properties:
+                  memberId:
+                    type: integer
+                    description: The id of the user which is being added to the group
+                  membershipType:
+                    type: string
+                    enum: ['user', 'group']
+                    description: The membership type
+    NewGroupBodyParam:
+      description: A JSON object containing group body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              param:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The group name
+                  description:
+                    type: string
+                    description: The group description
+                  privateGroup:
+                    type: boolean
+                    description: Flag indicte if the group is private or not
+                  selfRegister:
+                    type: boolean
+                    description: Flag indicte if the group allows self register
+  
+    SecurityGroupBodyParam:
+      description: A JSON object containing security group body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The security group name
