@@ -1,0 +1,10 @@
+{
+  "name": "tc-groups-client",
+  "description": "The new Groups API Client",
+  "version": "1.0.0",
+  "dependencies": {
+    "q": "^1.5.1",
+    "request": "^2.88.0",
+    "swagger-js-codegen": "^1.12.0"
+  }
+}
