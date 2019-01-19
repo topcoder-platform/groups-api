@@ -1,0 +1,298 @@
+/**
+ * This service provides operations of group memberships
+ */
+const _ = require('lodash')
+const Joi = require('joi')
+const uuid = require('uuid/v4')
+const helper = require('../common/helper')
+const logger = require('../common/logger')
+const errors = require('../common/errors')
+const constants = require('../../app-constants')
+
+/**
+ * Get group members
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to get members
+ * @param {Object} criteria the search criteria
+ * @returns {Object} the search result
+ */
+async function getGroupMembers (currentUser, groupId, criteria) {
+  const session = helper.createDBSession()
+  const group = await helper.ensureExists(session, 'Group', groupId)
+  // if the group is private, the user needs to be a member of the group, or an admin.
+  if (group.privateGroup && currentUser.role !== constants.UserRoles.Admin) {
+    await helper.ensureGroupMember(session, groupId, currentUser.id)
+  }
+
+  const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)'
+  const params = { groupId }
+
+  // query total record count
+  const totalRes = await session.run(`${matchClause} RETURN COUNT(o)`, params)
+  const total = totalRes.records[0].get(0).low || 0
+
+  // query page of records
+  let result = []
+  if (criteria.page <= Math.ceil(total / criteria.perPage)) {
+    const pageRes = await session.run(`${matchClause} RETURN r, o SKIP ${
+      (criteria.page - 1) * criteria.perPage
+    } LIMIT ${criteria.perPage}`, params)
+    result = _.map(pageRes.records, (record) => {
+      const r = record.get(0).properties
+      const o = record.get(1).properties
+      return {
+        id: r.id,
+        groupId,
+        groupName: group.name,
+        createdAt: r.createdAt,
+        createdBy: r.createdBy,
+        memberId: o.id,
+        membershipType: r.type
+      }
+    })
+  }
+
+  session.close()
+
+  return { total, page: criteria.page, perPage: criteria.perPage, result }
+}
+
+getGroupMembers.schema = {
+  currentUser: Joi.object().required(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  criteria: Joi.object().keys({
+    page: Joi.page(),
+    perPage: Joi.perPage()
+  })
+}
+
+/**
+ * Add group member.
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to add member
+ * @param {Object} data the data to add member
+ * @returns {Object} the added group membership
+ */
+async function addGroupMember (currentUser, groupId, data) {
+  const session = helper.createDBSession()
+  const group = await helper.ensureExists(session, 'Group', groupId)
+  // if the group is private, the user needs to be a member of the group, or an admin.
+  if (group.privateGroup && currentUser.role !== constants.UserRoles.Admin) {
+    await helper.ensureGroupMember(session, groupId, currentUser.id)
+  }
+
+  if (data.param.membershipType === constants.MembershipTypes.Group) {
+    if (data.param.memberId === groupId) {
+      throw new errors.BadRequestError('A group can not add to itself.')
+    }
+    const childGroup = await helper.ensureExists(session, 'Group', data.param.memberId)
+    // if parent group is private, the sub group must be private too
+    if (group.privateGroup && !childGroup.privateGroup) {
+      throw new errors.ConflictError('Parent group is private, the child group must be private too.')
+    }
+  } else {
+    await helper.ensureExists(session, 'User', data.param.memberId)
+  }
+
+  // check whether member is already in group
+  const targetObjectType = data.param.membershipType === constants.MembershipTypes.Group ? 'Group' : 'User'
+  const memberCheckRes = await session.run(`MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:${
+    targetObjectType
+  } {id: {memberId}}) RETURN o`, { groupId, memberId: data.param.memberId })
+  if (memberCheckRes.records.length > 0) {
+    throw new errors.ConflictError('The member is already in the group')
+  }
+
+  // check cyclical reference
+  if (data.param.membershipType === constants.MembershipTypes.Group) {
+    const pathRes = await session.run('MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p',
+      { fromId: data.param.memberId, toId: groupId })
+    if (pathRes.records.length > 0) {
+      throw new errors.ConflictError('There is cyclical group reference')
+    }
+  }
+
+  // add membership
+  const membershipId = uuid()
+  const createdAt = new Date().toISOString()
+  const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${
+    targetObjectType
+  } {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r`
+  await session.run(query, {
+    groupId,
+    memberId: data.param.memberId,
+    membershipId,
+    membershipType: data.param.membershipType,
+    createdAt,
+    createdBy: currentUser.id
+  })
+
+  session.close()
+  return {
+    id: membershipId,
+    groupId,
+    groupName: group.name,
+    createdAt,
+    createdBy: currentUser.id,
+    memberId: data.param.memberId,
+    membershipType: data.param.membershipType
+  }
+}
+
+addGroupMember.schema = {
+  currentUser: Joi.object().required(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  data: Joi.object().keys({
+    param: Joi.object().keys({
+      memberId: Joi.id(),
+      membershipType: Joi.string().valid(_.values(constants.MembershipTypes)).required()
+    }).required()
+  }).required()
+}
+
+/**
+ * Get group member with db session.
+ * @param {Object} session db session
+ * @param {String} groupId the group id
+ * @param {String} memberId the member id
+ * @returns {Object} the group membership
+ */
+async function getGroupMemberWithSession (session, groupId, memberId) {
+  const group = await helper.ensureExists(session, 'Group', groupId)
+
+  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r'
+  const membershipRes = await session.run(query, { groupId, memberId })
+  if (membershipRes.records.length === 0) {
+    throw new errors.NotFoundError('The member is not in the group')
+  }
+  const r = membershipRes.records[0].get(0).properties
+  return {
+    id: r.id,
+    groupId,
+    groupName: group.name,
+    createdAt: r.createdAt,
+    createdBy: r.createdBy,
+    memberId,
+    membershipType: r.type
+  }
+}
+
+/**
+ * Get group member.
+ * @param {String} groupId the group id
+ * @param {String} memberId the member id
+ * @returns {Object} the group membership
+ */
+async function getGroupMember (groupId, memberId) {
+  const session = helper.createDBSession()
+  const membership = await getGroupMemberWithSession(session, groupId, memberId)
+  session.close()
+  return membership
+}
+
+getGroupMember.schema = {
+  groupId: Joi.id(), // defined in app-bootstrap
+  memberId: Joi.id()
+}
+
+/**
+ * Delete group member.
+ * @param {String} groupId the group id
+ * @param {String} memberId the member id
+ * @returns {Object} the deleted group membership
+ */
+async function deleteGroupMember (groupId, memberId) {
+  const session = helper.createDBSession()
+
+  // get existing membership to ensure it exists
+  const membership = await getGroupMemberWithSession(session, groupId, memberId)
+  if (membership.membershipType === constants.MembershipTypes.User) {
+    const group = await helper.ensureExists(session, 'Group', groupId)
+    if (!group.selfRegister) {
+      throw new errors.BadRequestError('The group should allow self registration.')
+    }
+  }
+
+  // delete membership
+  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r'
+  await session.run(query, { groupId, memberId })
+
+  session.close()
+  return membership
+}
+
+deleteGroupMember.schema = {
+  groupId: Joi.id(), // defined in app-bootstrap
+  memberId: Joi.id()
+}
+
+/**
+ * Get all group members.
+ * @param {String} groupId the group id
+ * @returns {Array} all group members
+ */
+async function getAllGroupMembers (session, groupId) {
+  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o) RETURN r, o'
+  const res = await session.run(query, { groupId })
+  return _.map(res.records, (record) => {
+    const r = record.get(0).properties
+    const o = record.get(1).properties
+    return {
+      memberId: o.id,
+      membershipType: r.type
+    }
+  })
+}
+
+/**
+ * Get distinct user members count of given group. Optionally may include sub groups.
+ * @param {String} groupId the group id
+ * @param {Object} query the query parameters
+ * @returns {Object} the group members count data
+ */
+async function getGroupMembersCount (groupId, query) {
+  const session = helper.createDBSession()
+  await helper.ensureExists(session, 'Group', groupId)
+
+  // get distinct users using breadth first search algorithm,
+  // this is equivalent to recursive algorithm, but more efficient than latter,
+  // see https://en.wikipedia.org/wiki/Breadth-first_search
+  const groupIds = [groupId]
+  const userIds = []
+  let index = 0
+  while (index < groupIds.length) {
+    const gId = groupIds[index]
+    index += 1
+    const members = await getAllGroupMembers(session, gId)
+    _.forEach(members, (member) => {
+      if (member.membershipType === constants.MembershipTypes.User) {
+        if (!_.includes(userIds, member.memberId)) {
+          userIds.push(member.memberId)
+        }
+      } else if (!_.includes(groupIds, member.memberId) && query.includeSubGroups) {
+        // only handle group that was not handled yet, reduce duplicate processing
+        groupIds.push(member.memberId)
+      }
+    })
+  }
+
+  session.close()
+  return { count: userIds.length }
+}
+
+getGroupMembersCount.schema = {
+  groupId: Joi.id(), // defined in app-bootstrap
+  query: Joi.object().keys({
+    includeSubGroups: Joi.boolean().default(false)
+  })
+}
+
+module.exports = {
+  getGroupMembers,
+  addGroupMember,
+  getGroupMember,
+  deleteGroupMember,
+  getGroupMembersCount
+}
+
+logger.buildService(module.exports)

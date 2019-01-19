@@ -1,0 +1,621 @@
+{
+	"info": {
+		"_postman_id": "c965b55a-a118-4745-ba00-9a9b1279ccc7",
+		"name": "tc-groups-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "group",
+			"item": [
+				{
+					"name": "create group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"param\": {\n\t    \"name\": \"group1\",\n\t    \"description\": \"desc1\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/groups",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update group",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated\",\n\t    \"description\": \"desc1-updated\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{GROUP_ID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{GROUP_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search groups",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups?page=1&perPage=10&memberId=11ab038e-48da-123b-96e8-8d3b99b6d183&membershipType=group",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "perPage",
+									"value": "10"
+								},
+								{
+									"key": "memberId",
+									"value": "11ab038e-48da-123b-96e8-8d3b99b6d183"
+								},
+								{
+									"key": "membershipType",
+									"value": "group"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get group",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{GROUP_ID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{GROUP_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get test group",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}"
+							],
+							"query": [
+								{
+									"key": "includeSubGroups",
+									"value": "true"
+								},
+								{
+									"key": "includeParentGroup",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "oneLevel",
+									"value": "false"
+								},
+								{
+									"key": "fields",
+									"value": "id,name,description"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete group",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{GROUP_ID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{GROUP_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4b651537-6c26-4f18-ae6d-6f3c53aa7f18",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f50ae8d-c7dd-46d6-9b99-6c69b641ee3d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "group membership",
+			"item": [
+				{
+					"name": "get group members",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "perPage",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add group member (user)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_USER_ID}}\",\n\t    \"membershipType\": \"user\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add group member (group)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n\t    \"membershipType\": \"group\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get group member (user)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_USER_ID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members",
+								"{{TEST_USER_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get group member (group)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members",
+								"{{TEST_GROUP_ID2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete group member (user)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_USER_ID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members",
+								"{{TEST_USER_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete group member (group)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"members",
+								"{{TEST_GROUP_ID2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get group member count",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/membersCount?includeSubGroups=true",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"{{TEST_GROUP_ID}}",
+								"membersCount"
+							],
+							"query": [
+								{
+									"key": "includeSubGroups",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4b651537-6c26-4f18-ae6d-6f3c53aa7f18",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f50ae8d-c7dd-46d6-9b99-6c69b641ee3d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "4e396df5-d3a4-4c5f-8477-eeead6536fd5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "683c9325-3bdf-4d2f-89f2-6e2e4f5c854f",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

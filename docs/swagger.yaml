@@ -122,7 +122,7 @@ paths:
 
   /groups/{groupId}/membersCount:
     get:
-      description: Get members count by group id
+      description: Get distinct user members count by group id.
       tags:
         - group membership
       security:
@@ -347,7 +347,7 @@ components:
       required: true
       schema:
         type: string
-      example: '1234'
+      example: '10ba038e-48da-123b-96e8-8d3b99b6d18a'
     memberId:
       name: memberId
       in: path
@@ -355,7 +355,7 @@ components:
       required: true
       schema:
         type: string
-      example: '1234'
+      example: '10ba038e-48da-123b-96e8-8d3b99b6d18a'
     includeSubGroups:
       name: includeSubGroups
       in: query
@@ -387,7 +387,7 @@ components:
     page:
       name: page
       in: query
-      description: The page number.
+      description: The page number. 1 based.
       required: false
       schema:
         type: integer
@@ -579,10 +579,10 @@ components:
       description: The group membership entity
       properties:   
         id:
-          type: integer
+          type: string
           description: The group membership id
         groupId:
-          type: integer
+          type: string
           description: The group id
         groupName:
           type: string
@@ -593,18 +593,10 @@ components:
           description: The time the group membership created at
         createdBy:
           type: string
-          format: integer
           description: The id of the user who created the group membership
-        updatedAt:
-          type: string
-          format: date-time
-          description: The time the group membership updated at
-        updatedBy:
-          type: string
-          description: The id of the user who updated the group membership
         memberId:
-          type: integer
-          description: The user id
+          type: string
+          description: The member id
         membershipType:
           type: string
           enum: ['user', 'group']
@@ -614,7 +606,7 @@ components:
       description: The group entity
       properties:
         id:
-          type: integer
+          type: string
           description: The group id
         createdAt:
           type: string
@@ -622,7 +614,6 @@ components:
           description: The time the group created at
         createdBy:
           type: string
-          format: integer
           description: The id of the user who created the group
         updatedAt:
           type: string
@@ -644,12 +635,15 @@ components:
           type: boolean
           description: Flag indicates if the group allows self register
         subGroups:
-          description: Subgroup array
+          description: Sub groups array
           type: array
           items:
               $ref: '#/components/schemas/Group' 
-        parentGroup:
-          $ref: '#/components/schemas/Group'
+        parentGroups:
+          description: Parent groups array
+          type: array
+          items:
+              $ref: '#/components/schemas/Group' 
 
   requestBodies:
     NewGroupMembershipBodyParam:
@@ -664,7 +658,7 @@ components:
                 type: object
                 properties:
                   memberId:
-                    type: integer
+                    type: string
                     description: The id of the user which is being added to the group
                   membershipType:
                     type: string
