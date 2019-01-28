@@ -6,24 +6,81 @@ const constants = require('../app-constants')
 
 module.exports = {
   '/groups': {
-    get: { controller: 'GroupController', method: 'searchGroups', roles: [constants.UserRoles.Admin] },
-    post: { controller: 'GroupController', method: 'createGroup', roles: [constants.UserRoles.Admin] }
+    get: {
+      controller: 'GroupController',
+      method: 'searchGroups',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups', 'write:groups', 'all:groups']
+    },
+    post: {
+      controller: 'GroupController',
+      method: 'createGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    }
   },
   '/groups/:groupId': {
-    get: { controller: 'GroupController', method: 'getGroup' },
-    put: { controller: 'GroupController', method: 'updateGroup', roles: [constants.UserRoles.Admin] },
-    delete: { controller: 'GroupController', method: 'deleteGroup', roles: [constants.UserRoles.Admin] }
+    get: {
+      controller: 'GroupController',
+      method: 'getGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups', 'write:groups', 'all:groups']
+    },
+    put: {
+      controller: 'GroupController',
+      method: 'updateGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    },
+    delete: {
+      controller: 'GroupController',
+      method: 'deleteGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    }
   },
 
   '/groups/:groupId/members': {
-    get: { controller: 'GroupMembershipController', method: 'getGroupMembers' },
-    post: { controller: 'GroupMembershipController', method: 'addGroupMember' }
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'getGroupMembers',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups', 'write:groups', 'all:groups']
+    },
+    post: {
+      controller: 'GroupMembershipController',
+      method: 'addGroupMember',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['write:groups', 'all:groups']
+    }
   },
   '/groups/:groupId/members/:memberId': {
-    get: { controller: 'GroupMembershipController', method: 'getGroupMember' },
-    delete: { controller: 'GroupMembershipController', method: 'deleteGroupMember', roles: [constants.UserRoles.Admin] }
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'getGroupMember',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups', 'write:groups', 'all:groups']
+    },
+    delete: {
+      controller: 'GroupMembershipController',
+      method: 'deleteGroupMember',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['write:groups', 'all:groups']
+    }
   },
   '/groups/:groupId/membersCount': {
-    get: { controller: 'GroupMembershipController', method: 'getGroupMembersCount' }
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'getGroupMembersCount'
+    }
   }
 }

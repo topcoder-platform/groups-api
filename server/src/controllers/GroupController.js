@@ -3,6 +3,7 @@
  */
 const service = require('../services/GroupService')
 const helper = require('../common/helper')
+const constants = require('../../app-constants')
 
 /**
  * Search groups
@@ -10,7 +11,12 @@ const helper = require('../common/helper')
  * @param res the response
  */
 async function searchGroups (req, res) {
-  const result = await service.searchGroups(req.query)
+  let criteria = req.query
+  if (!req.authUser.isMachine && !helper.hasAdminRole(req.authUser) && criteria) {
+    criteria.memberId = req.authUser.userId
+    criteria.membershipType = constants.MembershipTypes.User
+  }
+  const result = await service.searchGroups(criteria)
   helper.setResHeaders(req, res, result)
   res.send({ result: result.result })
 }
@@ -21,7 +27,7 @@ async function searchGroups (req, res) {
  * @param res the response
  */
 async function createGroup (req, res) {
-  const result = await service.createGroup(req.user, req.body)
+  const result = await service.createGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.body)
   res.send({ result })
 }
 
@@ -31,7 +37,7 @@ async function createGroup (req, res) {
  * @param res the response
  */
 async function updateGroup (req, res) {
-  const result = await service.updateGroup(req.user, req.params.groupId, req.body)
+  const result = await service.updateGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId, req.body)
   res.send({ result })
 }
 
@@ -41,7 +47,8 @@ async function updateGroup (req, res) {
  * @param res the response
  */
 async function getGroup (req, res) {
-  const result = await service.getGroup(req.user, req.params.groupId, req.query)
+  const result = await service.getGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId,
+    req.query)
   res.send({ result })
 }
 

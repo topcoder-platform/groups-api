@@ -25,6 +25,9 @@ The following parameters can be set in config files or in env variables:
 - In the generated Client.js, the request bodies need to be modified to include passed parameters.
   For Eg:  Line 105 is to be changed from `var body = {}` to
   `var body = parameters.$body || {}`
+- In the generated Client.js, the request headers need to be modified to include passed headers.
+  For Eg: Line 107 is to be changed from `headers = {},` to
+  `headers = parameters.$headers || {},`
 - If there is future change to swagger, it is suggested to directly modify the Client.js to suit the changes,
   this is easier than doing above changes
 
@@ -32,7 +35,7 @@ The following parameters can be set in config files or in env variables:
 ## Server Setup
 
 The below demo call and unit tests depend on server test data,
-follow server/READMD.md to initialize database, insert test data, start server app, then do below tests.
+follow server/READMD.md to initialize database, create index, insert test data, start server app, then do below tests.
 
 
 ## To Run Client Demo Call

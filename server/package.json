@@ -8,7 +8,9 @@
     "lint": "standard",
     "lint:fix": "standard --fix",
     "init-db": "node src/init-db.js",
-    "test-data": "node src/test-data.js"
+    "test-data": "node src/test-data.js",
+    "create-index": "node src/create-index.js",
+    "drop-index": "node src/drop-index.js"
   },
   "author": "TCSCODER",
   "license": "none",
@@ -29,6 +31,7 @@
     "morgan": "^1.7.0",
     "neo4j-driver": "^1.7.2",
     "uuid": "^3.3.2",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.4.1"
   }
 }

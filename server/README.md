@@ -20,6 +20,8 @@ The following parameters can be set in config files or in env variables:
 - GRAPH_DB_URI: Graph DB URI, default is local db URI 'bolt://localhost:7687'
 - GRAPH_DB_USER: Graph DB user, default is 'neo4j'
 - GRAPH_DB_PASSWORD: Graph DB password, default is '123456', you probably need to change it
+- AUTH_SECRET: The authorization secret used during token verification.
+- VALID_ISSUERS: The valid issuer of tokens.
 
 
 ## Local graph database setup
@@ -36,10 +38,10 @@ The following parameters can be set in config files or in env variables:
 - Run lint `npm run lint`
 - Run lint fix `npm run lint:fix`
 - Clear and init db `npm run init-db`
+- Add index db `npm run create-index`
 - Insert test data `npm run test-data`
 - Start app `npm start`
 - App is running at `http://localhost:3000`
-
 
 
 ## Heroku deployment
@@ -86,7 +88,6 @@ The user node contains these fields:
 
 - id: the user UUID
 - handle: the user handle, should be unique
-- role: the user role, 'admin' or 'user'
 
 
 ### GroupContains relation

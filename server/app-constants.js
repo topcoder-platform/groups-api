@@ -2,8 +2,8 @@
  * App constants
  */
 const UserRoles = {
-  Admin: 'admin',
-  User: 'user'
+  Admin: 'Administrator',
+  User: 'Topcoder User'
 }
 
 const MembershipTypes = {
