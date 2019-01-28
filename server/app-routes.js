@@ -5,8 +5,9 @@ const _ = require('lodash')
 const config = require('config')
 const HttpStatus = require('http-status-codes')
 const helper = require('./src/common/helper')
-const auth = require('./src/common/auth')
+const errors = require('./src/common/errors')
 const routes = require('./src/routes')
+const authenticator = require('tc-core-library-js').middleware.jwtAuthenticator
 
 /**
  * Configure all routes for express app
@@ -28,9 +29,34 @@ module.exports = (app) => {
         next()
       })
 
-      // Authentication and Authorization
-      if (!def.public) {
-        actions.push(auth(def.roles))
+      // add Authenticator check if route has auth
+      if (def.auth) {
+        actions.push((req, res, next) => {
+          authenticator(_.pick(config, ['AUTH_SECRET', 'VALID_ISSUERS']))(req, res, next)
+        })
+
+        actions.push((req, res, next) => {
+          if (req.authUser.isMachine) {
+            // M2M
+            if (!req.authUser.scopes || !helper.checkIfExists(def.scopes, req.authUser.scopes)) {
+              next(new errors.ForbiddenError('You are not allowed to perform this action!'))
+            } else {
+              next()
+            }
+          } else {
+            req.authUser.userId = String(req.authUser.userId)
+            // User
+            if (req.authUser.roles) {
+              if (!helper.checkIfExists(def.access, req.authUser.roles)) {
+                next(new errors.ForbiddenError('You are not allowed to perform this action!'))
+              } else {
+                next()
+              }
+            } else {
+              next(new errors.ForbiddenError('You are not authorized to perform this action'))
+            }
+          }
+        })
       }
 
       actions.push(method)

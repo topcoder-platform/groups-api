@@ -15,9 +15,6 @@ info:
 servers:
   - url: api.topcoder.com/v5
 
-security:
-  - ApiKeyAuth: []
-
 paths:
   /groups/{groupId}/members:
     get:
@@ -49,7 +46,7 @@ paths:
     post:
       description: |
         Add a member to the specified group
-        
+
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
         - group membership
@@ -93,11 +90,11 @@ paths:
         404:
           $ref: "#/components/responses/NotFound"
         500:
-          $ref: "#/components/responses/InternalServerError"  
+          $ref: "#/components/responses/InternalServerError"
     delete:
       description: |
         Remove a member from specified group
-        
+
         The user has to have admin role and the group allows self registration.
       tags:
         - group membership
@@ -118,15 +115,13 @@ paths:
         404:
           $ref: "#/components/responses/NotFound"
         500:
-          $ref: "#/components/responses/InternalServerError"  
+          $ref: "#/components/responses/InternalServerError"
 
   /groups/{groupId}/membersCount:
     get:
       description: Get distinct user members count by group id.
       tags:
         - group membership
-      security:
-        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/includeSubGroups'
@@ -148,13 +143,13 @@ paths:
         404:
           $ref: "#/components/responses/NotFound"
         500:
-          $ref: "#/components/responses/InternalServerError"  
+          $ref: "#/components/responses/InternalServerError"
 
   /groups/{groupId}:
     get:
       description: |
         Fetch a particular group
-        
+
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
         - groups
@@ -193,11 +188,11 @@ paths:
         404:
           $ref: "#/components/responses/NotFound"
         500:
-          $ref: "#/components/responses/InternalServerError"  
+          $ref: "#/components/responses/InternalServerError"
     delete:
       description: |
         Delete a group
-        
+
         The user has to have admin role.
       tags:
         - groups
@@ -208,7 +203,7 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/GroupResponse"
-                
+
         400:
           $ref: "#/components/responses/BadRequest"
         401:
@@ -218,11 +213,11 @@ paths:
         404:
           $ref: "#/components/responses/NotFound"
         500:
-          $ref: "#/components/responses/InternalServerError"  
+          $ref: "#/components/responses/InternalServerError"
     put:
       description: |
         Update group
-        
+
         The user has to have admin role.
       tags:
         - groups
@@ -249,9 +244,9 @@ paths:
   /groups:
     get:
       description: |
-        Fetch groups by user or group. Omit the query parameters to fetch all groups.
-        
-        The user has to have admin role.
+        Fetch groups by user or group.
+
+        If the user is not admin, backend will ignore memberId and membershipType. It will fetch groups which given user is belonged to.
       tags:
         - groups
       security:
@@ -287,7 +282,7 @@ paths:
     post:
       description: |
         Creation of new group
-        
+
         The user has to have admin role.
       tags:
         - groups
@@ -313,7 +308,7 @@ paths:
     post:
       description: |
         Creation of new security group
-        
+
         The user has to have admin role.
       tags:
         - groups
@@ -541,7 +536,7 @@ components:
           schema:
             type: string
           description: Pagination link header
-                    
+
     GroupResponse:
       description: The group response
       content:
@@ -577,7 +572,7 @@ components:
   schemas:
     GroupMembership:
       description: The group membership entity
-      properties:   
+      properties:
         id:
           type: string
           description: The group membership id
@@ -601,7 +596,7 @@ components:
           type: string
           enum: ['user', 'group']
           description: The membership type
-  
+
     Group:
       description: The group entity
       properties:
@@ -638,12 +633,12 @@ components:
           description: Sub groups array
           type: array
           items:
-              $ref: '#/components/schemas/Group' 
+              $ref: '#/components/schemas/Group'
         parentGroups:
           description: Parent groups array
           type: array
           items:
-              $ref: '#/components/schemas/Group' 
+              $ref: '#/components/schemas/Group'
 
   requestBodies:
     NewGroupMembershipBodyParam:
@@ -687,7 +682,7 @@ components:
                   selfRegister:
                     type: boolean
                     description: Flag indicte if the group allows self register
-  
+
     SecurityGroupBodyParam:
       description: A JSON object containing security group body information
       required: true

@@ -8,15 +8,25 @@ const Client = require('../Client').Client
 const apiClient = new Client(config.API_URL)
 
 const TEST_GROUP_ID = '11ab038e-48da-123b-96e8-8d3b99b6d183'
+const PRIVATE_GROUP_ID = '11ab038e-48da-123b-96e8-8d3b99b6d185'
 const PARENT_GROUP_ID = '11ab038e-48da-123b-96e8-8d3b99b6d182'
+const m2mReadToken = config.TOKEN.M2M_R
+const m2mWriteToken = config.TOKEN.M2M_W
+const user1Token = config.TOKEN.ADMIN.USER1
+const user2Token = config.TOKEN.USER.USER2
+const user4Token = config.TOKEN.USER.USER4
 
 describe('TC Group Unit tests', () => {
   let groupId
+  let groupId2
 
   it('Create group successfully', async () => {
     // random name
     const name = `some-group-name-${new Date().getTime()}`
     const res = await apiClient.createNewGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
       $body: {
         param: {
           name,
@@ -37,9 +47,87 @@ describe('TC Group Unit tests', () => {
     groupId = res.body.result.id
   })
 
+  it('Create group via M2M write token successfully', async () => {
+    // random name
+    const name = `some-group-name-m2m-${new Date().getTime()}`
+    const res = await apiClient.createNewGroup({
+      $headers: {
+        Authorization: `Bearer ${m2mWriteToken}`
+      },
+      $body: {
+        param: {
+          name,
+          description: 'desc1',
+          privateGroup: false,
+          selfRegister: true
+        }
+      }
+    })
+    expect(res.body.result.name).to.equal(name)
+    expect(res.body.result.description).to.equal('desc1')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(true)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+    expect(res.body.result.createdAt).to.exist // eslint-disable-line
+    expect(res.body.result.createdBy).to.be.undefined // eslint-disable-line
+
+    groupId2 = res.body.result.id
+  })
+
+  it('Create group via user forbidden', async () => {
+    // random name
+    const name = `fail-group-name-${new Date().getTime()}`
+    try {
+      await apiClient.createNewGroup({
+        $headers: {
+          Authorization: `Bearer ${user2Token}`
+        },
+        $body: {
+          param: {
+            name,
+            description: 'desc1',
+            privateGroup: false,
+            selfRegister: true
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create group via M2M read token forbidden', async () => {
+    // random name
+    const name = `fail-group-name-${new Date().getTime()}`
+    try {
+      await apiClient.createNewGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mReadToken}`
+        },
+        $body: {
+          param: {
+            name,
+            description: 'desc1',
+            privateGroup: false,
+            selfRegister: true
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
   it('Create group - missing name', async () => {
     try {
       await apiClient.createNewGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             description: 'desc1',
@@ -59,6 +147,9 @@ describe('TC Group Unit tests', () => {
     try {
       const name = `some-group-name-${new Date().getTime()}`
       await apiClient.createNewGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             name,
@@ -79,6 +170,9 @@ describe('TC Group Unit tests', () => {
     try {
       const name = `some-group-name-${new Date().getTime()}`
       await apiClient.createNewGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             name,
@@ -97,6 +191,9 @@ describe('TC Group Unit tests', () => {
   it('Create group - name already used', async () => {
     try {
       await apiClient.createNewGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             name: 'test-group-1',
@@ -115,9 +212,12 @@ describe('TC Group Unit tests', () => {
 
   it('Update group successfully', async () => {
     // random name
-    const name = `some-group-name-${new Date().getTime()}`
+    const name = `some-group-name-update1-${new Date().getTime()}`
     const res = await apiClient.updateGroup({
       groupId,
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
       $body: {
         param: {
           name,
@@ -138,12 +238,93 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.updatedBy).to.exist // eslint-disable-line
   })
 
+  it('Update group via M2M successfully', async () => {
+    // random name
+    const name = `some-group-name-update2-${new Date().getTime()}`
+    const res = await apiClient.updateGroup({
+      groupId: groupId2,
+      $headers: {
+        Authorization: `Bearer ${m2mWriteToken}`
+      },
+      $body: {
+        param: {
+          name,
+          description: 'desc2',
+          privateGroup: false,
+          selfRegister: false
+        }
+      }
+    })
+    expect(res.body.result.name).to.equal(name)
+    expect(res.body.result.description).to.equal('desc2')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+    expect(res.body.result.createdAt).to.exist // eslint-disable-line
+    expect(res.body.result.createdBy).to.be.undefined // eslint-disable-line
+    expect(res.body.result.updatedAt).to.exist // eslint-disable-line
+    expect(res.body.result.updatedBy).to.be.undefined // eslint-disable-line
+  })
+
+  it('Update group via user forbidden', async () => {
+    try {
+      // random name
+      const name = `fail-group-name-${new Date().getTime()}`
+      await apiClient.updateGroup({
+        groupId,
+        $headers: {
+          Authorization: `Bearer ${user4Token}`
+        },
+        $body: {
+          param: {
+            name,
+            description: 'desc2',
+            privateGroup: true,
+            selfRegister: false
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Update group via M2M Read token forbidden', async () => {
+    try {
+      // random name
+      const name = `fail-group-name-${new Date().getTime()}`
+      await apiClient.updateGroup({
+        groupId,
+        $headers: {
+          Authorization: `Bearer ${m2mReadToken}`
+        },
+        $body: {
+          param: {
+            name,
+            description: 'desc2',
+            privateGroup: true,
+            selfRegister: false
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
   it('Update group - not found', async () => {
     try {
       // random name
       const name = `some-group-name-${new Date().getTime()}`
       await apiClient.updateGroup({
         groupId: 'asdflkjsdklfj293847928734',
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             name,
@@ -164,6 +345,9 @@ describe('TC Group Unit tests', () => {
     try {
       await apiClient.updateGroup({
         groupId,
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             name: 123,
@@ -186,6 +370,9 @@ describe('TC Group Unit tests', () => {
       const name = `some-group-name-${new Date().getTime()}`
       await apiClient.updateGroup({
         groupId,
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $body: {
           param: {
             name,
@@ -202,8 +389,11 @@ describe('TC Group Unit tests', () => {
     throw new Error('should not throw error here')
   })
 
-  it('Get group successfully', async () => {
+  it('Get group via admin successfully', async () => {
     const res = await apiClient.getGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
       groupId
     })
     expect(res.body.result.description).to.equal('desc2')
@@ -216,9 +406,71 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.updatedBy).to.exist // eslint-disable-line
   })
 
+  it('Get group via user2 successfully', async () => {
+    const res = await apiClient.getGroup({
+      $headers: {
+        Authorization: `Bearer ${user2Token}`
+      },
+      groupId: groupId2
+    })
+    expect(res.body.result.description).to.equal('desc2')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Get group via M2M read token successfully', async () => {
+    const res = await apiClient.getGroup({
+      $headers: {
+        Authorization: `Bearer ${m2mReadToken}`
+      },
+      groupId
+    })
+    expect(res.body.result.description).to.equal('desc2')
+    expect(res.body.result.privateGroup).to.equal(true)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+    expect(res.body.result.createdAt).to.exist // eslint-disable-line
+    expect(res.body.result.createdBy).to.exist // eslint-disable-line
+    expect(res.body.result.updatedAt).to.exist // eslint-disable-line
+    expect(res.body.result.updatedBy).to.exist // eslint-disable-line
+  })
+
+  it('Get private group via user4 successfully', async () => {
+    const res = await apiClient.getGroup({
+      $headers: {
+        Authorization: `Bearer ${user4Token}`
+      },
+      groupId: PRIVATE_GROUP_ID
+    })
+    expect(res.body.result.name).to.equal('test-group-5')
+    expect(res.body.result.description).to.equal('desc')
+    expect(res.body.result.privateGroup).to.equal(true)
+    expect(res.body.result.selfRegister).to.equal(true)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Get private group via user2 forbidden', async () => {
+    try {
+      await apiClient.getGroup({
+        $headers: {
+          Authorization: `Bearer ${user2Token}`
+        },
+        groupId: PRIVATE_GROUP_ID
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
   it('Get group - not found', async () => {
     try {
       await apiClient.getGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         groupId: 'asdflkjsdklfj293847928734'
       })
     } catch (err) {
@@ -230,6 +482,9 @@ describe('TC Group Unit tests', () => {
 
   it('Search groups successfully 1', async () => {
     const res = await apiClient.fetchGroupsByUserORGroup({
+      $headers: {
+        Authorization: `Bearer ${m2mWriteToken}`
+      },
       $queryParameters: {
         memberId: TEST_GROUP_ID,
         membershipType: 'group',
@@ -253,6 +508,9 @@ describe('TC Group Unit tests', () => {
 
   it('Search groups successfully 2', async () => {
     const res = await apiClient.fetchGroupsByUserORGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
       $queryParameters: {
         page: 1,
         perPage: 3
@@ -261,7 +519,7 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.length).to.equal(3)
     expect(res.response.headers['x-page']).to.equal('1')
     expect(res.response.headers['x-per-page']).to.equal('3')
-    expect(res.response.headers['x-total']).to.equal('7')
+    expect(res.response.headers['x-total']).to.equal('9')
     expect(res.response.headers['x-total-pages']).to.equal('3')
     expect(res.response.headers['x-next-page']).to.equal('2')
     expect(res.response.headers['link']).to.exist // eslint-disable-line
@@ -271,9 +529,31 @@ describe('TC Group Unit tests', () => {
     expect(res.response.headers['link'].indexOf('"next"') >= 0).to.equal(true)
   })
 
+  it('Search groups via user', async () => {
+    const res = await apiClient.fetchGroupsByUserORGroup({
+      $headers: {
+        Authorization: `Bearer ${user4Token}`
+      },
+      $queryParameters: {
+        page: 1,
+        perPage: 3,
+        memberId: '11ab038e-48da-123b-96e8-8d3b99b6d183',
+        membershipType: 'group'
+      }
+    })
+    expect(res.body.result.length).to.equal(2)
+    expect(res.response.headers['x-page']).to.equal('1')
+    expect(res.response.headers['x-per-page']).to.equal('3')
+    expect(res.response.headers['x-total']).to.equal('2')
+    expect(res.response.headers['x-total-pages']).to.equal('1')
+  })
+
   it('Search groups - invalid membershipType', async () => {
     try {
       await apiClient.fetchGroupsByUserORGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $queryParameters: {
           memberId: TEST_GROUP_ID,
           membershipType: 'invalid',
@@ -291,6 +571,9 @@ describe('TC Group Unit tests', () => {
   it('Search groups - missing memberId', async () => {
     try {
       await apiClient.fetchGroupsByUserORGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $queryParameters: {
           membershipType: 'group',
           page: 1,
@@ -307,6 +590,9 @@ describe('TC Group Unit tests', () => {
   it('Search groups - invalid page', async () => {
     try {
       await apiClient.fetchGroupsByUserORGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $queryParameters: {
           memberId: TEST_GROUP_ID,
           membershipType: 'group',
@@ -324,6 +610,9 @@ describe('TC Group Unit tests', () => {
   it('Search groups - invalid perPage', async () => {
     try {
       await apiClient.fetchGroupsByUserORGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         $queryParameters: {
           memberId: TEST_GROUP_ID,
           membershipType: 'group',
@@ -340,6 +629,9 @@ describe('TC Group Unit tests', () => {
 
   it('Delete group successfully', async () => {
     const res = await apiClient.deleteGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
       groupId
     })
     expect(res.body.result.description).to.equal('desc2')
@@ -352,9 +644,55 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.updatedBy).to.exist // eslint-disable-line
   })
 
+  it('Delete group via M2M write token successfully', async () => {
+    const res = await apiClient.deleteGroup({
+      $headers: {
+        Authorization: `Bearer ${m2mWriteToken}`
+      },
+      groupId: groupId2
+    })
+    expect(res.body.result.description).to.equal('desc2')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Delete group via user forbidden', async () => {
+    try {
+      await apiClient.deleteGroup({
+        $headers: {
+          Authorization: `Bearer ${user2Token}`
+        },
+        groupId2
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Delete group via M2M read token forbidden', async () => {
+    try {
+      await apiClient.deleteGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mReadToken}`
+        },
+        groupId2
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
   it('Delete group - not found', async () => {
     try {
       await apiClient.deleteGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
         groupId: 'asdflkjsdklfj293847928734'
       })
     } catch (err) {

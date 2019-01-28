@@ -82,8 +82,10 @@ async function createGroup (currentUser, data) {
   // generate next group id
   groupData.id = uuid()
   groupData.createdAt = new Date().toISOString()
-  groupData.createdBy = currentUser.id
-  const createRes = await session.run('CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}}) RETURN group',
+  if (currentUser !== 'M2M') {
+    groupData.createdBy = currentUser.userId
+  }
+  const createRes = await session.run(`CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''}}) RETURN group`,
     groupData)
   const group = createRes.records[0].get(0).properties
 
@@ -93,7 +95,7 @@ async function createGroup (currentUser, data) {
 }
 
 createGroup.schema = {
-  currentUser: Joi.object().required(),
+  currentUser: Joi.any(),
   data: Joi.object().keys({
     param: Joi.object().keys({
       name: Joi.string().required(),
@@ -124,8 +126,10 @@ async function updateGroup (currentUser, groupId, data) {
   const groupData = data.param
   groupData.id = groupId
   groupData.updatedAt = new Date().toISOString()
-  groupData.updatedBy = currentUser.id
-  const updateRes = await session.run('MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy} RETURN g',
+  if (currentUser !== 'M2M') {
+    groupData.updatedBy = currentUser.userId
+  }
+  const updateRes = await session.run(`MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}${currentUser !== 'M2M' ? ', g.updatedBy={updatedBy}' : ''} RETURN g`,
     groupData)
   const group = updateRes.records[0].get(0).properties
 
@@ -138,7 +142,7 @@ async function updateGroup (currentUser, groupId, data) {
 }
 
 updateGroup.schema = {
-  currentUser: Joi.object().required(),
+  currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   data: createGroup.schema.data
 }
@@ -181,9 +185,10 @@ async function getGroup (currentUser, groupId, criteria) {
 
   const session = helper.createDBSession()
   let group = await helper.ensureExists(session, 'Group', groupId)
+
   // if the group is private, the user needs to be a member of the group, or an admin
-  if (group.privateGroup && currentUser.role !== constants.UserRoles.Admin) {
-    await helper.ensureGroupMember(session, groupId, currentUser.id)
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+    await helper.ensureGroupMember(session, groupId, currentUser.userId)
   }
 
   // get parent or sub groups using breadth first search algorithm,
@@ -235,14 +240,15 @@ async function getGroup (currentUser, groupId, criteria) {
 }
 
 getGroup.schema = {
-  currentUser: Joi.object().required(),
+  currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   criteria: Joi.object().keys({
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
-  })
+  }),
+  isAnonymous: Joi.boolean()
 }
 
 /**

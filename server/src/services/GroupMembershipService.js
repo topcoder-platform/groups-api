@@ -19,9 +19,10 @@ const constants = require('../../app-constants')
 async function getGroupMembers (currentUser, groupId, criteria) {
   const session = helper.createDBSession()
   const group = await helper.ensureExists(session, 'Group', groupId)
-  // if the group is private, the user needs to be a member of the group, or an admin.
-  if (group.privateGroup && currentUser.role !== constants.UserRoles.Admin) {
-    await helper.ensureGroupMember(session, groupId, currentUser.id)
+
+  // if the group is private, the user needs to be a member of the group, or an admin
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+    await helper.ensureGroupMember(session, groupId, currentUser.userId)
   }
 
   const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)'
@@ -58,12 +59,13 @@ async function getGroupMembers (currentUser, groupId, criteria) {
 }
 
 getGroupMembers.schema = {
-  currentUser: Joi.object().required(),
+  currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   criteria: Joi.object().keys({
     page: Joi.page(),
     perPage: Joi.perPage()
-  })
+  }),
+  isAnonymous: Joi.boolean()
 }
 
 /**
@@ -76,9 +78,10 @@ getGroupMembers.schema = {
 async function addGroupMember (currentUser, groupId, data) {
   const session = helper.createDBSession()
   const group = await helper.ensureExists(session, 'Group', groupId)
-  // if the group is private, the user needs to be a member of the group, or an admin.
-  if (group.privateGroup && currentUser.role !== constants.UserRoles.Admin) {
-    await helper.ensureGroupMember(session, groupId, currentUser.id)
+  // only admins or self registering users are allowed (if the group allows self register)
+  if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser) &&
+    !(group.selfRegister && data.param.membershipType === constants.MembershipTypes.User && currentUser.userId === data.param.memberId)) {
+    throw new errors.ForbiddenError('You are not allowed to perform this action!')
   }
 
   if (data.param.membershipType === constants.MembershipTypes.Group) {
@@ -117,14 +120,14 @@ async function addGroupMember (currentUser, groupId, data) {
   const createdAt = new Date().toISOString()
   const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${
     targetObjectType
-  } {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r`
+  } {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}${currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''}}]->(o) RETURN r`
   await session.run(query, {
     groupId,
     memberId: data.param.memberId,
     membershipId,
     membershipType: data.param.membershipType,
     createdAt,
-    createdBy: currentUser.id
+    createdBy: currentUser === 'M2M' ? undefined : currentUser.userId
   })
 
   session.close()
@@ -133,14 +136,14 @@ async function addGroupMember (currentUser, groupId, data) {
     groupId,
     groupName: group.name,
     createdAt,
-    createdBy: currentUser.id,
+    createdBy: currentUser === 'M2M' ? undefined : currentUser.userId,
     memberId: data.param.memberId,
     membershipType: data.param.membershipType
   }
 }
 
 addGroupMember.schema = {
-  currentUser: Joi.object().required(),
+  currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   data: Joi.object().keys({
     param: Joi.object().keys({
@@ -179,37 +182,51 @@ async function getGroupMemberWithSession (session, groupId, memberId) {
 
 /**
  * Get group member.
+ * @param {Object} currentUser the current user
  * @param {String} groupId the group id
  * @param {String} memberId the member id
  * @returns {Object} the group membership
  */
-async function getGroupMember (groupId, memberId) {
+async function getGroupMember (currentUser, groupId, memberId) {
   const session = helper.createDBSession()
+  const group = await helper.ensureExists(session, 'Group', groupId)
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+    await helper.ensureGroupMember(session, groupId, currentUser.userId)
+  }
   const membership = await getGroupMemberWithSession(session, groupId, memberId)
+
   session.close()
   return membership
 }
 
 getGroupMember.schema = {
+  currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   memberId: Joi.id()
 }
 
 /**
  * Delete group member.
+ * @param {Object} currentUser the current user
  * @param {String} groupId the group id
  * @param {String} memberId the member id
  * @returns {Object} the deleted group membership
  */
-async function deleteGroupMember (groupId, memberId) {
+async function deleteGroupMember (currentUser, groupId, memberId) {
   const session = helper.createDBSession()
 
   // get existing membership to ensure it exists
   const membership = await getGroupMemberWithSession(session, groupId, memberId)
   if (membership.membershipType === constants.MembershipTypes.User) {
     const group = await helper.ensureExists(session, 'Group', groupId)
-    if (!group.selfRegister) {
-      throw new errors.BadRequestError('The group should allow self registration.')
+    // only admins or self registering users are allowed (if the group allows self register)
+    if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser) &&
+      !(group.selfRegister && currentUser.userId === memberId)) {
+      throw new errors.ForbiddenError('You are not allowed to perform this action!')
+    }
+  } else {
+    if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      throw new errors.ForbiddenError('You are not allowed to perform this action!')
     }
   }
 
@@ -222,6 +239,7 @@ async function deleteGroupMember (groupId, memberId) {
 }
 
 deleteGroupMember.schema = {
+  currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   memberId: Joi.id()
 }

@@ -104,11 +104,11 @@ var Client = (function() {
             path = '/groups/'+parameters['groupId']+'/members';
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
-        
+
         this.request('GET', domain + path, parameters, body, headers, queryParameters, form, deferred);
 
         return deferred.promise;
@@ -129,7 +129,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId + '/members';
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -155,7 +155,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId + '/members/' + parameters.memberId;
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -181,7 +181,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId + '/members/' + parameters.memberId;
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -207,7 +207,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId + '/membersCount';
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -246,7 +246,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId;
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -271,7 +271,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId;
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -296,7 +296,7 @@ var Client = (function() {
             path = '/groups/' + parameters.groupId;
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -324,7 +324,7 @@ var Client = (function() {
             path = '/groups';
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -348,7 +348,7 @@ var Client = (function() {
             path = '/groups';
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);
@@ -372,7 +372,7 @@ var Client = (function() {
             path = '/groups/securityGroups';
         var body = parameters.$body || {},
             queryParameters = {},
-            headers = {},
+            headers = parameters.$headers || {},
             form = {};
 
         queryParameters = mergeQueryParams(parameters, queryParameters);

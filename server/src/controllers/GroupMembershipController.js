@@ -10,7 +10,8 @@ const helper = require('../common/helper')
  * @param res the response
  */
 async function getGroupMembers (req, res) {
-  const result = await service.getGroupMembers(req.user, req.params.groupId, req.query)
+  const result = await service.getGroupMembers(req.authUser.isMachine ? 'M2M' : req.authUser,
+    req.params.groupId, req.query)
   helper.setResHeaders(req, res, result)
   res.send({ result: result.result })
 }
@@ -21,7 +22,8 @@ async function getGroupMembers (req, res) {
  * @param res the response
  */
 async function addGroupMember (req, res) {
-  const result = await service.addGroupMember(req.user, req.params.groupId, req.body)
+  const result = await service.addGroupMember(req.authUser.isMachine ? 'M2M' : req.authUser,
+    req.params.groupId, req.body)
   res.send({ result })
 }
 
@@ -31,7 +33,8 @@ async function addGroupMember (req, res) {
  * @param res the response
  */
 async function getGroupMember (req, res) {
-  const result = await service.getGroupMember(req.params.groupId, req.params.memberId)
+  const result = await service.getGroupMember(req.authUser.isMachine ? 'M2M' : req.authUser,
+    req.params.groupId, req.params.memberId)
   res.send({ result })
 }
 
@@ -41,7 +44,8 @@ async function getGroupMember (req, res) {
  * @param res the response
  */
 async function deleteGroupMember (req, res) {
-  const result = await service.deleteGroupMember(req.params.groupId, req.params.memberId)
+  const result = await service.deleteGroupMember(req.authUser.isMachine ? 'M2M' : req.authUser,
+    req.params.groupId, req.params.memberId)
   res.send({ result })
 }
 
