@@ -32,7 +32,8 @@ describe('TC Group Unit tests', () => {
           name,
           description: 'desc1',
           privateGroup: false,
-          selfRegister: true
+          selfRegister: true,
+          domain: 'test_domain'
         }
       }
     })
@@ -40,6 +41,7 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.description).to.equal('desc1')
     expect(res.body.result.privateGroup).to.equal(false)
     expect(res.body.result.selfRegister).to.equal(true)
+    expect(res.body.result.domain).to.equal('test_domain')
     expect(res.body.result.id).to.exist // eslint-disable-line
     expect(res.body.result.createdAt).to.exist // eslint-disable-line
     expect(res.body.result.createdBy).to.exist // eslint-disable-line
@@ -223,7 +225,8 @@ describe('TC Group Unit tests', () => {
           name,
           description: 'desc2',
           privateGroup: true,
-          selfRegister: false
+          selfRegister: false,
+          domain: 'new_domain'
         }
       }
     })
@@ -231,6 +234,7 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.description).to.equal('desc2')
     expect(res.body.result.privateGroup).to.equal(true)
     expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.domain).to.equal('new_domain')
     expect(res.body.result.id).to.exist // eslint-disable-line
     expect(res.body.result.createdAt).to.exist // eslint-disable-line
     expect(res.body.result.createdBy).to.exist // eslint-disable-line
@@ -399,6 +403,7 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.description).to.equal('desc2')
     expect(res.body.result.privateGroup).to.equal(true)
     expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.domain).to.equal('new_domain')
     expect(res.body.result.id).to.exist // eslint-disable-line
     expect(res.body.result.createdAt).to.exist // eslint-disable-line
     expect(res.body.result.createdBy).to.exist // eslint-disable-line

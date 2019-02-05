@@ -85,7 +85,7 @@ async function createGroup (currentUser, data) {
   if (currentUser !== 'M2M') {
     groupData.createdBy = currentUser.userId
   }
-  const createRes = await session.run(`CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''}}) RETURN group`,
+  const createRes = await session.run(`CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''}${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
     groupData)
   const group = createRes.records[0].get(0).properties
 
@@ -101,7 +101,8 @@ createGroup.schema = {
       name: Joi.string().required(),
       description: Joi.string(),
       privateGroup: Joi.boolean().required(),
-      selfRegister: Joi.boolean().required()
+      selfRegister: Joi.boolean().required(),
+      domain: Joi.string()
     }).required()
   }).required()
 }
@@ -129,7 +130,7 @@ async function updateGroup (currentUser, groupId, data) {
   if (currentUser !== 'M2M') {
     groupData.updatedBy = currentUser.userId
   }
-  const updateRes = await session.run(`MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}${currentUser !== 'M2M' ? ', g.updatedBy={updatedBy}' : ''} RETURN g`,
+  const updateRes = await session.run(`MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}${currentUser !== 'M2M' ? ', g.updatedBy={updatedBy}' : ''}${groupData.domain ? ', g.domain={domain}' : ''} RETURN g`,
     groupData)
   const group = updateRes.records[0].get(0).properties
 
@@ -169,7 +170,7 @@ async function getGroup (currentUser, groupId, criteria) {
   if (criteria.fields) {
     fieldNames = criteria.fields.split(',')
     const allowedFieldNames = ['id', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy',
-      'name', 'description', 'privateGroup', 'selfRegister']
+      'name', 'description', 'privateGroup', 'selfRegister', 'domain']
     for (let i = 0; i < fieldNames.length; i += 1) {
       if (!_.includes(allowedFieldNames, fieldNames[i])) {
         throw new errors.BadRequestError(`Field name ${fieldNames[i]} is not allowed, allowed field names: ${
@@ -247,8 +248,7 @@ getGroup.schema = {
     includeParentGroup: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
-  }),
-  isAnonymous: Joi.boolean()
+  })
 }
 
 /**

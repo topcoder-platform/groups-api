@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6b640c80-7684-406b-a434-d17d45b8eb18",
+		"_postman_id": "8e1beb37-0bcd-492c-befd-2cef4b4c5184",
 		"name": "tc-groups-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -401,6 +401,58 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "create group with domain",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0ea6b6db-be37-42c2-83d3-38dace2819a4",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_WITH_DOMAIN_ID\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"equals": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"test_domain\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"_postman_isSubFolder": true
@@ -429,7 +481,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-1\",\n\t    \"description\": \"desc1-updated-1\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-1\",\n\t    \"description\": \"desc1-updated-1\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false,\n\t    \"domain\": \"add_domain\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -742,6 +794,80 @@
 									"path": [
 										"groups",
 										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group with domain",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"update_domain\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_WITH_DOMAIN_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group without domain",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group2-update\",\n\t    \"description\": \"desc2-update\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}"
 									]
 								}
 							},
@@ -1124,13 +1250,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{GROUP_ID}}"
+										"{{GROUP_WITH_DOMAIN_ID}}"
 									]
 								}
 							},
@@ -1437,6 +1563,42 @@
 											"key": "fields",
 											"value": "id,name,description"
 										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with domain",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_WITH_DOMAIN_ID}}"
 									]
 								}
 							},
