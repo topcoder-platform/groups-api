@@ -3,7 +3,7 @@ services:
   groups-api:
     image: groups-api:latest
     build:
-      context: ../
-      dockerfile: docker/Dockerfile
+      context: ../../
+      dockerfile: server/docker/Dockerfile
     network_mode: "host"
 
