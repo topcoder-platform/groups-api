@@ -15,7 +15,7 @@ restore_cache_settings_for_build: &restore_cache_settings_for_build
 save_cache_settings: &save_cache_settings
   key: docker-node-modules-la-{{ checksum "server/package-lock.json" }}
   paths:
-    - node_modules
+    - server/node_modules
 
 jobs:
   # Build & Deploy against development backend
