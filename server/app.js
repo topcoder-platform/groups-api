@@ -12,6 +12,14 @@ const cors = require('cors')
 const logger = require('./src/common/logger')
 const HttpStatus = require('http-status-codes')
 const morgan = require('morgan')
+const healthcheck = require('topcoder-healthcheck-dropin')
+
+function check () {
+  // No checks to run. The output of this itself is an indication that the app is actively running
+  return {
+    checksRun: 1
+  }
+}
 
 // setup express app
 const app = express()
@@ -19,6 +27,7 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(healthcheck.middleware([check]))
 app.set('port', config.PORT)
 
 // Request logger
