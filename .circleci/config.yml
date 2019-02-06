@@ -10,10 +10,10 @@ install_dependency: &install_dependency
             sudo pip install awscli --upgrade
             sudo pip install docker-compose
 restore_cache_settings_for_build: &restore_cache_settings_for_build
-  key: docker-node-modules-la-{{ checksum "package-lock.json" }}
+  key: docker-node-modules-la-{{ checksum "server/package-lock.json" }}
 
 save_cache_settings: &save_cache_settings
-  key: docker-node-modules-la-{{ checksum "package-lock.json" }}
+  key: docker-node-modules-la-{{ checksum "server/package-lock.json" }}
   paths:
     - node_modules
 
