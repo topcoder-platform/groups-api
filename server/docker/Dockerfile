@@ -2,9 +2,9 @@
 FROM node:latest
 
 # Copy the current directory into the Docker image
-COPY . /groups-api
+COPY . /server
 # Set working directory for future use
-WORKDIR /groups-api
+WORKDIR /server
 
 # Install the dependencies from package.json
 RUN npm install
