@@ -1,6 +1,6 @@
 # New Groups API
 
-The new Groups API
+The new Groups API 
 
 ### SERVER
   See server/README.md and server/Validation.md for details.
