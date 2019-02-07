@@ -48,7 +48,7 @@ async function updateGroup (req, res) {
  */
 async function getGroup (req, res) {
   const result = await service.getGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId,
-    req.query)
+    req.query, false)
   res.send({ result })
 }
 
@@ -62,10 +62,22 @@ async function deleteGroup (req, res) {
   res.send({ result })
 }
 
+/**
+ * Get group
+ * @param req the request
+ * @param res the response
+ */
+async function getGroupByOldId (req, res) {
+  const result = await service.getGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.oldId,
+    req.query, true)
+  res.send({ result })
+}
+
 module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
   getGroup,
-  deleteGroup
+  deleteGroup,
+  getGroupByOldId
 }

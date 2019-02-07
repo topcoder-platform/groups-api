@@ -30,14 +30,33 @@ async function searchGroups (criteria) {
     matchClause = `MATCH (g:Group)`
   }
 
+  let whereClause = ''
+  if (criteria.oldId) {
+    whereClause = ` WHERE g.oldId = "${criteria.oldId}"`
+  }
+  if (criteria.selfRegister !== undefined) {
+    if (whereClause === '') {
+      whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`
+    } else {
+      whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`)
+    }
+  }
+  if (criteria.privateGroup !== undefined) {
+    if (whereClause === '') {
+      whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`
+    } else {
+      whereClause = whereClause.concat(` AND g.privateGroup = ${criteria.privateGroup}`)
+    }
+  }
+
   // query total record count
-  const totalRes = await session.run(`${matchClause} RETURN COUNT(g)`)
+  const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
   const total = totalRes.records[0].get(0).low || 0
 
   // query page of records
   let result = []
   if (criteria.page <= Math.ceil(total / criteria.perPage)) {
-    const pageRes = await session.run(`${matchClause} RETURN g ORDER BY g.name SKIP ${
+    const pageRes = await session.run(`${matchClause}${whereClause} RETURN g ORDER BY g.name SKIP ${
       (criteria.page - 1) * criteria.perPage
     } LIMIT ${criteria.perPage}`)
     result = _.map(pageRes.records, (record) => record.get(0).properties)
@@ -59,7 +78,10 @@ searchGroups.schema = {
     memberId: Joi.optionalId(), // defined in app-bootstrap
     membershipType: Joi.string().valid(_.values(constants.MembershipTypes)),
     page: Joi.page(),
-    perPage: Joi.perPage()
+    perPage: Joi.perPage(),
+    oldId: Joi.string(),
+    selfRegister: Joi.boolean(),
+    privateGroup: Joi.boolean()
   })
 }
 
@@ -153,9 +175,10 @@ updateGroup.schema = {
  * @param {Object} currentUser the current user
  * @param {String} groupId the id of group to get
  * @param {Object} criteria the query criteria
+ * @param {Boolean} isOldId the flag indicate groupId is old id
  * @returns {Object} the group
  */
-async function getGroup (currentUser, groupId, criteria) {
+async function getGroup (currentUser, groupId, criteria, isOldId) {
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
   }
@@ -170,7 +193,7 @@ async function getGroup (currentUser, groupId, criteria) {
   if (criteria.fields) {
     fieldNames = criteria.fields.split(',')
     const allowedFieldNames = ['id', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy',
-      'name', 'description', 'privateGroup', 'selfRegister', 'domain']
+      'name', 'description', 'privateGroup', 'selfRegister', 'domain', 'oldId']
     for (let i = 0; i < fieldNames.length; i += 1) {
       if (!_.includes(allowedFieldNames, fieldNames[i])) {
         throw new errors.BadRequestError(`Field name ${fieldNames[i]} is not allowed, allowed field names: ${
@@ -185,11 +208,11 @@ async function getGroup (currentUser, groupId, criteria) {
   }
 
   const session = helper.createDBSession()
-  let group = await helper.ensureExists(session, 'Group', groupId)
+  let group = isOldId ? await retrieveGroupByOldId(session, groupId) : await helper.ensureExists(session, 'Group', groupId)
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-    await helper.ensureGroupMember(session, groupId, currentUser.userId)
+    await helper.ensureGroupMember(session, group.id, currentUser.userId)
   }
 
   // get parent or sub groups using breadth first search algorithm,
@@ -248,7 +271,22 @@ getGroup.schema = {
     includeParentGroup: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
-  })
+  }),
+  isOldId: Joi.boolean()
+}
+
+/**
+ * Retrieve group by old id. Throw error if not exist.
+ * @param {Object} session the db session
+ * @param {String} oldId the old id
+ * @returns {Object} the found entity
+ */
+async function retrieveGroupByOldId (session, oldId) {
+  const res = await session.run(`MATCH (g:Group {oldId: {oldId}}) RETURN g`, { oldId })
+  if (!res || res.records.length === 0 || !res.records[0] || !res.records[0].get(0)) {
+    throw new errors.NotFoundError(`Not found Group with old id ${oldId}`)
+  }
+  return res.records[0].get(0).properties
 }
 
 /**
