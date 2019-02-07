@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8e1beb37-0bcd-492c-befd-2cef4b4c5184",
+		"_postman_id": "69d7124c-0c8f-486d-a15c-e02de9a3758d",
 		"name": "tc-groups-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1219,6 +1219,118 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "search groups with filter oldId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER4_USER_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups?page=1&perPage=10&oldId=12345",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "perPage",
+											"value": "10"
+										},
+										{
+											"key": "oldId",
+											"value": "12345"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search groups with filter privateGroup and selfRegister",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups?page=1&perPage=10&privateGroup=false&selfRegister=true",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "perPage",
+											"value": "10"
+										},
+										{
+											"key": "privateGroup",
+											"value": "false"
+										},
+										{
+											"key": "selfRegister",
+											"value": "true"
+										},
+										{
+											"key": "oldId",
+											"value": "12346",
+											"disabled": true
+										},
+										{
+											"key": "selfRegister",
+											"value": "false",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"_postman_isSubFolder": true
@@ -1897,6 +2009,361 @@
 									"path": [
 										"groups",
 										"{{GROUP_ID4}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "get group by old id",
+					"item": [
+						{
+							"name": "get public group via admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12346",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12346"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get public group via user",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER2_USER_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12346",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12346"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get public group via M2M",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_RW_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12346",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12346"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get private group via admin",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12345"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "true"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "oneLevel",
+											"value": "false"
+										},
+										{
+											"key": "fields",
+											"value": "id,name,description"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get private group via M2M",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_R_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12345"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "true"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "oneLevel",
+											"value": "false"
+										},
+										{
+											"key": "fields",
+											"value": "id,name,description"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get private group via user4",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER4_USER_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12345"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "true"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "oneLevel",
+											"value": "false"
+										},
+										{
+											"key": "fields",
+											"value": "id,name,description"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure get private group via user2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "bb8cc82b-3efd-4454-9c21-1795ca67ddab",
+										"exec": [
+											"pm.test(\"Status code is 403\", function () {",
+											"    pm.response.to.have.status(403);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER2_USER_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"12345"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "true"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "oneLevel",
+											"value": "false"
+										},
+										{
+											"key": "fields",
+											"value": "id,name,description"
+										}
 									]
 								}
 							},

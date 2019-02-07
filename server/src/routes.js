@@ -44,7 +44,15 @@ module.exports = {
       scopes: ['write:groups', 'all:groups']
     }
   },
-
+  '/groups/oldId/:oldId': {
+    get: {
+      controller: 'GroupController',
+      method: 'getGroupByOldId',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups', 'write:groups', 'all:groups']
+    }
+  },
   '/groups/:groupId/members': {
     get: {
       controller: 'GroupMembershipController',

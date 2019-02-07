@@ -485,6 +485,92 @@ describe('TC Group Unit tests', () => {
     throw new Error('should not throw error here')
   })
 
+  it('Get group by old id via admin successfully', async () => {
+    const res = await apiClient.getGroupByOldId({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
+      oldId: '12346'
+    })
+    expect(res.body.result.name).to.equal('test-group-9')
+    expect(res.body.result.description).to.equal('desc')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Get group by old id via user2 successfully', async () => {
+    const res = await apiClient.getGroupByOldId({
+      $headers: {
+        Authorization: `Bearer ${user2Token}`
+      },
+      oldId: '12346'
+    })
+    expect(res.body.result.name).to.equal('test-group-9')
+    expect(res.body.result.description).to.equal('desc')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Get group by old id via M2M read token successfully', async () => {
+    const res = await apiClient.getGroupByOldId({
+      $headers: {
+        Authorization: `Bearer ${m2mReadToken}`
+      },
+      oldId: '12346'
+    })
+    expect(res.body.result.name).to.equal('test-group-9')
+    expect(res.body.result.description).to.equal('desc')
+    expect(res.body.result.privateGroup).to.equal(false)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Get private group by old id via user4 successfully', async () => {
+    const res = await apiClient.getGroupByOldId({
+      $headers: {
+        Authorization: `Bearer ${user4Token}`
+      },
+      oldId: '12345'
+    })
+    expect(res.body.result.name).to.equal('test-group-8')
+    expect(res.body.result.description).to.equal('desc')
+    expect(res.body.result.privateGroup).to.equal(true)
+    expect(res.body.result.selfRegister).to.equal(false)
+    expect(res.body.result.id).to.exist // eslint-disable-line
+  })
+
+  it('Get private group via user2 forbidden', async () => {
+    try {
+      await apiClient.getGroupByOldId({
+        $headers: {
+          Authorization: `Bearer ${user2Token}`
+        },
+        oldId: '12345'
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Get group - not found', async () => {
+    try {
+      await apiClient.getGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
+        oldId: '11111111'
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(404)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
   it('Search groups successfully 1', async () => {
     const res = await apiClient.fetchGroupsByUserORGroup({
       $headers: {
@@ -524,14 +610,62 @@ describe('TC Group Unit tests', () => {
     expect(res.body.result.length).to.equal(3)
     expect(res.response.headers['x-page']).to.equal('1')
     expect(res.response.headers['x-per-page']).to.equal('3')
-    expect(res.response.headers['x-total']).to.equal('9')
-    expect(res.response.headers['x-total-pages']).to.equal('3')
+    expect(res.response.headers['x-total']).to.equal('11')
+    expect(res.response.headers['x-total-pages']).to.equal('4')
     expect(res.response.headers['x-next-page']).to.equal('2')
     expect(res.response.headers['link']).to.exist // eslint-disable-line
     expect(res.response.headers['link'].indexOf('"first"') >= 0).to.equal(true)
     expect(res.response.headers['link'].indexOf('"last') >= 0).to.equal(true)
     expect(res.response.headers['link'].indexOf('"prev"') >= 0).to.equal(false)
     expect(res.response.headers['link'].indexOf('"next"') >= 0).to.equal(true)
+  })
+
+  it('Search groups successfully 3', async () => {
+    const res = await apiClient.fetchGroupsByUserORGroup({
+      $headers: {
+        Authorization: `Bearer ${user4Token}`
+      },
+      $queryParameters: {
+        page: 1,
+        perPage: 10,
+        oldId: '12345'
+      }
+    })
+    expect(res.body.result.length).to.equal(1)
+    expect(res.response.headers['x-page']).to.equal('1')
+    expect(res.response.headers['x-per-page']).to.equal('10')
+    expect(res.response.headers['x-total']).to.equal('1')
+    expect(res.response.headers['x-total-pages']).to.equal('1')
+    expect(res.response.headers['link']).to.exist // eslint-disable-line
+    expect(res.response.headers['link'].indexOf('"first"') >= 0).to.equal(true)
+    expect(res.response.headers['link'].indexOf('"last') >= 0).to.equal(true)
+    expect(res.response.headers['link'].indexOf('"prev"') >= 0).to.equal(false)
+    expect(res.response.headers['link'].indexOf('"next"') >= 0).to.equal(false)
+    expect(res.body.result[0].name).to.equal('test-group-8')
+  })
+
+  it('Search groups successfully 4', async () => {
+    const res = await apiClient.fetchGroupsByUserORGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
+      $queryParameters: {
+        page: 1,
+        perPage: 10,
+        privateGroup: false,
+        selfRegister: true
+      }
+    })
+    expect(res.body.result.length).to.equal(5)
+    expect(res.response.headers['x-page']).to.equal('1')
+    expect(res.response.headers['x-per-page']).to.equal('10')
+    expect(res.response.headers['x-total']).to.equal('5')
+    expect(res.response.headers['x-total-pages']).to.equal('1')
+    expect(res.response.headers['link']).to.exist // eslint-disable-line
+    expect(res.response.headers['link'].indexOf('"first"') >= 0).to.equal(true)
+    expect(res.response.headers['link'].indexOf('"last') >= 0).to.equal(true)
+    expect(res.response.headers['link'].indexOf('"prev"') >= 0).to.equal(false)
+    expect(res.response.headers['link'].indexOf('"next"') >= 0).to.equal(false)
   })
 
   it('Search groups via user', async () => {
@@ -546,10 +680,10 @@ describe('TC Group Unit tests', () => {
         membershipType: 'group'
       }
     })
-    expect(res.body.result.length).to.equal(2)
+    expect(res.body.result.length).to.equal(3)
     expect(res.response.headers['x-page']).to.equal('1')
     expect(res.response.headers['x-per-page']).to.equal('3')
-    expect(res.response.headers['x-total']).to.equal('2')
+    expect(res.response.headers['x-total']).to.equal('3')
     expect(res.response.headers['x-total-pages']).to.equal('1')
   })
 

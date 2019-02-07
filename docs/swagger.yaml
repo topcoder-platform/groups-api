@@ -267,6 +267,24 @@ paths:
           schema:
             type: string
           description: membership type. Use 'group' if memberId is an id of a group, otherwise 'user'
+        - name: oldId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: old group id (legacy data)
+        - name: selfRegister
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if the group allows self register
+        - name: privateGroup
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if the group is private
       responses:
         200:
           $ref: "#/components/responses/GroupArrayResponse"
@@ -291,6 +309,52 @@ paths:
         - bearer: []
       requestBody:
         $ref: '#/components/requestBodies/NewGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /groups/oldId/{oldId}:
+    get:
+      description: |
+        Fetch a particular group by old id (legacy id)
+
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - groups
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/oldId'
+        - $ref: '#/components/parameters/includeSubGroups'
+        - $ref: '#/components/parameters/includeParentGroups'
+        - $ref: '#/components/parameters/oneLevel'
+        - name: fields
+          in: query
+          required: false
+          description: |
+            fields=fieldName1,fieldName2,...,fieldN  - parameter for
+            choosing which fields of group that will be included in response.
+
+            + id
+            + createdAt
+            + createdBy
+            + updatedAt
+            + updatedBy
+            + name
+            + description
+            + domain
+          schema:
+            type: string
       responses:
         200:
           $ref: "#/components/responses/GroupResponse"
@@ -344,6 +408,14 @@ components:
       schema:
         type: string
       example: '10ba038e-48da-123b-96e8-8d3b99b6d18a'
+    oldId:
+      name: oldId
+      in: path
+      description: The old group id.
+      required: true
+      schema:
+        type: string
+      example: '12345678'
     memberId:
       name: memberId
       in: path
