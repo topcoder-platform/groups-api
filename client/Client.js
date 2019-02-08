@@ -360,6 +360,46 @@ var Client = (function() {
     /**
      *
      * @method
+     * @name Client#getGroupByOldId
+     * @param {object} parameters - method options and parameters
+         * @param {} parameters. -
+         * @param {} parameters. -
+         * @param {} parameters. -
+         * @param {} parameters. -
+         * @param {} parameters.fields - fields=fieldName1,fieldName2,...,fieldN  - parameter for
+    choosing which fields of group that will be included in response.
+
+    + id
+    + createdAt
+    + createdBy
+    + updatedAt
+    + updatedBy
+    + name
+    + description
+    + domain
+
+     */
+    Client.prototype.getGroupByOldId = function(parameters) {
+        if (parameters === undefined) {
+            parameters = {};
+        }
+        var deferred = Q.defer();
+        var domain = this.domain,
+            path = '/groups/oldId/' + parameters.oldId;
+        var body = parameters.$body || {},
+            queryParameters = {},
+            headers = parameters.$headers || {},
+            form = {};
+
+        queryParameters = mergeQueryParams(parameters, queryParameters);
+
+        this.request('GET', domain + path, parameters, body, headers, queryParameters, form, deferred);
+
+        return deferred.promise;
+    };
+    /**
+     *
+     * @method
      * @name Client#createNewSecurityGroup
      * @param {object} parameters - method options and parameters
      */

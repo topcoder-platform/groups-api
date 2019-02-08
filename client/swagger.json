@@ -279,7 +279,7 @@
               "name": "fields",
               "in": "query",
               "required": false,
-              "description": "fields=fieldName1,fieldName2,...,fieldN  - parameter for\nchoosing which fields of group that will be included in response.\n\n+ id\n+ createdAt\n+ createdBy\n+ updatedAt\n+ updatedBy\n+ name\n+ description\n",
+              "description": "fields=fieldName1,fieldName2,...,fieldN  - parameter for\nchoosing which fields of group that will be included in response.\n\n+ id\n+ createdAt\n+ createdBy\n+ updatedAt\n+ updatedBy\n+ name\n+ description\n+ domain\n",
               "schema": {
                 "type": "string"
               }
@@ -426,6 +426,33 @@
                 "type": "string"
               },
               "description": "membership type. Use 'group' if memberId is an id of a group, otherwise 'user'"
+            },
+            {
+              "name": "oldId",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "old group id (legacy data)"
+            },
+            {
+              "name": "selfRegister",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              },
+              "description": "Flag indicates if the group allows self register"
+            },
+            {
+              "name": "privateGroup",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              },
+              "description": "Flag indicates if the group is private"
             }
           ],
           "responses": {
@@ -464,6 +491,67 @@
           "requestBody": {
             "$ref": "#/components/requestBodies/NewGroupBodyParam"
           },
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/GroupResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthenticated"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalServerError"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "path": "/groups/oldId/{oldId}",
+      "operations": [
+        {
+          "method": "GET",
+          "nickname": "getGroupByOldId",
+          "description": "Fetch a particular group\n\nIf the group is private, the user needs to be a member of the group, or an admin.\n",
+          "tags": [
+            "groups"
+          ],
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/oldId"
+            },
+            {
+              "$ref": "#/components/parameters/includeSubGroups"
+            },
+            {
+              "$ref": "#/components/parameters/includeParentGroups"
+            },
+            {
+              "$ref": "#/components/parameters/oneLevel"
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "description": "fields=fieldName1,fieldName2,...,fieldN  - parameter for\nchoosing which fields of group that will be included in response.\n\n+ id\n+ createdAt\n+ createdBy\n+ updatedAt\n+ updatedBy\n+ name\n+ description\n+ domain\n",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "200": {
               "$ref": "#/components/responses/GroupResponse"
@@ -544,6 +632,16 @@
           "type": "string"
         },
         "example": "1234"
+      },
+      "oldId": {
+        "name": "oldId",
+        "in": "path",
+        "description": "The old group id.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "12345678"
       },
       "memberId": {
         "name": "memberId",
@@ -954,6 +1052,10 @@
           "selfRegister": {
             "type": "boolean",
             "description": "Flag indicates if the group allows self register"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Domain to indicate what tc web site that the group belongs to"
           },
           "subGroups": {
             "description": "Subgroup array",
