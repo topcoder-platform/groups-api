@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "69d7124c-0c8f-486d-a15c-e02de9a3758d",
+		"_postman_id": "7bda6c76-fb73-4736-8fd7-aba1aea4658e",
 		"name": "tc-groups-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -453,6 +453,694 @@
 								}
 							},
 							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "create security group",
+					"item": [
+						{
+							"name": "failure",
+							"item": [
+								{
+									"name": "failure create group via user",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER2_USER_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "failure create group via M2M Read",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{M2M_R_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "failure create group with invalid token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer invalid"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "failure create group without token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - missing id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - invalid id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"123\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - missing name",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n\t    \"id\": \"{{TEST_GROUP_ID}}\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - name already used",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"{{TEST_GROUP_NAME1}}\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - id already used",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID1}}\",\n\t    \"name\": \"some-group\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "create group via admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group via M2M Read And Write",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID2\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_RW_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID2}}\",\n\t    \"name\": \"group2\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group via M2M Write",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID3\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_W_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID3}}\",\n\t    \"name\": \"group3\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group via M2M All",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID4\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_ALL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID4}}\",\n\t    \"name\": \"group4\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d267b1d4-c503-4e1e-96e4-fa96c658a721",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1818feec-4788-4997-952e-2848a7b1c0dc",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					],
 					"_postman_isSubFolder": true

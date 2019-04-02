@@ -3,11 +3,13 @@
  */
 
 const expect = require('chai').expect
+const helper = require('./helper')
 const config = require('../config')
 const Client = require('../Client').Client
 const apiClient = new Client(config.API_URL)
 
 const TEST_GROUP_ID = '11ab038e-48da-123b-96e8-8d3b99b6d183'
+const TEST_GROUP_NAME = 'test-group-1'
 const PRIVATE_GROUP_ID = '11ab038e-48da-123b-96e8-8d3b99b6d185'
 const PARENT_GROUP_ID = '11ab038e-48da-123b-96e8-8d3b99b6d182'
 const m2mReadToken = config.TOKEN.M2M_R
@@ -16,7 +18,13 @@ const user1Token = config.TOKEN.ADMIN.USER1
 const user2Token = config.TOKEN.USER.USER2
 const user4Token = config.TOKEN.USER.USER4
 
-describe('TC Group Unit tests', () => {
+describe('TC Group Unit tests', function () {
+  this.timeout(helper.testTimeout)
+  before(async () => {
+    // runs before all tests in this block
+    await helper.initDB()
+  })
+
   let groupId
   let groupId2
 
@@ -836,6 +844,204 @@ describe('TC Group Unit tests', () => {
       })
     } catch (err) {
       expect(err.response.statusCode).to.equal(404)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  /**
+   * Create security group tests
+   */
+
+  /**
+  * Utility function to create a group
+  */
+  async function createGroup () {
+    // random name
+    const name = `some-group-name-${new Date().getTime()}`
+    const res = await apiClient.createNewGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
+      $body: {
+        param: {
+          name,
+          description: 'desc1',
+          privateGroup: false,
+          selfRegister: true
+        }
+      }
+    })
+
+    return res.body.result
+  }
+
+  it('Create security group successfully', async () => {
+    const newGroup = await createGroup()
+    const res = await apiClient.createNewSecurityGroup({
+      $headers: {
+        Authorization: `Bearer ${user1Token}`
+      },
+      $body: {
+        param: {
+          id: newGroup.id,
+          name: newGroup.name
+        }
+      }
+    })
+    expect(res.body.result.name).to.equal(newGroup.name)
+    expect(res.body.result.id).to.equal(newGroup.id) // eslint-disable-line
+    expect(res.body.result.createdAt).to.exist // eslint-disable-line
+    expect(res.body.result.createdBy).to.exist // eslint-disable-line
+  })
+
+  it('Create security group via M2M write token successfully', async () => {
+    const newGroup = await createGroup()
+    const res = await apiClient.createNewSecurityGroup({
+      $headers: {
+        Authorization: `Bearer ${m2mWriteToken}`
+      },
+      $body: {
+        param: {
+          id: newGroup.id,
+          name: newGroup.name
+        }
+      }
+    })
+    expect(res.body.result.name).to.equal(newGroup.name)
+    expect(res.body.result.id).to.equal(newGroup.id) // eslint-disable-line
+    expect(res.body.result.createdAt).to.exist // eslint-disable-line
+    expect(res.body.result.createdBy).to.be.undefined // eslint-disable-line
+  })
+
+  it('Create security group via user forbidden', async () => {
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${user2Token}`
+        },
+        $body: {
+          // no body required cause it will fail.
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create security group via M2M read token forbidden', async () => {
+    // random name
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mReadToken}`
+        },
+        $body: {
+          // no body required cause it will fail.
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(403)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create security group - missing name', async () => {
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
+        $body: {
+          param: {
+            id: TEST_GROUP_ID
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(400)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create security group - missing id', async () => {
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
+        $body: {
+          param: {
+            name: ''
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(400)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create security group - invalid id', async () => {
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
+        $body: {
+          param: {
+            id: '123',
+            name: ''
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(400)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create security group - name already used', async () => {
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
+        $body: {
+          param: {
+            id: TEST_GROUP_ID,
+            name: TEST_GROUP_NAME
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(409)
+      return
+    }
+    throw new Error('should not throw error here')
+  })
+
+  it('Create security group - id already used', async () => {
+    try {
+      await apiClient.createNewSecurityGroup({
+        $headers: {
+          Authorization: `Bearer ${m2mWriteToken}`
+        },
+        $body: {
+          param: {
+            id: PARENT_GROUP_ID,
+            name: 'group1'
+          }
+        }
+      })
+    } catch (err) {
+      expect(err.response.statusCode).to.equal(409)
       return
     }
     throw new Error('should not throw error here')

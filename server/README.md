@@ -38,7 +38,7 @@ The following parameters can be set in config files or in env variables:
 - Run lint `npm run lint`
 - Run lint fix `npm run lint:fix`
 - Clear and init db `npm run init-db`
-- Add index db `npm run create-index`
+- Add index to db `npm run create-index`
 - Insert test data `npm run test-data`
 - Start app `npm start`
 - App is running at `http://localhost:3000`
@@ -55,17 +55,26 @@ The following parameters can be set in config files or in env variables:
   `heroku config:set LOG_LEVEL=info`
 - git push heroku master // push code to Heroku
 - to initialize db, run `heroku run npm run init-db`
+- to add index to db, run `heroku run npm run create-index`
 - to insert test data, run `heroku run npm run test-data`
-
-
-I deployed the code to:
-https://lit-earth-25873.herokuapp.com
 
 
 ## Graph Database Structure
 
-The graph database consists of two node types: Group and User, and one relation type: GroupContains.
+The graph database consists of 3 node types: SecurityGroup, Group and User, and one relation type: GroupContains.
 The GroupContains relation links from a group to a child group or user.
+
+### SecurityGroup node
+
+The security group node contains these fields:
+
+- id: the group UUID corresponding to the security group
+- name: the security group name, should be unique (usually the same as the group)
+- createdAt: the created at date string
+- createdBy: the created by user id
+- updatedAt: the updated at date string
+- updatedBy: the updated by user id
+
 
 ### Group node
 
@@ -76,6 +85,7 @@ The group node contains these fields:
 - description: the group description
 - privateGroup: flag whether group is private
 - selfRegister: flag whether group allows self register
+- oldId: the old id, optional
 - createdAt: the created at date string
 - createdBy: the created by user id
 - updatedAt: the updated at date string
@@ -98,11 +108,4 @@ The GroupContains relation contains these fields:
 - type: the relationship type, 'group' or 'user'
 - createdAt: the created at date string
 - createdBy: the created by user id
-
-
-## Notes
-
-- the generated server code is not in good practice, so I totally re-write them
-- security is not ready yet, a mock admin is set as current user, see src/common/auth.js,
-  to test different user role, change the role in the mock user
 

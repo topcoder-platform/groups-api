@@ -631,16 +631,25 @@ components:
                 type: object
                 properties:
                   id:
-                    type: number
-                    format: long
+                    type: string
                     description: The security group id
-                  createUserId:
-                    type: number
-                    format: long
-                    description: The id of the user who created the security group
                   name:
                     type: string
                     description: The security group name
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: The time the group created at
+                  createdBy:
+                    type: string
+                    description: The id of the user who created the group
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    description: The time the group updated at
+                  updatedBy:
+                    type: string
+                    description: The id of the user who updated the group
 
   schemas:
     GroupMembership:

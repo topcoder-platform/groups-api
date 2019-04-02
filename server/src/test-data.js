@@ -27,6 +27,11 @@ const insertData = async () => {
   await session.run(query, { id: '11ab038e-48da-123b-96e8-8d3b99b6d186', name: 'test-group-6', privateGroup: false, selfRegister: true })
   await session.run(query, { id: '11ab038e-48da-123b-96e8-8d3b99b6d187', name: 'test-group-7', privateGroup: true, selfRegister: false })
 
+  // create security groups
+  query = 'CREATE (g:SecurityGroup {id: {id}, name: {name}}) RETURN g'
+  await session.run(query, { id: '11ab038e-48da-123b-96e8-8d3b99b6d181', name: 'test-group-1' })
+  await session.run(query, { id: '11ab038e-48da-123b-96e8-8d3b99b6d182', name: 'test-group-2' })
+
   // create groups with old id
   query = 'CREATE (g:Group {id: {id}, name: {name}, description: "desc", privateGroup: {privateGroup}, selfRegister: {selfRegister}, oldId: {oldId}}) RETURN g'
   await session.run(query, { id: '11ab038e-48da-123b-96e8-8d3b99b6d188', name: 'test-group-8', privateGroup: true, selfRegister: false, oldId: '12345' })
