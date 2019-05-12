@@ -6,3 +6,9 @@
   call `create group` before other groups tests, the former will set created `GROUP_ID` to be used by the latter tests
 
 - there are unit tests for the API, see client/README.md for details, note that the unit tests also depend on the test data
+
+
+## Bus Event Verification
+
+- login `https://lauscher.topcoder-dev.com/` with credential `tonyj / appirio123`
+- then select topic to view, see app-constants.js Topics field for used topics, then click `View` button to view related messages

@@ -87,6 +87,28 @@ var Client = (function() {
     };
 
     /**
+     * Check health of the app.
+     * @method
+     * @name Client#checkHealth
+     */
+    Client.prototype.checkHealth = function() {
+        const parameters = {};
+        var deferred = Q.defer();
+        var domain = this.domain,
+            path = '/health';
+        var body = {},
+            queryParameters = {},
+            headers = {},
+            form = {};
+
+        queryParameters = mergeQueryParams(parameters, queryParameters);
+
+        this.request('GET', domain + path, parameters, body, headers, queryParameters, form, deferred);
+
+        return deferred.promise;
+    };
+
+    /**
      *
      * @method
      * @name Client#listMembersByGroup

@@ -90,5 +90,11 @@ module.exports = {
       controller: 'GroupMembershipController',
       method: 'getGroupMembersCount'
     }
+  },
+  '/health': {
+    get: {
+      controller: 'HealthController',
+      method: 'checkHealth'
+    }
   }
 }

@@ -22,6 +22,15 @@ The following parameters can be set in config files or in env variables:
 - GRAPH_DB_PASSWORD: Graph DB password, default is '123456', you probably need to change it
 - AUTH_SECRET: The authorization secret used during token verification.
 - VALID_ISSUERS: The valid issuer of tokens.
+- AUTH0_URL: AUTH0 URL, used to get M2M token
+- AUTH0_PROXY_SERVER_URL: AUTH0 proxy server URL, used to get M2M token
+- AUTH0_AUDIENCE: AUTH0 audience, used to get M2M token
+- TOKEN_CACHE_TIME: AUTH0 token cache time, used to get M2M token
+- AUTH0_CLIENT_ID: AUTH0 client id, used to get M2M token
+- AUTH0_CLIENT_SECRET: AUTH0 client secret, used to get M2M token
+- BUSAPI_URL: Bus API URL
+- KAFKA_ERROR_TOPIC: Kafka error topic used by bus API wrapper
+- HEALTH_CHECK_TIMEOUT: health check timeout in milliseconds
 
 
 ## Local graph database setup
@@ -38,7 +47,7 @@ The following parameters can be set in config files or in env variables:
 - Run lint `npm run lint`
 - Run lint fix `npm run lint:fix`
 - Clear and init db `npm run init-db`
-- Add index db `npm run create-index`
+- Add db indices `npm run create-index`
 - Insert test data `npm run test-data`
 - Start app `npm start`
 - App is running at `http://localhost:3000`
@@ -55,11 +64,12 @@ The following parameters can be set in config files or in env variables:
   `heroku config:set LOG_LEVEL=info`
 - git push heroku master // push code to Heroku
 - to initialize db, run `heroku run npm run init-db`
+- to create db indices, run `heroku run npm run create-index`
 - to insert test data, run `heroku run npm run test-data`
 
 
 I deployed the code to:
-https://lit-earth-25873.herokuapp.com
+https://thawing-savannah-55254.herokuapp.com
 
 
 ## Graph Database Structure
@@ -102,7 +112,5 @@ The GroupContains relation contains these fields:
 
 ## Notes
 
-- the generated server code is not in good practice, so I totally re-write them
-- security is not ready yet, a mock admin is set as current user, see src/common/auth.js,
-  to test different user role, change the role in the mock user
-
+In the app-constants.js Topics field, the used topics are using a test topic,
+the suggested ones are commented out, because these topics are not created in TC dev Kafka yet.
