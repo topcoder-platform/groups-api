@@ -1,14 +1,22 @@
 version: 2
 defaults: &defaults
-    docker:
-      - image: docker:18.06-git        
+  docker:
+    - image: circleci/python:2.7-stretch-browsers
 install_dependency: &install_dependency
           name: Installation of build and deployment dependencies.
           command: |
-            apk add --no-cache bash
-            apk add --no-cache jq py-pip sudo
+            sudo apt install jq
             sudo pip install awscli --upgrade
             sudo pip install docker-compose
+
+install_deploysuite: &install_deploysuite
+          name: Installation of install_deploysuite.
+          command: |
+            git clone --branch v1.3 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+            cp ./../buildscript/master_deploy.sh .
+            cp ./../buildscript/buildenv.sh .
+            cp ./../buildscript/awsconfiguration.sh .
+
 restore_cache_settings_for_build: &restore_cache_settings_for_build
   key: docker-node-modules-la-{{ checksum "package-lock.json" }}
 
@@ -17,40 +25,38 @@ save_cache_settings: &save_cache_settings
   paths:
     - node_modules
 
+builddeploy_steps: &builddeploy_steps
+      - checkout
+      - setup_remote_docker
+      - run: *install_dependency
+      - run: *install_deploysuite
+      - restore_cache: *restore_cache_settings_for_build
+      - run: ./build.sh
+      - save_cache: *save_cache_settings
+      - deploy:
+          name: Running MasterScript.
+          command: |
+            ./awsconfiguration.sh $DEPLOY_ENV
+            source awsenvconf
+            ./buildenv.sh -e $DEPLOY_ENV -b ${DEPLOY_ENV}-groups-api-deployvar
+            source buildenvvar
+            ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${DEPLOY_ENV}-groups-api-appvar -i groups-api
+            #./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s groups-api -i groups-api
+
 jobs:
   # Build & Deploy against development backend
   "build-dev":
     <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run: *install_dependency
-      - restore_cache: *restore_cache_settings_for_build
-      - run: ./build.sh
-      - save_cache: *save_cache_settings
-      - deploy:
-          name: Running MasterScript.
-          command: |
-            git clone --branch v1.1 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
-            cp ./../buildscript/master_deploy.sh .
-            ./master_deploy.sh -d ECS -e DEV -t latest -s groups-api -i groups-api
+    environment:
+      DEPLOY_ENV: "DEV"
+    steps: *builddeploy_steps
 
   # Build & Deploy against production backend
   "build-prod":
     <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run: *install_dependency
-      - restore_cache: *restore_cache_settings_for_build
-      - run: ./build.sh
-      - save_cache: *save_cache_settings
-      - deploy:
-          name: Running MasterScript.
-          command: |
-            git clone --branch v1.1 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
-            cp ./../buildscript/master_deploy.sh .
-            ./master_deploy.sh -d ECS -e PROD  -t latest -s groups-api -i groups-api
+    environment:
+      DEPLOY_ENV: "PROD"
+    steps: *builddeploy_steps
 
 workflows:
   version: 2
@@ -58,11 +64,13 @@ workflows:
     jobs:
       # Development builds are executed on "develop" branch only.
       - "build-dev":
+          context : org-global
           filters:
             branches:
               only:
                 - develop
       - "build-prod":
+          context : org-global
           filters:
             branches:
               only:
