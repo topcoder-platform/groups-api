@@ -131,7 +131,8 @@ async function addGroupMember (currentUser, groupId, data) {
   })
 
   session.close()
-  return {
+
+  const result = {
     id: membershipId,
     groupId,
     groupName: group.name,
@@ -140,6 +141,10 @@ async function addGroupMember (currentUser, groupId, data) {
     memberId: data.param.memberId,
     membershipType: data.param.membershipType
   }
+
+  // post bus event
+  await helper.postBusEvent(constants.Topics.GroupMemberCreated, result)
+  return result
 }
 
 addGroupMember.schema = {
@@ -235,6 +240,9 @@ async function deleteGroupMember (currentUser, groupId, memberId) {
   await session.run(query, { groupId, memberId })
 
   session.close()
+
+  // post bus event
+  await helper.postBusEvent(constants.Topics.GroupMemberDeleted, membership)
   return membership
 }
 

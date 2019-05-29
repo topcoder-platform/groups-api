@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7bda6c76-fb73-4736-8fd7-aba1aea4658e",
+		"_postman_id": "b77e52b5-ae63-45fd-b5aa-b72dbba52673",
 		"name": "tc-groups-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -212,6 +212,58 @@
 							"response": []
 						},
 						{
+							"name": "create group with domain",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0ea6b6db-be37-42c2-83d3-38dace2819a4",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_WITH_DOMAIN_ID\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"equals": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"test_domain\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "failure create group via user",
 							"event": [
 								{
@@ -389,58 +441,6 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\n    \"param\": {\n\t    \"name\": \"group_fail\",\n\t    \"description\": \"desc_fail\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
-								},
-								"url": {
-									"raw": "{{URL}}/groups",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "create group with domain",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"id": "0ea6b6db-be37-42c2-83d3-38dace2819a4",
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"    pm.environment.set(\"GROUP_WITH_DOMAIN_ID\", pm.response.json().result.id);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
-										"equals": true
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"test_domain\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -1293,6 +1293,80 @@
 							"response": []
 						},
 						{
+							"name": "update group with domain",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"update_domain\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_WITH_DOMAIN_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group without domain",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group2-update\",\n\t    \"description\": \"desc2-update\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "failure update group via user",
 							"event": [
 								{
@@ -1482,80 +1556,6 @@
 									"path": [
 										"groups",
 										"{{GROUP_ID}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "update group with domain",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"update_domain\"\n    }\n}"
-								},
-								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups",
-										"{{GROUP_WITH_DOMAIN_ID}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "update group without domain",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									},
-									{
-										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"param\": {\n\t    \"name\": \"group2-update\",\n\t    \"description\": \"desc2-update\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
-								},
-								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups",
-										"{{GROUP_ID2}}"
 									]
 								}
 							},
@@ -1773,6 +1773,118 @@
 							"response": []
 						},
 						{
+							"name": "search groups with filter oldId",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER4_USER_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups?page=1&perPage=10&oldId=12345",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "perPage",
+											"value": "10"
+										},
+										{
+											"key": "oldId",
+											"value": "12345"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search groups with filter privateGroup and selfRegister",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups?page=1&perPage=10&privateGroup=false&selfRegister=true",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "perPage",
+											"value": "10"
+										},
+										{
+											"key": "privateGroup",
+											"value": "false"
+										},
+										{
+											"key": "selfRegister",
+											"value": "true"
+										},
+										{
+											"key": "oldId",
+											"value": "12346",
+											"disabled": true
+										},
+										{
+											"key": "selfRegister",
+											"value": "false",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "failure search groups invalid parameter 1",
 							"event": [
 								{
@@ -1902,118 +2014,6 @@
 										{
 											"key": "membershipType",
 											"value": "group"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "search groups with filter oldId",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{USER4_USER_TOKEN}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
-								"url": {
-									"raw": "{{URL}}/groups?page=1&perPage=10&oldId=12345",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "1"
-										},
-										{
-											"key": "perPage",
-											"value": "10"
-										},
-										{
-											"key": "oldId",
-											"value": "12345"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "search groups with filter privateGroup and selfRegister",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
-								"url": {
-									"raw": "{{URL}}/groups?page=1&perPage=10&privateGroup=false&selfRegister=true",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "1"
-										},
-										{
-											"key": "perPage",
-											"value": "10"
-										},
-										{
-											"key": "privateGroup",
-											"value": "false"
-										},
-										{
-											"key": "selfRegister",
-											"value": "true"
-										},
-										{
-											"key": "oldId",
-											"value": "12346",
-											"disabled": true
-										},
-										{
-											"key": "selfRegister",
-											"value": "false",
-											"disabled": true
 										}
 									]
 								}
@@ -2300,6 +2300,42 @@
 							"response": []
 						},
 						{
+							"name": "get group with domain",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_WITH_DOMAIN_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "failure get private group via user2",
 							"event": [
 								{
@@ -2363,42 +2399,6 @@
 											"key": "fields",
 											"value": "id,name,description"
 										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "get group with domain",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Authorization",
-										"type": "text",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
-								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups",
-										"{{GROUP_WITH_DOMAIN_ID}}"
 									]
 								}
 							},
@@ -4376,6 +4376,41 @@
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "health check",
+			"item": [
+				{
+					"name": "get app health status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{URL}}/health",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}

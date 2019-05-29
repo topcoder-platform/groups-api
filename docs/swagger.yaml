@@ -392,6 +392,24 @@ paths:
           $ref: "#/components/responses/Forbidden"
         500:
           $ref: "#/components/responses/InternalServerError"
+  /health:
+    get:
+      description: |
+        Get app health status
+      tags:
+        - health
+      responses:
+        200:
+          description: success, the service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksRun:
+                    type: integer
+        503:
+          $ref: "#/components/responses/ServiceUnavailableError"
 
 components:
   securitySchemes:
@@ -525,7 +543,17 @@ components:
                 type: string
                 description: The server error message.
                 example: Something went wrong while processing your request. We’re sorry for the trouble. We’ve been notified of the error and will correct it as soon as possible. Please try your request again in a moment.
-
+    ServiceUnavailableError:
+      description: service is unavailable, e.g. database is down, or database access is very slow
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The server error message.
+                example: the database operation is slow
 
     GroupMembershipArrayResponse:
       description: The group members response

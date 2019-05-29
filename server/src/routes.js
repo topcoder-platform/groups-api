@@ -99,5 +99,11 @@ module.exports = {
       access: [constants.UserRoles.Admin],
       scopes: ['write:groups', 'all:groups']
     }
+  }.
+  '/health': {
+    get: {
+      controller: 'HealthController',
+      method: 'checkHealth'
+    }
   }
 }
