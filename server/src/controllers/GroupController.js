@@ -76,11 +76,22 @@ async function getGroupByOldId (req, res) {
   res.send({ result })
 }
 
+/**
+ * Create security group
+ * @param req the request
+ * @param res the response
+ */
+async function createSecurityGroup (req, res) {
+  const result = await service.createSecurityGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.body)
+  res.send({ result })
+}
+
 module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
   getGroup,
   deleteGroup,
-  getGroupByOldId
+  getGroupByOldId,
+  createSecurityGroup
 }

@@ -91,6 +91,15 @@ module.exports = {
       method: 'getGroupMembersCount'
     }
   },
+  '/groups/securityGroups': {
+    post: {
+      controller: 'GroupController',
+      method: 'createSecurityGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    }
+  }.
   '/health': {
     get: {
       controller: 'HealthController',

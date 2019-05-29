@@ -13,6 +13,8 @@ const createIndex = async () => {
   await session.run('DROP INDEX ON :Group (id)')
   await session.run('DROP INDEX ON :Group (name)')
   await session.run('DROP INDEX ON :User (id)')
+  await session.run('DROP INDEX ON :SecurityGroup (id)')
+  await session.run('DROP INDEX ON :SecurityGroup (name)')
 
   session.close()
 }

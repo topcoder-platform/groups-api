@@ -72,10 +72,23 @@ I deployed the code to:
 https://thawing-savannah-55254.herokuapp.com
 
 
+
 ## Graph Database Structure
 
-The graph database consists of two node types: Group and User, and one relation type: GroupContains.
+The graph database consists of 3 node types: SecurityGroup, Group and User, and one relation type: GroupContains.
 The GroupContains relation links from a group to a child group or user.
+
+### SecurityGroup node
+
+The security group node contains these fields:
+
+- id: the group UUID corresponding to the security group
+- name: the security group name, should be unique (usually the same as the group)
+- createdAt: the created at date string
+- createdBy: the created by user id
+- updatedAt: the updated at date string
+- updatedBy: the updated by user id
+
 
 ### Group node
 
@@ -86,6 +99,7 @@ The group node contains these fields:
 - description: the group description
 - privateGroup: flag whether group is private
 - selfRegister: flag whether group allows self register
+- oldId: the old id, optional
 - createdAt: the created at date string
 - createdBy: the created by user id
 - updatedAt: the updated at date string
@@ -109,8 +123,8 @@ The GroupContains relation contains these fields:
 - createdAt: the created at date string
 - createdBy: the created by user id
 
-
 ## Notes
 
 In the app-constants.js Topics field, the used topics are using a test topic,
 the suggested ones are commented out, because these topics are not created in TC dev Kafka yet.
+

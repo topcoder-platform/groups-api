@@ -358,12 +358,62 @@ deleteGroup.schema = {
   groupId: Joi.id() // defined in app-bootstrap
 }
 
+/**
+ * Create security group.
+ * @param {Object} currentUser the current user
+ * @param {Object} data the data to create the security group
+ * @returns {Object} the created security group
+ */
+async function createSecurityGroup (currentUser, data) {
+  const session = helper.createDBSession()
+  // check whether security group name is already used
+  const nameCheckRes = await session.run('MATCH (g:SecurityGroup {name: {name}}) RETURN g LIMIT 1', { name: data.param.name })
+  if (nameCheckRes.records.length > 0) {
+    throw new errors.ConflictError(`The security group name ${data.param.name} is already used`)
+  }
+
+  // check that the group exists
+  await helper.ensureExists(session, 'Group', data.param.id)
+
+  // check that the group is not used already
+  const idCheck = await session.run('MATCH (g:SecurityGroup {id: {id}}) RETURN g LIMIT 1', { id: data.param.id })
+  if (idCheck.records.length > 0) {
+    throw new errors.ConflictError(`The group id ${data.param.id} is already used in a security group`)
+  }
+
+  // create security group
+  const groupData = data.param
+  groupData.createdAt = new Date().toISOString()
+  if (currentUser !== 'M2M') {
+    groupData.createdBy = currentUser.userId
+  }
+  const createRes = await session.run(`CREATE (group:SecurityGroup {id: {id}, name: {name}, createdAt: {createdAt}${currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''}}) RETURN group`,
+    groupData)
+  const group = createRes.records[0].get(0).properties
+
+  session.close()
+
+  return group
+}
+
+createSecurityGroup.schema = {
+  currentUser: Joi.any(),
+  data: Joi.object().keys({
+    param: Joi.object().keys({
+      // this represents the group id the security group belongs to
+      id: Joi.string().guid().required(),
+      name: Joi.string().min(2).max(50).required()
+    }).required()
+  }).required()
+}
+
 module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
   getGroup,
-  deleteGroup
+  deleteGroup,
+  createSecurityGroup
 }
 
 logger.buildService(module.exports)

@@ -3,6 +3,7 @@
  */
 
 const expect = require('chai').expect
+const helper = require('./helper')
 const config = require('../config')
 const Client = require('../Client').Client
 const apiClient = new Client(config.API_URL)
@@ -18,7 +19,12 @@ const user1Token = config.TOKEN.ADMIN.USER1
 const user2Token = config.TOKEN.USER.USER2
 const user4Token = config.TOKEN.USER.USER4
 
-describe('TC Group Membership Unit tests', () => {
+describe('TC Group Membership Unit tests', function () {
+  this.timeout(helper.testTimeout)
+  before(() => {
+    // runs before all tests in this block
+    helper.initDB()
+  })
   it('Get group members successfully', async () => {
     const res = await apiClient.listMembersByGroup({
       $headers: {
