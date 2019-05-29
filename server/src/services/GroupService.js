@@ -113,6 +113,8 @@ async function createGroup (currentUser, data) {
 
   session.close()
 
+  // post bus event
+  await helper.postBusEvent(constants.Topics.GroupCreated, group)
   return group
 }
 
@@ -161,6 +163,9 @@ async function updateGroup (currentUser, groupId, data) {
   group.subGroups = await helper.getChildGroups(session, group.id)
 
   session.close()
+
+  // post bus event
+  await helper.postBusEvent(constants.Topics.GroupUpdated, group)
   return group
 }
 
@@ -343,6 +348,9 @@ async function deleteGroup (groupId) {
 
   await tx.commit()
   session.close()
+
+  // post bus event
+  await helper.postBusEvent(constants.Topics.GroupDeleted, group)
   return group
 }
 

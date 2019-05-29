@@ -10,7 +10,7 @@
 Configuration for the application is at `config.js`.
 The following parameters can be set in config files or in env variables:
 
-- API_URL: the base URL of TC groups API to test, default value is 'https://lit-earth-25873.herokuapp.com'
+- API_URL: the base URL of TC groups API to test, default value is 'http://localhost:3000'
 
 
 ## To Generate Client Code
