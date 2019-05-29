@@ -260,6 +260,8 @@ async function getGroup (currentUser, groupId, criteria, isOldId) {
   }
 
   session.close()
+
+  logger.debug(`group details - ${group}`)
   return group
 }
 

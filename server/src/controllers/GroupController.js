@@ -3,6 +3,7 @@
  */
 const service = require('../services/GroupService')
 const helper = require('../common/helper')
+const logger = require("../common/logger");
 const constants = require('../../app-constants')
 
 /**
@@ -47,8 +48,10 @@ async function updateGroup (req, res) {
  * @param res the response
  */
 async function getGroup (req, res) {
+  logger.debug(`Get group details for req = ${req}`);
   const result = await service.getGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId,
     req.query, false)
+  logger.debug(`Group Details = ${result}`)
   res.send({ result })
 }
 
