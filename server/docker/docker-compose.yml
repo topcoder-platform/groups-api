@@ -1,9 +1,0 @@
-version: '3'
-services:
-  groups-api:
-    image: groups-api:latest
-    build:
-      context: ../../
-      dockerfile: server/docker/Dockerfile
-    network_mode: "host"
-
