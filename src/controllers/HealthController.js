@@ -4,6 +4,7 @@
 const config = require("config");
 const errors = require("../common/errors");
 const service = require("../services/GroupService");
+const helper = require("../common/helper")
 
 // the topcoder-healthcheck-dropin library returns checksRun count,
 // here it follows that to return such count

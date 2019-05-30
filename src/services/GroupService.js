@@ -15,6 +15,8 @@ const constants = require("../../app-constants");
  * @returns {Object} the search result
  */
 async function searchGroups(criteria) {
+  logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`);
+
   if (criteria.memberId && !criteria.membershipType) {
     throw new errors.BadRequestError(
       "The membershipType parameter should be provided if memberId is provided."
@@ -83,8 +85,7 @@ async function searchGroups(criteria) {
   }
 
   session.close();
-
-  return { total, page: criteria.page, perPage: criteria.perPage, result };
+  return result;
 }
 
 searchGroups.schema = {
@@ -106,6 +107,10 @@ searchGroups.schema = {
  * @returns {Object} the created group
  */
 async function createGroup(currentUser, data) {
+  logger.debug(
+    `Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`
+  );
+
   const session = helper.createDBSession();
   // check whether group name is already used
   const nameCheckRes = await session.run(
@@ -166,6 +171,12 @@ createGroup.schema = {
  * @returns {Object} the updated group
  */
 async function updateGroup(currentUser, groupId, data) {
+  logger.debug(
+    `Update Group - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(
+      data
+    )}`
+  );
+
   const session = helper.createDBSession();
   await helper.ensureExists(session, "Group", groupId);
   // check whether group name is used by other group
@@ -219,6 +230,12 @@ updateGroup.schema = {
  * @returns {Object} the group
  */
 async function getGroup(currentUser, groupId, criteria, isOldId) {
+  logger.debug(
+    `Get Group - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
+      criteria
+    )} , isOldId - ${isOldId}`
+  );
+
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError(
       "includeSubGroups and includeParentGroup can not be both true"
@@ -334,8 +351,6 @@ async function getGroup(currentUser, groupId, criteria, isOldId) {
   }
 
   session.close();
-
-  logger.debug(`group details - ${group}`);
   return group;
 }
 
@@ -358,6 +373,10 @@ getGroup.schema = {
  * @returns {Object} the found entity
  */
 async function retrieveGroupByOldId(session, oldId) {
+  logger.debug(
+    `retrieveGroupByOldId - ${isOldId}`
+  );
+
   const res = await session.run(`MATCH (g:Group {oldId: {oldId}}) RETURN g`, {
     oldId
   });
@@ -378,6 +397,10 @@ async function retrieveGroupByOldId(session, oldId) {
  * @returns {Object} the deleted group
  */
 async function deleteGroup(groupId) {
+  logger.debug(
+    `deleteGroup - ${groupId}`
+  );
+
   const session = helper.createDBSession();
   const group = await helper.ensureExists(session, "Group", groupId);
   // populate parent/sub groups
@@ -445,6 +468,10 @@ deleteGroup.schema = {
  * @returns {Object} the created security group
  */
 async function createSecurityGroup(currentUser, data) {
+  logger.debug(
+    `createSecurityGroup - currentUser ${currentUser} - data ${JSON.stringify(data)}`
+  );
+
   const session = helper.createDBSession();
   // check whether security group name is already used
   const nameCheckRes = await session.run(

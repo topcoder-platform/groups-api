@@ -23,7 +23,7 @@ async function searchGroups(req, res) {
   }
   const result = await service.searchGroups(criteria);
   helper.setResHeaders(req, res, result);
-  res.send({ result: result.result });
+  res.send(result);
 }
 
 /**
@@ -50,7 +50,7 @@ async function updateGroup(req, res) {
     req.params.groupId,
     req.body
   );
-  res.send({ result });
+  res.send(result);
 }
 
 /**
@@ -66,8 +66,8 @@ async function getGroup(req, res) {
     req.query,
     false
   );
-  logger.debug(`Group Details = ${result}`);
-  res.send({ result });
+  logger.debug(`Group Details = ${JSON.stringify(result)}`);
+  res.send(result);
 }
 
 /**
@@ -92,7 +92,7 @@ async function getGroupByOldId(req, res) {
     req.query,
     true
   );
-  res.send({ result });
+  res.send(result);
 }
 
 /**
@@ -105,7 +105,7 @@ async function createSecurityGroup(req, res) {
     req.authUser.isMachine ? "M2M" : req.authUser,
     req.body
   );
-  res.send({ result });
+  res.send(result);
 }
 
 module.exports = {

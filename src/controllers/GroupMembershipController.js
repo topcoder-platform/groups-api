@@ -16,7 +16,7 @@ async function getGroupMembers(req, res) {
     req.query
   );
   helper.setResHeaders(req, res, result);
-  res.send({ result: result.result });
+  res.send(result);
 }
 
 /**
@@ -30,7 +30,7 @@ async function addGroupMember(req, res) {
     req.params.groupId,
     req.body
   );
-  res.send({ result });
+  res.send(result);
 }
 
 /**
@@ -44,7 +44,7 @@ async function getGroupMember(req, res) {
     req.params.groupId,
     req.params.memberId
   );
-  res.send({ result });
+  res.send(result);
 }
 
 /**
@@ -58,7 +58,7 @@ async function deleteGroupMember(req, res) {
     req.params.groupId,
     req.params.memberId
   );
-  res.send({ result });
+  res.send(result);
 }
 
 /**
@@ -71,7 +71,7 @@ async function getGroupMembersCount(req, res) {
     req.params.groupId,
     req.query
   );
-  res.send({ result });
+  res.send(result);
 }
 
 module.exports = {
