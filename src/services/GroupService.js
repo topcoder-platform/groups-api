@@ -259,8 +259,8 @@ async function getGroup(currentUser, groupId, criteria) {
   const session = helper.createDBSession();
 
   let group = validate(groupId, 4)
-    ? await retrieveGroupByOldId(session, groupId)
-    : await helper.ensureExists(session, 'Group', groupId);
+    ? await helper.ensureExists(session, 'Group', groupId)
+    : await retrieveGroupByOldId(session, groupId);
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
