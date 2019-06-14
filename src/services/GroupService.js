@@ -107,6 +107,7 @@ async function createGroup(currentUser, data) {
     const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
       name: data.param.name
     });
+    logger.debug(JSON.stringify(nameCheckRes));
     if (nameCheckRes.records.length > 0) {
       throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
     }
@@ -126,7 +127,7 @@ async function createGroup(currentUser, data) {
       groupData
     );
     logger.debug(JSON.stringify(createRes));
-    const group = createRes.records[0].get(0).properties;
+    const group = createRes.records[0]._fields[0].properties;
     await tx.commit();
 
     // post bus event
