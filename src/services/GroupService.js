@@ -334,7 +334,7 @@ getGroup.schema = {
  * @returns {Object} the found entity
  */
 async function retrieveGroupByOldId(session, oldId) {
-  logger.debug(`retrieveGroupByOldId - ${isOldId}`);
+  logger.debug(`retrieveGroupByOldId - ${oldId}`);
 
   const res = await session.run(`MATCH (g:Group {oldId: {oldId}}) RETURN g`, {
     oldId
