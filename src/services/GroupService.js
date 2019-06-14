@@ -98,36 +98,46 @@ searchGroups.schema = {
  * @returns {Object} the created group
  */
 async function createGroup(currentUser, data) {
-  logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
-
   const session = helper.createDBSession();
-  // check whether group name is already used
-  const nameCheckRes = await session.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', { name: data.param.name });
-  if (nameCheckRes.records.length > 0) {
-    throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
+  const tx = await session.BeginTransactionAsync();
+  try {
+    logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
+
+    // check whether group name is already used
+    const nameCheckRes = await tx.RunAsync('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
+      name: data.param.name
+    });
+    if (nameCheckRes.records.length > 0) {
+      throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
+    }
+
+    // create group
+    const groupData = data.param;
+    // generate next group id
+    groupData.id = uuid();
+    groupData.createdAt = new Date().toISOString();
+    if (currentUser !== 'M2M') {
+      groupData.createdBy = currentUser.userId;
+    }
+    const createRes = await session.run(
+      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${
+        currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
+      }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
+      groupData
+    );
+    const group = createRes.records[0].get(0).properties;
+    await tx.CommitAsync();
+
+    // post bus event
+    await helper.postBusEvent(constants.Topics.GroupCreated, group);
+    return group;
+  } catch (error) {
+    logger.error(error);
+    await tx.RollbackAsync();
+    throw new errors.BadRequestError('Group has not been created due to error');
+  } finally {
+    await session.CloseAsync();
   }
-
-  // create group
-  const groupData = data.param;
-  // generate next group id
-  groupData.id = uuid();
-  groupData.createdAt = new Date().toISOString();
-  if (currentUser !== 'M2M') {
-    groupData.createdBy = currentUser.userId;
-  }
-  const createRes = await session.run(
-    `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${
-      currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
-    }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
-    groupData
-  );
-  const group = createRes.records[0].get(0).properties;
-
-  session.close();
-
-  // post bus event
-  await helper.postBusEvent(constants.Topics.GroupCreated, group);
-  return group;
 }
 
 createGroup.schema = {

@@ -19,10 +19,9 @@ module.exports = {
   AUTH0_URL: process.env.AUTH0_URL || 'https://topcoder-dev.auth0.com/oauth/token',
   AUTH0_PROXY_SERVER_URL: process.env.AUTH0_PROXY_SERVER_URL,
   AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE || 'https://m2m.topcoder-dev.com/',
-  TOKEN_CACHE_TIME: process.env.TOKEN_CACHE_TIME || 90,
-  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID || 'e6oZAxnoFvjdRtjJs1Jt3tquLnNXXXXX',
-  AUTH0_CLIENT_SECRET:
-    process.env.AUTH0_CLIENT_SECRET || 'OGCzOnQkhYTQpZM3NI0sD--JJ_EPcm2E7707_k6zX11m223LrRK1-QZL4PoXXXXX',
+  TOKEN_CACHE_TIME: process.env.TOKEN_CACHE_TIME || '86400000',
+  AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+  AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECR,
 
   // bus API config params
   BUSAPI_URL: process.env.BUSAPI_URL || 'https://api.topcoder-dev.com/v5',
