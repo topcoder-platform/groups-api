@@ -119,7 +119,7 @@ async function createGroup(currentUser, data) {
     if (currentUser !== 'M2M') {
       groupData.createdBy = currentUser.userId;
     }
-    const createRes = await session.run(
+    const createRes = await tx.run(
       `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${
         currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
       }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
