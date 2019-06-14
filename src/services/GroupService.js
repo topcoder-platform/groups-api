@@ -4,11 +4,11 @@
 const _ = require('lodash');
 const Joi = require('joi');
 const uuid = require('uuid/v4');
-const validate = require('uuid-validate');
 const helper = require('../common/helper');
 const logger = require('../common/logger');
 const errors = require('../common/errors');
 const constants = require('../../app-constants');
+let validate = require('uuid-validate');
 
 /**
  * Search groups
