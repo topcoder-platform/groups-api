@@ -141,8 +141,10 @@ async function createGroup(currentUser, data) {
 
   session.close();
 
+  createSecurityGroup(currentUser, data);
+
   // post bus event
-  await helper.postBusEvent(constants.Topics.GroupCreated, group);
+  // await helper.postBusEvent(constants.Topics.GroupCreated, group);
   return group;
 }
 
@@ -373,9 +375,7 @@ getGroup.schema = {
  * @returns {Object} the found entity
  */
 async function retrieveGroupByOldId(session, oldId) {
-  logger.debug(
-    `retrieveGroupByOldId - ${isOldId}`
-  );
+  logger.debug(`retrieveGroupByOldId - ${isOldId}`);
 
   const res = await session.run(`MATCH (g:Group {oldId: {oldId}}) RETURN g`, {
     oldId
@@ -397,9 +397,7 @@ async function retrieveGroupByOldId(session, oldId) {
  * @returns {Object} the deleted group
  */
 async function deleteGroup(groupId) {
-  logger.debug(
-    `deleteGroup - ${groupId}`
-  );
+  logger.debug(`deleteGroup - ${groupId}`);
 
   const session = helper.createDBSession();
   const group = await helper.ensureExists(session, "Group", groupId);
@@ -469,7 +467,9 @@ deleteGroup.schema = {
  */
 async function createSecurityGroup(currentUser, data) {
   logger.debug(
-    `createSecurityGroup - currentUser ${currentUser} - data ${JSON.stringify(data)}`
+    `createSecurityGroup - currentUser ${currentUser} - data ${JSON.stringify(
+      data
+    )}`
   );
 
   const session = helper.createDBSession();
