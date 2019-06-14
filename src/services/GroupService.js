@@ -125,10 +125,8 @@ async function createGroup(currentUser, data) {
 
   session.close();
 
-  createSecurityGroup(currentUser, data);
-
   // post bus event
-  // await helper.postBusEvent(constants.Topics.GroupCreated, group);
+  await helper.postBusEvent(constants.Topics.GroupCreated, group);
   return group;
 }
 
