@@ -125,6 +125,7 @@ async function createGroup(currentUser, data) {
       }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
       groupData
     );
+    logger.debug(createRes);
     const group = createRes.records[0].get(0).properties;
     await tx.commit();
 
