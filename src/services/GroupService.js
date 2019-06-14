@@ -1,13 +1,14 @@
 /**
  * This service provides operations of groups
  */
-const _ = require("lodash");
-const Joi = require("joi");
-const uuid = require("uuid/v4");
-const helper = require("../common/helper");
-const logger = require("../common/logger");
-const errors = require("../common/errors");
-const constants = require("../../app-constants");
+const _ = require('lodash');
+const Joi = require('joi');
+const uuid = require('uuid/v4');
+const validate = require('uuid-validate');
+const helper = require('../common/helper');
+const logger = require('../common/logger');
+const errors = require('../common/errors');
+const constants = require('../../app-constants');
 
 /**
  * Search groups
@@ -18,62 +19,52 @@ async function searchGroups(criteria) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`);
 
   if (criteria.memberId && !criteria.membershipType) {
-    throw new errors.BadRequestError(
-      "The membershipType parameter should be provided if memberId is provided."
-    );
+    throw new errors.BadRequestError('The membershipType parameter should be provided if memberId is provided.');
   }
   if (!criteria.memberId && criteria.membershipType) {
-    throw new errors.BadRequestError(
-      "The memberId parameter should be provided if membershipType is provided."
-    );
+    throw new errors.BadRequestError('The memberId parameter should be provided if membershipType is provided.');
   }
 
   const session = helper.createDBSession();
   let matchClause;
   if (criteria.memberId) {
-    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${
-      criteria.membershipType
-    }"}]->(o {id: "${criteria.memberId}"})`;
+    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${
+      criteria.memberId
+    }"})`;
   } else {
     matchClause = `MATCH (g:Group)`;
   }
 
-  let whereClause = "";
+  let whereClause = '';
   if (criteria.oldId) {
     whereClause = ` WHERE g.oldId = "${criteria.oldId}"`;
   }
   if (criteria.selfRegister !== undefined) {
-    if (whereClause === "") {
+    if (whereClause === '') {
       whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`;
     } else {
-      whereClause = whereClause.concat(
-        ` AND g.selfRegister = ${criteria.selfRegister}`
-      );
+      whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`);
     }
   }
   if (criteria.privateGroup !== undefined) {
-    if (whereClause === "") {
+    if (whereClause === '') {
       whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`;
     } else {
-      whereClause = whereClause.concat(
-        ` AND g.privateGroup = ${criteria.privateGroup}`
-      );
+      whereClause = whereClause.concat(` AND g.privateGroup = ${criteria.privateGroup}`);
     }
   }
 
   // query total record count
-  const totalRes = await session.run(
-    `${matchClause}${whereClause} RETURN COUNT(g)`
-  );
+  const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`);
   const total = totalRes.records[0].get(0).low || 0;
 
   // query page of records
   let result = [];
   if (criteria.page <= Math.ceil(total / criteria.perPage)) {
     const pageRes = await session.run(
-      `${matchClause}${whereClause} RETURN g ORDER BY g.name SKIP ${(criteria.page -
-        1) *
-        criteria.perPage} LIMIT ${criteria.perPage}`
+      `${matchClause}${whereClause} RETURN g ORDER BY g.name SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
+        criteria.perPage
+      }`
     );
     result = _.map(pageRes.records, record => record.get(0).properties);
     // populate parent/sub groups
@@ -107,20 +98,13 @@ searchGroups.schema = {
  * @returns {Object} the created group
  */
 async function createGroup(currentUser, data) {
-  logger.debug(
-    `Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`
-  );
+  logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
 
   const session = helper.createDBSession();
   // check whether group name is already used
-  const nameCheckRes = await session.run(
-    "MATCH (g:Group {name: {name}}) RETURN g LIMIT 1",
-    { name: data.param.name }
-  );
+  const nameCheckRes = await session.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', { name: data.param.name });
   if (nameCheckRes.records.length > 0) {
-    throw new errors.ConflictError(
-      `The group name ${data.param.name} is already used`
-    );
+    throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
   }
 
   // create group
@@ -128,13 +112,13 @@ async function createGroup(currentUser, data) {
   // generate next group id
   groupData.id = uuid();
   groupData.createdAt = new Date().toISOString();
-  if (currentUser !== "M2M") {
+  if (currentUser !== 'M2M') {
     groupData.createdBy = currentUser.userId;
   }
   const createRes = await session.run(
     `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${
-      currentUser !== "M2M" ? ", createdBy: {createdBy}" : ""
-    }${groupData.domain ? ", domain: {domain}" : ""}}) RETURN group`,
+      currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
+    }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
     groupData
   );
   const group = createRes.records[0].get(0).properties;
@@ -173,35 +157,29 @@ createGroup.schema = {
  * @returns {Object} the updated group
  */
 async function updateGroup(currentUser, groupId, data) {
-  logger.debug(
-    `Update Group - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(
-      data
-    )}`
-  );
+  logger.debug(`Update Group - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(data)}`);
 
   const session = helper.createDBSession();
-  await helper.ensureExists(session, "Group", groupId);
+  await helper.ensureExists(session, 'Group', groupId);
   // check whether group name is used by other group
-  const nameCheckRes = await session.run(
-    `MATCH (g:Group) WHERE g.id <> {id} AND g.name = {name} RETURN g LIMIT 1`,
-    { id: groupId, name: data.param.name }
-  );
+  const nameCheckRes = await session.run(`MATCH (g:Group) WHERE g.id <> {id} AND g.name = {name} RETURN g LIMIT 1`, {
+    id: groupId,
+    name: data.param.name
+  });
   if (nameCheckRes.records.length > 0) {
-    throw new errors.ConflictError(
-      `The group name ${data.param.name} is already used`
-    );
+    throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
   }
   // update group
   const groupData = data.param;
   groupData.id = groupId;
   groupData.updatedAt = new Date().toISOString();
-  if (currentUser !== "M2M") {
+  if (currentUser !== 'M2M') {
     groupData.updatedBy = currentUser.userId;
   }
   const updateRes = await session.run(
     `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}${
-      currentUser !== "M2M" ? ", g.updatedBy={updatedBy}" : ""
-    }${groupData.domain ? ", g.domain={domain}" : ""} RETURN g`,
+      currentUser !== 'M2M' ? ', g.updatedBy={updatedBy}' : ''
+    }${groupData.domain ? ', g.domain={domain}' : ''} RETURN g`,
     groupData
   );
   const group = updateRes.records[0].get(0).properties;
@@ -228,20 +206,13 @@ updateGroup.schema = {
  * @param {Object} currentUser the current user
  * @param {String} groupId the id of group to get
  * @param {Object} criteria the query criteria
- * @param {Boolean} isOldId the flag indicate groupId is old id
  * @returns {Object} the group
  */
-async function getGroup(currentUser, groupId, criteria, isOldId) {
-  logger.debug(
-    `Get Group - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
-      criteria
-    )} , isOldId - ${isOldId}`
-  );
+async function getGroup(currentUser, groupId, criteria) {
+  logger.debug(`Get Group - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(criteria)}`);
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
-    throw new errors.BadRequestError(
-      "includeSubGroups and includeParentGroup can not be both true"
-    );
+    throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true');
   }
   if (_.isNil(criteria.oneLevel)) {
     if (criteria.includeSubGroups) {
@@ -250,28 +221,27 @@ async function getGroup(currentUser, groupId, criteria, isOldId) {
       criteria.oneLevel = true;
     }
   }
+
   let fieldNames = null;
   if (criteria.fields) {
-    fieldNames = criteria.fields.split(",");
+    fieldNames = criteria.fields.split(',');
     const allowedFieldNames = [
-      "id",
-      "createdAt",
-      "createdBy",
-      "updatedAt",
-      "updatedBy",
-      "name",
-      "description",
-      "privateGroup",
-      "selfRegister",
-      "domain",
-      "oldId"
+      'id',
+      'createdAt',
+      'createdBy',
+      'updatedAt',
+      'updatedBy',
+      'name',
+      'description',
+      'privateGroup',
+      'selfRegister',
+      'domain',
+      'oldId'
     ];
     for (let i = 0; i < fieldNames.length; i += 1) {
       if (!_.includes(allowedFieldNames, fieldNames[i])) {
         throw new errors.BadRequestError(
-          `Field name ${
-            fieldNames[i]
-          } is not allowed, allowed field names: ${JSON.stringify(
+          `Field name ${fieldNames[i]} is not allowed, allowed field names: ${JSON.stringify(
             allowedFieldNames,
             null,
             4
@@ -280,25 +250,20 @@ async function getGroup(currentUser, groupId, criteria, isOldId) {
       }
       for (let j = i + 1; j < fieldNames.length; j += 1) {
         if (fieldNames[i] === fieldNames[j]) {
-          throw new errors.BadRequestError(
-            `There are duplicate field names: ${fieldNames[i]}`
-          );
+          throw new errors.BadRequestError(`There are duplicate field names: ${fieldNames[i]}`);
         }
       }
     }
   }
 
   const session = helper.createDBSession();
-  let group = isOldId
+
+  let group = validate(groupId, 4)
     ? await retrieveGroupByOldId(session, groupId)
-    : await helper.ensureExists(session, "Group", groupId);
+    : await helper.ensureExists(session, 'Group', groupId);
 
   // if the group is private, the user needs to be a member of the group, or an admin
-  if (
-    group.privateGroup &&
-    currentUser !== "M2M" &&
-    !helper.hasAdminRole(currentUser)
-  ) {
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
     await helper.ensureGroupMember(session, group.id, currentUser.userId);
   }
 
@@ -324,20 +289,14 @@ async function getGroup(currentUser, groupId, criteria, isOldId) {
       expanded.push(groupToExpand);
       if (criteria.includeSubGroups) {
         // find child groups
-        groupToExpand.subGroups = await helper.getChildGroups(
-          session,
-          groupToExpand.id
-        );
+        groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id);
         // add child groups to pending if needed
         if (!criteria.oneLevel) {
           _.forEach(groupToExpand.subGroups, g => pending.push(g));
         }
       } else {
         // find parent groups
-        groupToExpand.parentGroups = await helper.getParentGroups(
-          session,
-          groupToExpand.id
-        );
+        groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id);
         // add parent groups to pending if needed
         if (!criteria.oneLevel) {
           _.forEach(groupToExpand.parentGroups, g => pending.push(g));
@@ -347,8 +306,8 @@ async function getGroup(currentUser, groupId, criteria, isOldId) {
   }
 
   if (fieldNames) {
-    fieldNames.push("subGroups");
-    fieldNames.push("parentGroups");
+    fieldNames.push('subGroups');
+    fieldNames.push('parentGroups');
     group = _.pick(group, fieldNames);
   }
 
@@ -380,12 +339,7 @@ async function retrieveGroupByOldId(session, oldId) {
   const res = await session.run(`MATCH (g:Group {oldId: {oldId}}) RETURN g`, {
     oldId
   });
-  if (
-    !res ||
-    res.records.length === 0 ||
-    !res.records[0] ||
-    !res.records[0].get(0)
-  ) {
+  if (!res || res.records.length === 0 || !res.records[0] || !res.records[0].get(0)) {
     throw new errors.NotFoundError(`Not found Group with old id ${oldId}`);
   }
   return res.records[0].get(0).properties;
@@ -400,7 +354,7 @@ async function deleteGroup(groupId) {
   logger.debug(`deleteGroup - ${groupId}`);
 
   const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, "Group", groupId);
+  const group = await helper.ensureExists(session, 'Group', groupId);
   // populate parent/sub groups
   group.parentGroups = await helper.getParentGroups(session, group.id);
   group.subGroups = await helper.getChildGroups(session, group.id);
@@ -438,11 +392,11 @@ async function deleteGroup(groupId) {
   for (let i = 0; i < groupsToDelete.length; i += 1) {
     const theId = groupsToDelete[i].id;
     // delete group's relationships
-    await tx.run("MATCH (g:Group {id: {groupId}})-[r]-() DELETE r", {
+    await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
       groupId: theId
     });
     // delete group
-    await tx.run("MATCH (g:Group {id: {groupId}}) DELETE g", {
+    await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
       groupId: theId
     });
   }
@@ -459,91 +413,12 @@ deleteGroup.schema = {
   groupId: Joi.id() // defined in app-bootstrap
 };
 
-/**
- * Create security group.
- * @param {Object} currentUser the current user
- * @param {Object} data the data to create the security group
- * @returns {Object} the created security group
- */
-async function createSecurityGroup(currentUser, data) {
-  logger.debug(
-    `createSecurityGroup - currentUser ${currentUser} - data ${JSON.stringify(
-      data
-    )}`
-  );
-
-  const session = helper.createDBSession();
-  // check whether security group name is already used
-  const nameCheckRes = await session.run(
-    "MATCH (g:SecurityGroup {name: {name}}) RETURN g LIMIT 1",
-    { name: data.param.name }
-  );
-  if (nameCheckRes.records.length > 0) {
-    throw new errors.ConflictError(
-      `The security group name ${data.param.name} is already used`
-    );
-  }
-
-  // check that the group exists
-  await helper.ensureExists(session, "Group", data.param.id);
-
-  // check that the group is not used already
-  const idCheck = await session.run(
-    "MATCH (g:SecurityGroup {id: {id}}) RETURN g LIMIT 1",
-    { id: data.param.id }
-  );
-  if (idCheck.records.length > 0) {
-    throw new errors.ConflictError(
-      `The group id ${data.param.id} is already used in a security group`
-    );
-  }
-
-  // create security group
-  const groupData = data.param;
-  groupData.createdAt = new Date().toISOString();
-  if (currentUser !== "M2M") {
-    groupData.createdBy = currentUser.userId;
-  }
-  const createRes = await session.run(
-    `CREATE (group:SecurityGroup {id: {id}, name: {name}, createdAt: {createdAt}${
-      currentUser !== "M2M" ? ", createdBy: {createdBy}" : ""
-    }}) RETURN group`,
-    groupData
-  );
-  const group = createRes.records[0].get(0).properties;
-
-  session.close();
-
-  return group;
-}
-
-createSecurityGroup.schema = {
-  currentUser: Joi.any(),
-  data: Joi.object()
-    .keys({
-      param: Joi.object()
-        .keys({
-          // this represents the group id the security group belongs to
-          id: Joi.string()
-            .guid()
-            .required(),
-          name: Joi.string()
-            .min(2)
-            .max(50)
-            .required()
-        })
-        .required()
-    })
-    .required()
-};
-
 module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
   getGroup,
-  deleteGroup,
-  createSecurityGroup
+  deleteGroup
 };
 
 logger.buildService(module.exports);
