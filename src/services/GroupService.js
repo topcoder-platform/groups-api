@@ -99,12 +99,12 @@ searchGroups.schema = {
  */
 async function createGroup(currentUser, data) {
   const session = helper.createDBSession();
-  const tx = await session.BeginTransactionAsync();
+  const tx = await session.beginTransaction();
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
 
     // check whether group name is already used
-    const nameCheckRes = await tx.RunAsync('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
+    const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
       name: data.param.name
     });
     if (nameCheckRes.records.length > 0) {
@@ -126,17 +126,17 @@ async function createGroup(currentUser, data) {
       groupData
     );
     const group = createRes.records[0].get(0).properties;
-    await tx.CommitAsync();
+    await tx.commit();
 
     // post bus event
     await helper.postBusEvent(constants.Topics.GroupCreated, group);
     return group;
   } catch (error) {
     logger.error(error);
-    await tx.RollbackAsync();
+    await tx.rollback();
     throw new errors.BadRequestError('Group has not been created due to error');
   } finally {
-    await session.CloseAsync();
+    await session.close();
   }
 }
 
