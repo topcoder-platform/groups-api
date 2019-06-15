@@ -107,38 +107,41 @@ async function createGroup(currentUser, data) {
     const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
       name: data.param.name
     });
-    logger.debug(JSON.stringify(nameCheckRes));
     if (nameCheckRes.records.length > 0) {
       throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
     }
 
     // create group
     const groupData = data.param;
+
     // generate next group id
     groupData.id = uuid();
     groupData.createdAt = new Date().toISOString();
     if (currentUser !== 'M2M') {
       groupData.createdBy = currentUser.userId;
     }
+
     const createRes = await tx.run(
       `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${
         currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
       }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
       groupData
     );
-    logger.debug(JSON.stringify(createRes));
+
     const group = createRes.records[0]._fields[0].properties;
-    await tx.commit();
+    logger.debug(JSON.stringify(group));
+
+    await tx.commit;
+    session.close();
 
     // post bus event
     await helper.postBusEvent(constants.Topics.GroupCreated, group);
     return group;
   } catch (error) {
     logger.error(error);
-    await tx.rollback();
+    tx.rollback();
+    session.close();
     throw new errors.BadRequestError('Group has not been created due to error');
-  } finally {
-    await session.close();
   }
 }
 
