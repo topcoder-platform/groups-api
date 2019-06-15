@@ -99,7 +99,7 @@ searchGroups.schema = {
  */
 async function createGroup(currentUser, data) {
   const session = helper.createDBSession();
-  let tx = session.beginTransaction();
+  const tx = session.beginTransaction();
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
 
@@ -134,6 +134,8 @@ async function createGroup(currentUser, data) {
     // post bus event
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group);
     await tx.commit();
+    console.log('====== after commit =====');
+    session.close();
     return group;
   } catch (error) {
     logger.error(error);
