@@ -99,7 +99,7 @@ searchGroups.schema = {
  */
 async function createGroup(currentUser, data) {
   const session = helper.createDBSession();
-  const tx = session.beginTransaction();
+  let tx = session.beginTransaction();
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
 
@@ -131,9 +131,7 @@ async function createGroup(currentUser, data) {
     const group = createRes.records[0]._fields[0].properties;
     logger.debug(`Group = ${JSON.stringify(group)}`);
 
-    logger.debug(tx);
     await tx.commit();
-    session.close();
 
     // post bus event
     await helper.postBusEvent(constants.Topics.GroupCreated, group);
@@ -142,8 +140,10 @@ async function createGroup(currentUser, data) {
     logger.error(error);
     logger.error('Transaction Rollback');
     tx.rollback();
+    throw error;
+  } finally {
+    logger.error('Session Close');
     session.close();
-    throw new errors.BadRequestError('Group has not been created due to error');
   }
 }
 
