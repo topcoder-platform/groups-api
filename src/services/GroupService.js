@@ -131,10 +131,9 @@ async function createGroup(currentUser, data) {
     const group = createRes.records[0]._fields[0].properties;
     logger.debug(`Group = ${JSON.stringify(group)}`);
 
-    await tx.commit();
-
     // post bus event
     await helper.postBusEvent(constants.Topics.GroupCreated, group);
+    await tx.commit();
     return group;
   } catch (error) {
     logger.error(error);
