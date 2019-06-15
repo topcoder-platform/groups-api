@@ -135,15 +135,14 @@ async function createGroup(currentUser, data) {
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group);
     await tx.commit();
     console.log('====== after commit =====');
-    session.close();
     return group;
   } catch (error) {
     logger.error(error);
-    logger.error('Transaction Rollback');
+    logger.debug('Transaction Rollback');
     tx.rollback();
     throw error;
   } finally {
-    logger.error('Session Close');
+    logger.debug('Session Close');
     session.close();
   }
 }
