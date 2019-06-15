@@ -98,8 +98,8 @@ searchGroups.schema = {
  * @returns {Object} the created group
  */
 async function createGroup(currentUser, data) {
-  const session = helper.createDBSession();
-  const tx = session.beginTransaction();
+  let session = helper.createDBSession();
+  let tx = session.beginTransaction();
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
 
