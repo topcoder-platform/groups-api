@@ -1,10 +1,9 @@
 /**
  * Controller for health endpoint
  */
-const config = require("config");
-const errors = require("../common/errors");
-const service = require("../services/GroupService");
-const helper = require("../common/helper")
+const config = require('config');
+const errors = require('../common/errors');
+const service = require('../services/GroupService');
 
 // the topcoder-healthcheck-dropin library returns checksRun count,
 // here it follows that to return such count
@@ -23,15 +22,10 @@ async function checkHealth(req, res) {
   try {
     await service.searchGroups({ page: 1, perPage: 1 });
   } catch (e) {
-    throw new errors.ServiceUnavailableError(
-      `There is database operation error, ${e.message}`
-    );
+    throw new errors.ServiceUnavailableError(`There is database operation error, ${e.message}`);
   }
-  if (
-    new Date().getTime() - timestampMS >
-    Number(config.HEALTH_CHECK_TIMEOUT)
-  ) {
-    throw new errors.ServiceUnavailableError("Database operation is slow.");
+  if (new Date().getTime() - timestampMS > Number(config.HEALTH_CHECK_TIMEOUT)) {
+    throw new errors.ServiceUnavailableError('Database operation is slow.');
   }
   // there is no error, and it is quick, then return checks run count
   res.send({ checksRun });

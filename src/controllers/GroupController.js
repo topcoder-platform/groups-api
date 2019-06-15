@@ -1,10 +1,10 @@
 /**
  * Controller for group endpoints
  */
+const config = require('config');
 const service = require('../services/GroupService');
 const helper = require('../common/helper');
 const logger = require('../common/logger');
-const constants = require('../../app-constants');
 
 /**
  * Search groups
@@ -15,7 +15,7 @@ async function searchGroups(req, res) {
   let criteria = req.query;
   if (!req.authUser.isMachine && !helper.hasAdminRole(req.authUser) && criteria) {
     criteria.memberId = req.authUser.userId;
-    criteria.membershipType = constants.MembershipTypes.User;
+    criteria.membershipType = config.MEMBERSHIP_TYPES.User;
   }
   const result = await service.searchGroups(criteria);
   helper.setResHeaders(req, res, result);

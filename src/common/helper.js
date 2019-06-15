@@ -1,13 +1,14 @@
 /**
  * This file defines helper methods
  */
-const querystring = require('querystring');
+
 const _ = require('lodash');
+const busApi = require('tc-bus-api-wrapper');
 const config = require('config');
 const neo4j = require('neo4j-driver').v1;
-const constants = require('../../app-constants');
+const querystring = require('querystring');
+
 const errors = require('./errors');
-const busApi = require('tc-bus-api-wrapper');
 
 // Bus API Client
 let busApiClient;
@@ -80,7 +81,7 @@ async function ensureExists(session, model, id) {
 async function ensureGroupMember(session, groupId, userId) {
   const memberCheckRes = await session.run(
     'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
-    { groupId, membershipType: constants.MembershipTypes.User, userId }
+    { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
   );
   if (memberCheckRes.records.length === 0) {
     throw new errors.ForbiddenError(`User is not member of the group`);
@@ -192,7 +193,7 @@ function checkIfExists(source, term) {
  */
 function hasAdminRole(authUser) {
   for (let i = 0; i < authUser.roles.length; i++) {
-    if (authUser.roles[i].toLowerCase() === constants.UserRoles.Admin.toLowerCase()) {
+    if (authUser.roles[i].toLowerCase() === config.USER_ROLES.Admin.toLowerCase()) {
       return true;
     }
   }
@@ -232,9 +233,9 @@ async function postBusEvent(topic, payload) {
   const client = getBusApiClient();
   await client.postEvent({
     topic,
-    originator: constants.EVENT_ORIGINATOR,
+    originator: 'topcoder-groups-api',
     timestamp: new Date().toISOString(),
-    'mime-type': constants.EVENT_MIME_TYPE,
+    'mime-type': 'application/json',
     payload
   });
 }

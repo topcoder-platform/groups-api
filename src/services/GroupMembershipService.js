@@ -1,13 +1,13 @@
 /**
  * This service provides operations of group memberships
  */
-const _ = require("lodash");
-const Joi = require("joi");
-const uuid = require("uuid/v4");
-const helper = require("../common/helper");
-const logger = require("../common/logger");
-const errors = require("../common/errors");
-const constants = require("../../app-constants");
+const _ = require('lodash');
+const config = require('config');
+const Joi = require('joi');
+const uuid = require('uuid/v4');
+const helper = require('../common/helper');
+const logger = require('../common/logger');
+const errors = require('../common/errors');
 
 /**
  * Get group members
@@ -18,18 +18,14 @@ const constants = require("../../app-constants");
  */
 async function getGroupMembers(currentUser, groupId, criteria) {
   const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, "Group", groupId);
+  const group = await helper.ensureExists(session, 'Group', groupId);
 
   // if the group is private, the user needs to be a member of the group, or an admin
-  if (
-    group.privateGroup &&
-    currentUser !== "M2M" &&
-    !helper.hasAdminRole(currentUser)
-  ) {
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
     await helper.ensureGroupMember(session, groupId, currentUser.userId);
   }
 
-  const matchClause = "MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)";
+  const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)';
   const params = { groupId };
 
   // query total record count
@@ -40,8 +36,7 @@ async function getGroupMembers(currentUser, groupId, criteria) {
   let result = [];
   if (criteria.page <= Math.ceil(total / criteria.perPage)) {
     const pageRes = await session.run(
-      `${matchClause} RETURN r, o SKIP ${(criteria.page - 1) *
-        criteria.perPage} LIMIT ${criteria.perPage}`,
+      `${matchClause} RETURN r, o SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`,
       params
     );
     result = _.map(pageRes.records, record => {
@@ -83,62 +78,51 @@ getGroupMembers.schema = {
  */
 async function addGroupMember(currentUser, groupId, data) {
   const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, "Group", groupId);
+  const group = await helper.ensureExists(session, 'Group', groupId);
   // only admins or self registering users are allowed (if the group allows self register)
   if (
-    currentUser !== "M2M" &&
+    currentUser !== 'M2M' &&
     !helper.hasAdminRole(currentUser) &&
     !(
       group.selfRegister &&
-      data.param.membershipType === constants.MembershipTypes.User &&
+      data.param.membershipType === config.MEMBERSHIP_TYPES.User &&
       currentUser.userId === data.param.memberId
     )
   ) {
-    throw new errors.ForbiddenError(
-      "You are not allowed to perform this action!"
-    );
+    throw new errors.ForbiddenError('You are not allowed to perform this action!');
   }
 
-  if (data.param.membershipType === constants.MembershipTypes.Group) {
+  if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
     if (data.param.memberId === groupId) {
-      throw new errors.BadRequestError("A group can not add to itself.");
+      throw new errors.BadRequestError('A group can not add to itself.');
     }
-    const childGroup = await helper.ensureExists(
-      session,
-      "Group",
-      data.param.memberId
-    );
+    const childGroup = await helper.ensureExists(session, 'Group', data.param.memberId);
     // if parent group is private, the sub group must be private too
     if (group.privateGroup && !childGroup.privateGroup) {
-      throw new errors.ConflictError(
-        "Parent group is private, the child group must be private too."
-      );
+      throw new errors.ConflictError('Parent group is private, the child group must be private too.');
     }
   } else {
-    await helper.ensureExists(session, "User", data.param.memberId);
+    await helper.ensureExists(session, 'User', data.param.memberId);
   }
 
   // check whether member is already in group
-  const targetObjectType =
-    data.param.membershipType === constants.MembershipTypes.Group
-      ? "Group"
-      : "User";
+  const targetObjectType = data.param.membershipType === config.MEMBERSHIP_TYPES.Group ? 'Group' : 'User';
   const memberCheckRes = await session.run(
     `MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:${targetObjectType} {id: {memberId}}) RETURN o`,
     { groupId, memberId: data.param.memberId }
   );
   if (memberCheckRes.records.length > 0) {
-    throw new errors.ConflictError("The member is already in the group");
+    throw new errors.ConflictError('The member is already in the group');
   }
 
   // check cyclical reference
-  if (data.param.membershipType === constants.MembershipTypes.Group) {
+  if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
     const pathRes = await session.run(
-      "MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p",
+      'MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p',
       { fromId: data.param.memberId, toId: groupId }
     );
     if (pathRes.records.length > 0) {
-      throw new errors.ConflictError("There is cyclical group reference");
+      throw new errors.ConflictError('There is cyclical group reference');
     }
   }
 
@@ -146,7 +130,7 @@ async function addGroupMember(currentUser, groupId, data) {
   const membershipId = uuid();
   const createdAt = new Date().toISOString();
   const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${targetObjectType} {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}${
-    currentUser !== "M2M" ? ", createdBy: {createdBy}" : ""
+    currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
   }}]->(o) RETURN r`;
   await session.run(query, {
     groupId,
@@ -154,7 +138,7 @@ async function addGroupMember(currentUser, groupId, data) {
     membershipId,
     membershipType: data.param.membershipType,
     createdAt,
-    createdBy: currentUser === "M2M" ? undefined : currentUser.userId
+    createdBy: currentUser === 'M2M' ? undefined : currentUser.userId
   });
 
   session.close();
@@ -164,13 +148,13 @@ async function addGroupMember(currentUser, groupId, data) {
     groupId,
     groupName: group.name,
     createdAt,
-    createdBy: currentUser === "M2M" ? undefined : currentUser.userId,
+    createdBy: currentUser === 'M2M' ? undefined : currentUser.userId,
     memberId: data.param.memberId,
     membershipType: data.param.membershipType
   };
 
   // post bus event
-  await helper.postBusEvent(constants.Topics.GroupMemberCreated, result);
+  await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result);
   return result;
 }
 
@@ -183,7 +167,7 @@ addGroupMember.schema = {
         .keys({
           memberId: Joi.id(),
           membershipType: Joi.string()
-            .valid(_.values(constants.MembershipTypes))
+            .valid(_.values(config.MEMBERSHIP_TYPES))
             .required()
         })
         .required()
@@ -199,13 +183,12 @@ addGroupMember.schema = {
  * @returns {Object} the group membership
  */
 async function getGroupMemberWithSession(session, groupId, memberId) {
-  const group = await helper.ensureExists(session, "Group", groupId);
+  const group = await helper.ensureExists(session, 'Group', groupId);
 
-  const query =
-    "MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r";
+  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r';
   const membershipRes = await session.run(query, { groupId, memberId });
   if (membershipRes.records.length === 0) {
-    throw new errors.NotFoundError("The member is not in the group");
+    throw new errors.NotFoundError('The member is not in the group');
   }
   const r = membershipRes.records[0].get(0).properties;
   return {
@@ -228,19 +211,11 @@ async function getGroupMemberWithSession(session, groupId, memberId) {
  */
 async function getGroupMember(currentUser, groupId, memberId) {
   const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, "Group", groupId);
-  if (
-    group.privateGroup &&
-    currentUser !== "M2M" &&
-    !helper.hasAdminRole(currentUser)
-  ) {
+  const group = await helper.ensureExists(session, 'Group', groupId);
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
     await helper.ensureGroupMember(session, groupId, currentUser.userId);
   }
-  const membership = await getGroupMemberWithSession(
-    session,
-    groupId,
-    memberId
-  );
+  const membership = await getGroupMemberWithSession(session, groupId, memberId);
 
   session.close();
   return membership;
@@ -263,40 +238,31 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
   const session = helper.createDBSession();
 
   // get existing membership to ensure it exists
-  const membership = await getGroupMemberWithSession(
-    session,
-    groupId,
-    memberId
-  );
-  if (membership.membershipType === constants.MembershipTypes.User) {
-    const group = await helper.ensureExists(session, "Group", groupId);
+  const membership = await getGroupMemberWithSession(session, groupId, memberId);
+  if (membership.membershipType === config.MEMBERSHIP_TYPES.User) {
+    const group = await helper.ensureExists(session, 'Group', groupId);
     // only admins or self registering users are allowed (if the group allows self register)
     if (
-      currentUser !== "M2M" &&
+      currentUser !== 'M2M' &&
       !helper.hasAdminRole(currentUser) &&
       !(group.selfRegister && currentUser.userId === memberId)
     ) {
-      throw new errors.ForbiddenError(
-        "You are not allowed to perform this action!"
-      );
+      throw new errors.ForbiddenError('You are not allowed to perform this action!');
     }
   } else {
-    if (currentUser !== "M2M" && !helper.hasAdminRole(currentUser)) {
-      throw new errors.ForbiddenError(
-        "You are not allowed to perform this action!"
-      );
+    if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      throw new errors.ForbiddenError('You are not allowed to perform this action!');
     }
   }
 
   // delete membership
-  const query =
-    "MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r";
+  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r';
   await session.run(query, { groupId, memberId });
 
   session.close();
 
   // post bus event
-  await helper.postBusEvent(constants.Topics.GroupMemberDeleted, membership);
+  await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_DELETE_TOPIC, membership);
   return membership;
 }
 
@@ -312,8 +278,7 @@ deleteGroupMember.schema = {
  * @returns {Array} all group members
  */
 async function getAllGroupMembers(session, groupId) {
-  const query =
-    "MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o) RETURN r, o";
+  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o) RETURN r, o';
   const res = await session.run(query, { groupId });
   return _.map(res.records, record => {
     const r = record.get(0).properties;
@@ -333,7 +298,7 @@ async function getAllGroupMembers(session, groupId) {
  */
 async function getGroupMembersCount(groupId, query) {
   const session = helper.createDBSession();
-  await helper.ensureExists(session, "Group", groupId);
+  await helper.ensureExists(session, 'Group', groupId);
 
   // get distinct users using breadth first search algorithm,
   // this is equivalent to recursive algorithm, but more efficient than latter,
@@ -346,14 +311,11 @@ async function getGroupMembersCount(groupId, query) {
     index += 1;
     const members = await getAllGroupMembers(session, gId);
     _.forEach(members, member => {
-      if (member.membershipType === constants.MembershipTypes.User) {
+      if (member.membershipType === config.MEMBERSHIP_TYPES.User) {
         if (!_.includes(userIds, member.memberId)) {
           userIds.push(member.memberId);
         }
-      } else if (
-        !_.includes(groupIds, member.memberId) &&
-        query.includeSubGroups
-      ) {
+      } else if (!_.includes(groupIds, member.memberId) && query.includeSubGroups) {
         // only handle group that was not handled yet, reduce duplicate processing
         groupIds.push(member.memberId);
       }

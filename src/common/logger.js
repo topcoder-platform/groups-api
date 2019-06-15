@@ -2,12 +2,12 @@
  * This module contains the winston logger configuration.
  */
 
-const _ = require("lodash");
-const Joi = require("joi");
-const util = require("util");
-const config = require("config");
-const getParams = require("get-parameter-names");
-const { createLogger, format, transports } = require("winston");
+const _ = require('lodash');
+const config = require('config');
+const Joi = require('joi');
+const getParams = require('get-parameter-names');
+const util = require('util');
+const { createLogger, format, transports } = require('winston');
 
 const logger = createLogger({
   level: config.LOG_LEVEL,
@@ -77,20 +77,20 @@ const _combineObject = (params, arr) => {
  * @param {Object} service the service
  */
 logger.decorateWithLogging = service => {
-  if (config.LOG_LEVEL !== "debug") {
+  if (config.LOG_LEVEL !== 'debug') {
     return;
   }
   _.each(service, (method, name) => {
     const params = method.params || getParams(method);
     service[name] = async function() {
       logger.debug(`ENTER ${name}`);
-      logger.debug("input arguments");
+      logger.debug('input arguments');
       const args = Array.prototype.slice.call(arguments);
       logger.debug(util.inspect(_sanitizeObject(_combineObject(params, args))));
       try {
         const result = await method.apply(this, arguments);
         logger.debug(`EXIT ${name}`);
-        logger.debug("output arguments");
+        logger.debug('output arguments');
         if (result !== null && result !== undefined) {
           logger.debug(util.inspect(_sanitizeObject(result)));
         }

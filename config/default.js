@@ -28,5 +28,22 @@ module.exports = {
   KAFKA_ERROR_TOPIC: process.env.KAFKA_ERROR_TOPIC || 'common.error.reporting',
 
   // health check timeout in milliseconds
-  HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 3000
+  HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 3000,
+
+  //Kafka Topics
+  KAFKA_GROUP_CREATE_TOPIC: process.env.KAFKA_GROUP_CREATE_TOPIC,
+  KAFKA_GROUP_UPDATE_TOPIC: process.env.KAFKA_GROUP_UPDATE_TOPIC,
+  KAFKA_GROUP_DELETE_TOPIC: process.env.KAFKA_GROUP_DELETE_TOPIC,
+  KAFKA_GROUP_MEMBER_ADD_TOPIC: process.env.KAFKA_GROUP_MEMBER_ADD_TOPIC,
+  KAFKA_GROUP_MEMBER_DELETE_TOPIC: process.env.KAFKA_GROUP_MEMBER_DELETE_TOPIC,
+
+  USER_ROLES: {
+    Admin: 'Administrator',
+    User: 'Topcoder User'
+  },
+
+  MEMBERSHIP_TYPES: {
+    Group: 'group',
+    User: 'user'
+  }
 };

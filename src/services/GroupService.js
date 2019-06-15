@@ -2,12 +2,12 @@
  * This service provides operations of groups
  */
 const _ = require('lodash');
+const config = require('config');
 const Joi = require('joi');
 const uuid = require('uuid/v4');
 const helper = require('../common/helper');
 const logger = require('../common/logger');
 const errors = require('../common/errors');
-const constants = require('../../app-constants');
 let validate = require('uuid-validate');
 
 /**
@@ -82,7 +82,7 @@ async function searchGroups(criteria) {
 searchGroups.schema = {
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
-    membershipType: Joi.string().valid(_.values(constants.MembershipTypes)),
+    membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
     page: Joi.page(),
     perPage: Joi.perPage(),
     oldId: Joi.string(),
@@ -132,7 +132,7 @@ async function createGroup(currentUser, data) {
     logger.debug(`Group = ${JSON.stringify(group)}`);
 
     // post bus event
-    await helper.postBusEvent(constants.Topics.GroupCreated, group);
+    await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group);
     await tx.commit();
     return group;
   } catch (error) {
@@ -205,7 +205,7 @@ async function updateGroup(currentUser, groupId, data) {
   session.close();
 
   // post bus event
-  await helper.postBusEvent(constants.Topics.GroupUpdated, group);
+  await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, group);
   return group;
 }
 
@@ -419,7 +419,7 @@ async function deleteGroup(groupId) {
   session.close();
 
   // post bus event
-  await helper.postBusEvent(constants.Topics.GroupDeleted, group);
+  await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, group);
   return group;
 }
 
