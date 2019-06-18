@@ -162,9 +162,8 @@ async function addGroupMember(currentUser, groupId, data) {
     };
 
     logger.debug(`sending message ${result} to kafka topic ${config.KAFKA_GROUP_MEMBER_ADD_TOPIC}`);
-
-    // post bus event
     await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result);
+
     tx.commit();
     return result;
   } catch (error) {

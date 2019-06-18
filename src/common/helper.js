@@ -8,6 +8,7 @@ const config = require('config');
 const neo4j = require('neo4j-driver').v1;
 const querystring = require('querystring');
 
+const logger = require('./logger');
 const errors = require('./errors');
 
 // Bus API Client
