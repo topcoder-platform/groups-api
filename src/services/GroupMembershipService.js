@@ -77,6 +77,10 @@ getGroupMembers.schema = {
  * @returns {Object} the added group membership
  */
 async function addGroupMember(currentUser, groupId, data) {
+  logger.debug('Started adding member to group');
+  logger.debug(currentUser);
+  logger.debug(groupId);
+  logger.debug(JSON.stringify(data));
   const session = helper.createDBSession();
   const group = await helper.ensureExists(session, 'Group', groupId);
   // only admins or self registering users are allowed (if the group allows self register)
