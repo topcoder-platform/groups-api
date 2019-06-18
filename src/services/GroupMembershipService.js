@@ -77,89 +77,105 @@ getGroupMembers.schema = {
  * @returns {Object} the added group membership
  */
 async function addGroupMember(currentUser, groupId, data) {
-  logger.debug('Started adding member to group');
-  logger.debug(currentUser);
-  logger.debug(groupId);
-  logger.debug(JSON.stringify(data));
-  const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, 'Group', groupId);
-  // only admins or self registering users are allowed (if the group allows self register)
-  if (
-    currentUser !== 'M2M' &&
-    !helper.hasAdminRole(currentUser) &&
-    !(
-      group.selfRegister &&
-      data.param.membershipType === config.MEMBERSHIP_TYPES.User &&
-      currentUser.userId === data.param.memberId
-    )
-  ) {
-    throw new errors.ForbiddenError('You are not allowed to perform this action!');
-  }
+  logger.debug(`Enter in addGroupMember - Group = ${groupId} Criteria = ${data}`);
+  let session = helper.createDBSession();
+  let tx = session.beginTransaction();
 
-  if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
-    if (data.param.memberId === groupId) {
-      throw new errors.BadRequestError('A group can not add to itself.');
+  try {
+    logger.debug(`Check for groupId ${groupId} exist or not`);
+    const group = await helper.ensureExists(tx, 'Group', groupId);
+
+    if (
+      currentUser !== 'M2M' &&
+      !helper.hasAdminRole(currentUser) &&
+      !(
+        group.selfRegister &&
+        data.param.membershipType === config.MEMBERSHIP_TYPES.User &&
+        currentUser.userId === data.param.memberId
+      )
+    ) {
+      throw new errors.ForbiddenError('You are not allowed to perform this action!');
     }
-    const childGroup = await helper.ensureExists(session, 'Group', data.param.memberId);
-    // if parent group is private, the sub group must be private too
-    if (group.privateGroup && !childGroup.privateGroup) {
-      throw new errors.ConflictError('Parent group is private, the child group must be private too.');
+
+    if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
+      if (data.param.memberId === groupId) {
+        throw new errors.BadRequestError('A group can not add to itself.');
+      }
+      logger.debug(`Check for groupId ${data.param.memberId} exist or not`);
+      const childGroup = await helper.ensureExists(tx, 'Group', data.param.memberId);
+      // if parent group is private, the sub group must be private too
+      if (group.privateGroup && !childGroup.privateGroup) {
+        throw new errors.ConflictError('Parent group is private, the child group must be private too.');
+      }
+    } else {
+      logger.debug(`Check for memberId ${data.param.memberId} exist or not`);
+      await helper.ensureExists(tx, 'User', data.param.memberId);
     }
-  } else {
-    await helper.ensureExists(session, 'User', data.param.memberId);
-  }
 
-  // check whether member is already in group
-  const targetObjectType = data.param.membershipType === config.MEMBERSHIP_TYPES.Group ? 'Group' : 'User';
-  const memberCheckRes = await session.run(
-    `MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:${targetObjectType} {id: {memberId}}) RETURN o`,
-    { groupId, memberId: data.param.memberId }
-  );
-  if (memberCheckRes.records.length > 0) {
-    throw new errors.ConflictError('The member is already in the group');
-  }
-
-  // check cyclical reference
-  if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
-    const pathRes = await session.run(
-      'MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p',
-      { fromId: data.param.memberId, toId: groupId }
+    logger.debug(`check member ${data.param.memberId} is part of group ${groupId}`);
+    const targetObjectType = data.param.membershipType === config.MEMBERSHIP_TYPES.Group ? 'Group' : 'User';
+    const memberCheckRes = await tx.run(
+      `MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:${targetObjectType} {id: {memberId}}) RETURN o`,
+      { groupId, memberId: data.param.memberId }
     );
-    if (pathRes.records.length > 0) {
-      throw new errors.ConflictError('There is cyclical group reference');
+    if (memberCheckRes.records.length > 0) {
+      throw new errors.ConflictError('The member is already in the group');
     }
+
+    // check cyclical reference
+    if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
+      const pathRes = await tx.run(
+        'MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p',
+        { fromId: data.param.memberId, toId: groupId }
+      );
+      if (pathRes.records.length > 0) {
+        throw new errors.ConflictError('There is cyclical group reference');
+      }
+    }
+
+    // add membership
+    const membershipId = uuid();
+    const createdAt = new Date().toISOString();
+    const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${targetObjectType} {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}${
+      currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
+    }}]->(o) RETURN r`;
+    const params = {
+      groupId,
+      memberId: data.param.memberId,
+      membershipId,
+      membershipType: data.param.membershipType,
+      createdAt,
+      createdBy: currentUser === 'M2M' ? undefined : currentUser.userId
+    };
+
+    logger.debug(`quey for adding membership ${query} with params ${params}`);
+    await tx.run(query, params);
+
+    const result = {
+      id: membershipId,
+      groupId,
+      groupName: group.name,
+      createdAt,
+      createdBy: currentUser === 'M2M' ? undefined : currentUser.userId,
+      memberId: data.param.memberId,
+      membershipType: data.param.membershipType
+    };
+
+    logger.debug(`sending message ${result} to kafka topic ${config.KAFKA_GROUP_MEMBER_ADD_TOPIC}`);
+
+    // post bus event
+    await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result);
+    tx.commit();
+    return result;
+  } catch (error) {
+    logger.error(error);
+    logger.debug('Transaction Rollback');
+    tx.rollback();
+    throw error;
+  } finally {
+    logger.debug('Session Close');
+    session.close();
   }
-
-  // add membership
-  const membershipId = uuid();
-  const createdAt = new Date().toISOString();
-  const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${targetObjectType} {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}${
-    currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
-  }}]->(o) RETURN r`;
-  await session.run(query, {
-    groupId,
-    memberId: data.param.memberId,
-    membershipId,
-    membershipType: data.param.membershipType,
-    createdAt,
-    createdBy: currentUser === 'M2M' ? undefined : currentUser.userId
-  });
-
-  session.close();
-
-  const result = {
-    id: membershipId,
-    groupId,
-    groupName: group.name,
-    createdAt,
-    createdBy: currentUser === 'M2M' ? undefined : currentUser.userId,
-    memberId: data.param.memberId,
-    membershipType: data.param.membershipType
-  };
-
-  // post bus event
-  await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result);
-  return result;
 }
 
 addGroupMember.schema = {

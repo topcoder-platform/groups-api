@@ -134,7 +134,6 @@ async function createGroup(currentUser, data) {
     // post bus event
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group);
     await tx.commit();
-    console.log('====== after commit =====');
     return group;
   } catch (error) {
     logger.error(error);
