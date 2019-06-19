@@ -155,6 +155,7 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
     logger.debug(`Check for groupId ${groupId} exist or not`);
     const group = await helper.ensureExists(tx, 'Group', groupId);
     const oldId = group.oldId;
+    const name = group.name;
 
     if (
       currentUser !== 'M2M' &&
@@ -175,6 +176,7 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
 
     const result = {
       groupId,
+      name,
       oldId,
       memberId
     };
