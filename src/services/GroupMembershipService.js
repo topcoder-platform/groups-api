@@ -84,6 +84,7 @@ async function addGroupMember(currentUser, groupId, data) {
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`);
     const group = await helper.ensureExists(tx, 'Group', groupId);
+    data.param.oldId = group.oldId;
 
     if (
       currentUser !== 'M2M' &&
@@ -103,6 +104,8 @@ async function addGroupMember(currentUser, groupId, data) {
       }
       logger.debug(`Check for groupId ${data.param.memberId} exist or not`);
       const childGroup = await helper.ensureExists(tx, 'Group', data.param.memberId);
+
+      data.param.memberOldId = childGroup.oldId;
       // if parent group is private, the sub group must be private too
       if (group.privateGroup && !childGroup.privateGroup) {
         throw new errors.ConflictError('Parent group is private, the child group must be private too.');
@@ -136,9 +139,8 @@ async function addGroupMember(currentUser, groupId, data) {
     // add membership
     const membershipId = uuid();
     const createdAt = new Date().toISOString();
-    const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${targetObjectType} {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}${
-      currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
-    }}]->(o) RETURN r`;
+    const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${targetObjectType} {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r`;
+
     const params = {
       groupId,
       memberId: data.param.memberId,
@@ -148,28 +150,30 @@ async function addGroupMember(currentUser, groupId, data) {
       createdBy: currentUser === 'M2M' ? undefined : currentUser.userId
     };
 
-    logger.debug(`quey for adding membership ${query} with params ${params}`);
+    logger.debug(`quey for adding membership ${query} with params ${JSON.stringify(params)}`);
     await tx.run(query, params);
 
     const result = {
       id: membershipId,
       groupId,
-      groupName: group.name,
+      oldId: data.param.oldId,
+      name: group.name,
       createdAt,
       createdBy: currentUser === 'M2M' ? undefined : currentUser.userId,
       memberId: data.param.memberId,
+      ...(data.param.memberOldId ? { memberOldId: data.param.memberOldId } : {}),
       membershipType: data.param.membershipType
     };
 
     logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_ADD_TOPIC}`);
     await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result);
 
-    tx.commit();
+    await tx.commit();
     return result;
   } catch (error) {
     logger.error(error);
     logger.debug('Transaction Rollback');
-    tx.rollback();
+    await tx.rollback();
     throw error;
   } finally {
     logger.debug('Session Close');

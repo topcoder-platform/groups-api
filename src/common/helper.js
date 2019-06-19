@@ -67,9 +67,6 @@ async function ensureExists(tx, model, id) {
   const res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {
     id
   });
-  logger.debug('=====');
-  logger.debug(JSON.stringify(res));
-  logger.debug('=====');
   if (!res || res.records.length === 0 || !res.records[0] || !res.records[0].get(0)) {
     throw new errors.NotFoundError(`Not found ${model} of id ${id}`);
   }

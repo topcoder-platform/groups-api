@@ -50,7 +50,6 @@ async function updateGroup(req, res) {
 async function getGroup(req, res) {
   logger.debug(`Get group details for req = ${req}`);
   const result = await service.getGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId, req.query);
-  logger.debug(`Group Details = ${JSON.stringify(result)}`);
   res.send(result);
 }
 

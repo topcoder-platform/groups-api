@@ -138,7 +138,7 @@ async function createGroup(currentUser, data) {
   } catch (error) {
     logger.error(error);
     logger.debug('Transaction Rollback');
-    tx.rollback();
+    await tx.rollback();
     throw error;
   } finally {
     logger.debug('Session Close');
