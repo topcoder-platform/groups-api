@@ -154,7 +154,7 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`);
     const group = await helper.ensureExists(tx, 'Group', groupId);
-    data.param.oldId = group.oldId;
+    const oldId = group.oldId;
 
     if (
       currentUser !== 'M2M' &&
@@ -167,9 +167,6 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
     // delete membership
     const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r';
     await tx.run(query, { groupId, memberId });
-
-    const getGroup = 'MATCH (g:Group {id: {groupId}}) return g.oldId';
-    const oldId = await tx.run(getGroup, { groupId });
 
     if (validate(memberId, 4)) {
       const getMember = 'MATCH (g:Group {id: {memberId}}) return g.oldId';
