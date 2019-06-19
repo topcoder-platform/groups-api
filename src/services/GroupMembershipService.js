@@ -170,8 +170,9 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
     await tx.run(query, { groupId, memberId });
 
     if (validate(memberId, 4)) {
-      const getMember = 'MATCH (g:Group {id: {memberId}}) return g.oldId';
+      const getMember = 'MATCH (g:Group {id: {memberId}}) return g';
       memberId = await tx.run(getMember, { memberId });
+      logger.debug(JSON.stringify(memberId));
     }
 
     const result = {
