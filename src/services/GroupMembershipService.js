@@ -8,66 +8,7 @@ const uuid = require('uuid/v4');
 const helper = require('../common/helper');
 const logger = require('../common/logger');
 const errors = require('../common/errors');
-
-/**
- * Get group members
- * @param {Object} currentUser the current user
- * @param {String} groupId the id of group to get members
- * @param {Object} criteria the search criteria
- * @returns {Object} the search result
- */
-async function getGroupMembers(currentUser, groupId, criteria) {
-  const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, 'Group', groupId);
-
-  // if the group is private, the user needs to be a member of the group, or an admin
-  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-    await helper.ensureGroupMember(session, groupId, currentUser.userId);
-  }
-
-  const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)';
-  const params = { groupId };
-
-  // query total record count
-  const totalRes = await session.run(`${matchClause} RETURN COUNT(o)`, params);
-  const total = totalRes.records[0].get(0).low || 0;
-
-  // query page of records
-  let result = [];
-  if (criteria.page <= Math.ceil(total / criteria.perPage)) {
-    const pageRes = await session.run(
-      `${matchClause} RETURN r, o SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`,
-      params
-    );
-    result = _.map(pageRes.records, record => {
-      const r = record.get(0).properties;
-      const o = record.get(1).properties;
-      return {
-        id: r.id,
-        groupId,
-        groupName: group.name,
-        createdAt: r.createdAt,
-        createdBy: r.createdBy,
-        memberId: o.id,
-        membershipType: r.type
-      };
-    });
-  }
-
-  session.close();
-
-  return { total, page: criteria.page, perPage: criteria.perPage, result };
-}
-
-getGroupMembers.schema = {
-  currentUser: Joi.any(),
-  groupId: Joi.id(), // defined in app-bootstrap
-  criteria: Joi.object().keys({
-    page: Joi.page(),
-    perPage: Joi.perPage()
-  }),
-  isAnonymous: Joi.boolean()
-};
+let validate = require('uuid-validate');
 
 /**
  * Add group member.
@@ -199,6 +140,131 @@ addGroupMember.schema = {
 };
 
 /**
+ * Delete group member.
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the group id
+ * @param {String} memberId the member id
+ * @returns {Object} the deleted group membership
+ */
+async function deleteGroupMember(currentUser, groupId, memberId) {
+  logger.debug(`Enter in deleteGroupMember - Group = ${groupId} memberId = ${memberId}`);
+  let session = helper.createDBSession();
+  let tx = session.beginTransaction();
+
+  try {
+    logger.debug(`Check for groupId ${groupId} exist or not`);
+    const group = await helper.ensureExists(tx, 'Group', groupId);
+    data.param.oldId = group.oldId;
+
+    if (
+      currentUser !== 'M2M' &&
+      !helper.hasAdminRole(currentUser) &&
+      !(group.selfRegister && currentUser.userId === memberId)
+    ) {
+      throw new errors.ForbiddenError('You are not allowed to perform this action!');
+    }
+
+    // delete membership
+    const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r';
+    await tx.run(query, { groupId, memberId });
+
+    const getGroup = 'MATCH (g:Group {id: {groupId}}) return g.oldId';
+    const oldId = await tx.run(getGroup, { groupId });
+
+    if (validate(memberId, 4)) {
+      const getMember = 'MATCH (g:Group {id: {memberId}}) return g.oldId';
+      memberId = await tx.run(getMember, { memberId });
+    }
+
+    const result = {
+      groupId,
+      oldId,
+      memberId
+    };
+
+    logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_ADD_TOPIC}`);
+    await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result);
+
+    await tx.commit();
+    return result;
+  } catch (error) {
+    logger.error(error);
+    logger.debug('Transaction Rollback');
+    await tx.rollback();
+    throw error;
+  } finally {
+    logger.debug('Session Close');
+    session.close();
+  }
+}
+
+deleteGroupMember.schema = {
+  currentUser: Joi.any(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  memberId: Joi.id()
+};
+
+/**
+ * Get group members
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to get members
+ * @param {Object} criteria the search criteria
+ * @returns {Object} the search result
+ */
+async function getGroupMembers(currentUser, groupId, criteria) {
+  const session = helper.createDBSession();
+  const group = await helper.ensureExists(session, 'Group', groupId);
+
+  // if the group is private, the user needs to be a member of the group, or an admin
+  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+    await helper.ensureGroupMember(session, groupId, currentUser.userId);
+  }
+
+  const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)';
+  const params = { groupId };
+
+  // query total record count
+  const totalRes = await session.run(`${matchClause} RETURN COUNT(o)`, params);
+  const total = totalRes.records[0].get(0).low || 0;
+
+  // query page of records
+  let result = [];
+  if (criteria.page <= Math.ceil(total / criteria.perPage)) {
+    const pageRes = await session.run(
+      `${matchClause} RETURN r, o SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`,
+      params
+    );
+    result = _.map(pageRes.records, record => {
+      const r = record.get(0).properties;
+      const o = record.get(1).properties;
+      return {
+        id: r.id,
+        groupId,
+        groupName: group.name,
+        createdAt: r.createdAt,
+        createdBy: r.createdBy,
+        memberId: o.id,
+        membershipType: r.type
+      };
+    });
+  }
+
+  session.close();
+
+  return { total, page: criteria.page, perPage: criteria.perPage, result };
+}
+
+getGroupMembers.schema = {
+  currentUser: Joi.any(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  criteria: Joi.object().keys({
+    page: Joi.page(),
+    perPage: Joi.perPage()
+  }),
+  isAnonymous: Joi.boolean()
+};
+
+/**
  * Get group member with db session.
  * @param {Object} session db session
  * @param {String} groupId the group id
@@ -245,51 +311,6 @@ async function getGroupMember(currentUser, groupId, memberId) {
 }
 
 getGroupMember.schema = {
-  currentUser: Joi.any(),
-  groupId: Joi.id(), // defined in app-bootstrap
-  memberId: Joi.id()
-};
-
-/**
- * Delete group member.
- * @param {Object} currentUser the current user
- * @param {String} groupId the group id
- * @param {String} memberId the member id
- * @returns {Object} the deleted group membership
- */
-async function deleteGroupMember(currentUser, groupId, memberId) {
-  const session = helper.createDBSession();
-
-  // get existing membership to ensure it exists
-  const membership = await getGroupMemberWithSession(session, groupId, memberId);
-  if (membership.membershipType === config.MEMBERSHIP_TYPES.User) {
-    const group = await helper.ensureExists(session, 'Group', groupId);
-    // only admins or self registering users are allowed (if the group allows self register)
-    if (
-      currentUser !== 'M2M' &&
-      !helper.hasAdminRole(currentUser) &&
-      !(group.selfRegister && currentUser.userId === memberId)
-    ) {
-      throw new errors.ForbiddenError('You are not allowed to perform this action!');
-    }
-  } else {
-    if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-      throw new errors.ForbiddenError('You are not allowed to perform this action!');
-    }
-  }
-
-  // delete membership
-  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r';
-  await session.run(query, { groupId, memberId });
-
-  session.close();
-
-  // post bus event
-  await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_DELETE_TOPIC, membership);
-  return membership;
-}
-
-deleteGroupMember.schema = {
   currentUser: Joi.any(),
   groupId: Joi.id(), // defined in app-bootstrap
   memberId: Joi.id()
