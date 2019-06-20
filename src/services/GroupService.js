@@ -374,6 +374,7 @@ async function deleteGroup(groupId) {
     const groupsToDelete = [group];
     let index = 0;
     while (index < groupsToDelete.length) {
+      const g = groupsToDelete[index];
       index += 1;
       const childGroups = await helper.getChildGroups(session, g.id);
       for (let i = 0; i < childGroups.length; i += 1) {
