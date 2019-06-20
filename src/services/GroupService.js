@@ -184,8 +184,8 @@ async function updateGroup(currentUser, groupId, data) {
       groupData.updatedBy = currentUser.userId;
     }
 
-    if (!data.param.domain) {
-      groupData.domain = '';
+    if (data.param.domain) {
+      groupData.domain = data.param.domain;
     }
 
     const updateRes = await tx.run(
@@ -407,7 +407,9 @@ async function deleteGroup(groupId) {
       });
     }
 
-    await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, group);
+    const kafkaPayload = {};
+    kafkaPayload.groups = groupsToDelete;
+    await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, kafkaPayload);
     await tx.commit();
     return group;
   } catch (error) {
