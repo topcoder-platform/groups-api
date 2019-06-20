@@ -195,6 +195,8 @@ async function updateGroup(currentUser, groupId, data) {
       groupData
     );
     const updatedGroup = updateRes.records[0].get(0).properties;
+    updateGroup.orgName = group.name;
+
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`);
 
     await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup);
