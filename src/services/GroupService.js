@@ -186,6 +186,8 @@ async function updateGroup(currentUser, groupId, data) {
 
     if (data.param.domain) {
       groupData.domain = data.param.domain;
+    } else {
+      groupData.domain = '';
     }
 
     const updateRes = await tx.run(
