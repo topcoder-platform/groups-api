@@ -392,7 +392,7 @@ async function deleteGroup(groupId) {
       }
     }
 
-    logger.debug(`Groups to delete ${groupsToDelete}`);
+    logger.debug(`Groups to delete ${JSON.stringify(groupsToDelete)}`);
 
     for (let i = 0; i < groupsToDelete.length; i += 1) {
       const id = groupsToDelete[i].id;
