@@ -196,9 +196,9 @@ async function updateGroup(currentUser, groupId, data) {
     );
 
     let updatedGroup = updateRes.records[0].get(0).properties;
-    updateGroup['oldName'] = group.name;
+    updatedGroup['oldName'] = group.name;
     console.log('====');
-    console.log(updateGroup);
+    console.log(updatedGroup);
     console.log('====');
 
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`);
