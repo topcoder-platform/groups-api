@@ -376,7 +376,8 @@ async function deleteGroup(groupId) {
     while (index < groupsToDelete.length) {
       const g = groupsToDelete[index];
       index += 1;
-      const childGroups = await helper.getChildGroups(session, g.id);
+
+      const childGroups = await helper.getChildGroups(tx, g.id);
       for (let i = 0; i < childGroups.length; i += 1) {
         const child = childGroups[i];
         if (_.find(groupsToDelete, gtd => gtd.id === child.id)) {
@@ -384,7 +385,7 @@ async function deleteGroup(groupId) {
           continue;
         }
         // delete child if it doesn't belong to other group
-        const parents = await helper.getParentGroups(session, child.id);
+        const parents = await helper.getParentGroups(tx, child.id);
         if (parents.length <= 1) {
           groupsToDelete.push(child);
         }
