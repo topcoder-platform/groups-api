@@ -368,7 +368,7 @@ async function deleteGroup(groupId) {
   let session = helper.createDBSession();
   let tx = session.beginTransaction();
   try {
-    logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
+    logger.debug(`Delete Group - ${groupId}`);
     const group = await helper.ensureExists(tx, 'Group', groupId);
 
     const groupsToDelete = [group];

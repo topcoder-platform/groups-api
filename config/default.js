@@ -4,7 +4,7 @@
 
 module.exports = {
   LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
-  PORT: process.env.PORT || 4000,
+  PORT: process.env.PORT || 3000,
   // it is configured to be empty at present, but may add prefix like '/api/v5'
   API_PREFIX: process.env.API_PREFIX || '',
   GRAPH_DB_URI: process.env.GRAPH_DB_URI || process.env.GRAPHENEDB_BOLT_URL || 'bolt://localhost:7687',
