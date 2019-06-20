@@ -194,7 +194,10 @@ async function updateGroup(currentUser, groupId, data) {
       `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain} RETURN g`,
       groupData
     );
+
     let updatedGroup = updateRes.records[0].get(0).properties;
+    console.log(updatedGroup);
+    console.log(typeof updatedGroup);
     updateGroup.orgName = group.name;
 
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`);
