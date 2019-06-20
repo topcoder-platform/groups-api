@@ -195,6 +195,7 @@ async function updateGroup(currentUser, groupId, data) {
       groupData
     );
     const updatedGroup = updateRes.records[0].get(0).properties;
+    logger.debug(`========== ${group.name}`);
     updateGroup.orgName = group.name;
 
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`);
