@@ -192,12 +192,12 @@ async function updateGroup(currentUser, groupId, data) {
       `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain} RETURN g`,
       groupData
     );
-    const group = updateRes.records[0].get(0).properties;
-    logger.debug(`Group = ${JSON.stringify(group)}`);
+    const updatedGroup = updateRes.records[0].get(0).properties;
+    logger.debug(`Group = ${JSON.stringify(updatedGroup)}`);
 
-    await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, group);
+    await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup);
     await tx.commit();
-    return group;
+    return updatedGroup;
   } catch (error) {
     logger.error(error);
     logger.debug('Transaction Rollback');
