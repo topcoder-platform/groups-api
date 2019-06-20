@@ -4,7 +4,7 @@
 
 module.exports = {
   LOG_LEVEL: process.env.LOG_LEVEL || 'debug',
-  PORT: process.env.PORT || 3000,
+  PORT: process.env.PORT || 4000,
   // it is configured to be empty at present, but may add prefix like '/api/v5'
   API_PREFIX: process.env.API_PREFIX || '',
   GRAPH_DB_URI: process.env.GRAPH_DB_URI || process.env.GRAPHENEDB_BOLT_URL || 'bolt://localhost:7687',
@@ -17,9 +17,9 @@ module.exports = {
 
   // Auth0 config params
   AUTH0_URL: process.env.AUTH0_URL || 'https://topcoder-dev.auth0.com/oauth/token',
-  AUTH0_PROXY_SERVER_URL: process.env.AUTH0_PROXY_SERVER_URL,
+  AUTH0_PROXY_SERVER_URL: process.env.AUTH0_PROXY_SERVER_URL || 'https://auth0proxy.topcoder-dev.com/token',
   AUTH0_AUDIENCE: process.env.AUTH0_AUDIENCE || 'https://m2m.topcoder-dev.com/',
-  TOKEN_CACHE_TIME: process.env.TOKEN_CACHE_TIME || '86400000',
+  TOKEN_CACHE_TIME: process.env.TOKEN_CACHE_TIME || 86400000,
   AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET: process.env.AUTH0_CLIENT_SECRET,
 

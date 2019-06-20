@@ -171,47 +171,47 @@ createGroup.schema = {
  * @returns {Object} the updated group
  */
 async function updateGroup(currentUser, groupId, data) {
-  logger.debug(`Update Group - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(data)}`);
+  let session = helper.createDBSession();
+  let tx = session.beginTransaction();
+  try {
+    logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
+    const group = await helper.ensureExists(tx, 'Group', groupId);
 
-  const session = helper.createDBSession();
-  await helper.ensureExists(session, 'Group', groupId);
-  // check whether group name is used by other group
-  const nameCheckRes = await session.run(`MATCH (g:Group) WHERE g.id <> {id} AND g.name = {name} RETURN g LIMIT 1`, {
-    id: groupId,
-    name: data.param.name
-  });
-  if (nameCheckRes.records.length > 0) {
-    throw new errors.ConflictError(`The group name ${data.param.name} is already used`);
+    const groupData = data.param;
+    groupData.id = groupId;
+    groupData.updatedAt = new Date().toISOString();
+    if (currentUser !== 'M2M') {
+      groupData.updatedBy = currentUser.userId;
+    }
+
+    if (!data.param.domain) {
+      groupData.domain = '';
+    }
+
+    const updateRes = await tx.run(
+      `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain} RETURN g`,
+      groupData
+    );
+    const group = updateRes.records[0].get(0).properties;
+    logger.debug(`Group = ${JSON.stringify(group)}`);
+
+    await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, group);
+    await tx.commit();
+    return group;
+  } catch (error) {
+    logger.error(error);
+    logger.debug('Transaction Rollback');
+    await tx.rollback();
+    throw error;
+  } finally {
+    logger.debug('Session Close');
+    session.close();
   }
-  // update group
-  const groupData = data.param;
-  groupData.id = groupId;
-  groupData.updatedAt = new Date().toISOString();
-  if (currentUser !== 'M2M') {
-    groupData.updatedBy = currentUser.userId;
-  }
-  const updateRes = await session.run(
-    `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}${
-      currentUser !== 'M2M' ? ', g.updatedBy={updatedBy}' : ''
-    }${groupData.domain ? ', g.domain={domain}' : ''} RETURN g`,
-    groupData
-  );
-  const group = updateRes.records[0].get(0).properties;
-
-  // populate parent/sub groups
-  group.parentGroups = await helper.getParentGroups(session, group.id);
-  group.subGroups = await helper.getChildGroups(session, group.id);
-
-  session.close();
-
-  // post bus event
-  await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, group);
-  return group;
 }
 
 updateGroup.schema = {
   currentUser: Joi.any(),
-  groupId: Joi.id(), // defined in app-bootstrap
+  groupId: Joi.string(), // defined in app-bootstrap
   data: createGroup.schema.data
 };
 
@@ -365,62 +365,58 @@ async function retrieveGroupByOldId(session, oldId) {
  * @returns {Object} the deleted group
  */
 async function deleteGroup(groupId) {
-  logger.debug(`deleteGroup - ${groupId}`);
+  let session = helper.createDBSession();
+  let tx = session.beginTransaction();
+  try {
+    logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`);
+    const group = await helper.ensureExists(tx, 'Group', groupId);
 
-  const session = helper.createDBSession();
-  const group = await helper.ensureExists(session, 'Group', groupId);
-  // populate parent/sub groups
-  group.parentGroups = await helper.getParentGroups(session, group.id);
-  group.subGroups = await helper.getChildGroups(session, group.id);
-
-  // use breadth first search algorithm to find out all groups to delete,
-  // this is equivalent to recursive algorithm, but more efficient than latter,
-  // see https://en.wikipedia.org/wiki/Breadth-first_search
-
-  // if a group is to be deleted, then all its child groups are also checked, if any child group has only
-  // one parent group, then that child group is also deleted, similar for child of child group
-
-  const groupsToDelete = [group];
-  let index = 0;
-  while (index < groupsToDelete.length) {
-    const g = groupsToDelete[index];
-    index += 1;
-    const childGroups = await helper.getChildGroups(session, g.id);
-    for (let i = 0; i < childGroups.length; i += 1) {
-      const child = childGroups[i];
-      if (_.find(groupsToDelete, gtd => gtd.id === child.id)) {
-        // the child was checked, ignore duplicate processing
-        continue;
-      }
-      // delete child if it doesn't belong to other group
-      const parents = await helper.getParentGroups(session, child.id);
-      if (parents.length <= 1) {
-        groupsToDelete.push(child);
+    const groupsToDelete = [group];
+    let index = 0;
+    while (index < groupsToDelete.length) {
+      index += 1;
+      const childGroups = await helper.getChildGroups(session, g.id);
+      for (let i = 0; i < childGroups.length; i += 1) {
+        const child = childGroups[i];
+        if (_.find(groupsToDelete, gtd => gtd.id === child.id)) {
+          // the child was checked, ignore duplicate processing
+          continue;
+        }
+        // delete child if it doesn't belong to other group
+        const parents = await helper.getParentGroups(session, child.id);
+        if (parents.length <= 1) {
+          groupsToDelete.push(child);
+        }
       }
     }
+
+    logger.debug(`Groups to delete ${groupsToDelete}`);
+
+    for (let i = 0; i < groupsToDelete.length; i += 1) {
+      const id = groupsToDelete[i].id;
+      // delete group's relationships
+      await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
+        groupId: id
+      });
+
+      // delete group
+      await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
+        groupId: id
+      });
+    }
+
+    await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, group);
+    await tx.commit();
+    return group;
+  } catch (error) {
+    logger.error(error);
+    logger.debug('Transaction Rollback');
+    await tx.rollback();
+    throw error;
+  } finally {
+    logger.debug('Session Close');
+    session.close();
   }
-
-  // transaction should be used because there are multiple delete
-  const tx = session.beginTransaction();
-
-  for (let i = 0; i < groupsToDelete.length; i += 1) {
-    const theId = groupsToDelete[i].id;
-    // delete group's relationships
-    await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
-      groupId: theId
-    });
-    // delete group
-    await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
-      groupId: theId
-    });
-  }
-
-  await tx.commit();
-  session.close();
-
-  // post bus event
-  await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, group);
-  return group;
 }
 
 deleteGroup.schema = {
