@@ -196,11 +196,7 @@ async function updateGroup(currentUser, groupId, data) {
     );
 
     let updatedGroup = updateRes.records[0].get(0).properties;
-    updatedGroup['oldName'] = group.name;
-    console.log('====');
-    console.log(updatedGroup);
-    console.log('====');
-
+    updatedGroup.oldName = group.name;
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`);
 
     await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup);
