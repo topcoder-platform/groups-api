@@ -152,8 +152,13 @@ createGroup.schema = {
     .keys({
       param: Joi.object()
         .keys({
-          name: Joi.string().required(),
-          description: Joi.string(),
+          name: Joi.string()
+            .min(3)
+            .max(150)
+            .required(),
+          description: Joi.string()
+            .min(3)
+            .max(2048),
           privateGroup: Joi.boolean().required(),
           selfRegister: Joi.boolean().required(),
           domain: Joi.string()
