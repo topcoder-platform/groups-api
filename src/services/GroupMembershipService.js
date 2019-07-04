@@ -25,6 +25,9 @@ async function addGroupMember(currentUser, groupId, data) {
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`);
     const group = await helper.ensureExists(tx, 'Group', groupId);
+    console.log('==========');
+    console.log(group);
+    console.log('==========');
     data.param.oldId = group.oldId;
 
     if (
@@ -93,6 +96,10 @@ async function addGroupMember(currentUser, groupId, data) {
 
     logger.debug(`quey for adding membership ${query} with params ${JSON.stringify(params)}`);
     await tx.run(query, params);
+
+    console.log('==========');
+    console.log(data.param);
+    console.log('==========');
 
     const result = {
       id: membershipId,
