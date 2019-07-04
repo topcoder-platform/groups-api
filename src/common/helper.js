@@ -68,26 +68,12 @@ async function ensureExists(tx, model, id) {
     id
   });
 
-  logger.debug('=====');
-  logger.debug(JSON.stringify(res));
-  logger.debug('=====');
-
-  // if (!res || res.records.length === 0 || !res.records[0] || !res.records[0].get(0)) {
-  //   throw new errors.NotFoundError(`Not found ${model} of id ${id}`);
-  // }
-
   if (model === 'Group' && res && res.records.length === 0) {
     throw new errors.NotFoundError(`Not found ${model} of id ${id}`);
   } else if (model === 'User' && res && res.records.length === 0) {
-    logger.debug('==#==');
-    logger.debug('creating user');
-    logger.debug('==#==');
     const user = await tx.run(`CREATE (user:User {id: {id}}) RETURN user`, { id });
     return user.records[0]._fields[0].properties;
   }
-  logger.debug('==*==');
-  logger.debug('creating user');
-  logger.debug('==*==');
   return res.records[0]._fields[0].properties;
 }
 
