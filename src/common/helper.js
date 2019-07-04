@@ -68,7 +68,9 @@ async function ensureExists(tx, model, id) {
     id
   });
   if (!res || res.records.length === 0 || !res.records[0] || !res.records[0].get(0)) {
-    throw new errors.NotFoundError(`Not found ${model} of id ${id}`);
+    const user = await tx.run(`CREATE (user:User {id: {id}}) RETURN user`);
+    logger.debug(`========== ${user.records[0]._fields[0].properties}`);
+    return user.records[0]._fields[0].properties;
   }
   return res.records[0].get(0).properties;
 }
