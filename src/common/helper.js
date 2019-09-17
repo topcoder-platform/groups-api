@@ -7,6 +7,8 @@ const busApi = require('tc-bus-api-wrapper');
 const config = require('config');
 const neo4j = require('neo4j-driver').v1;
 const querystring = require('querystring');
+const uuid = require('uuid/v4');
+let validate = require('uuid-validate');
 
 const logger = require('./logger');
 const errors = require('./errors');
@@ -64,16 +66,36 @@ function createDBSession() {
  * @returns {Object} the found entity
  */
 async function ensureExists(tx, model, id) {
-  const res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {
-    id
-  });
+  let res;
+  if (model === 'Group') {
+    if (validate(id, 4)) {
+      res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {
+        id
+      });
+    } else {
+      res = await tx.run(`MATCH (e:${model} {oldId: {id}}) RETURN e`, {
+        id
+      });
+    }
 
-  if (model === 'Group' && res && res.records.length === 0) {
-    throw new errors.NotFoundError(`Not found ${model} of id ${id}`);
-  } else if (model === 'User' && res && res.records.length === 0) {
-    const user = await tx.run(`CREATE (user:User {id: {id}}) RETURN user`, { id });
-    return user.records[0]._fields[0].properties;
+    if (res && res.records.length === 0) {
+      throw new errors.NotFoundError(`Not found ${model} of id ${id}`);
+    }
+  } else if (model === 'User') {
+    res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {
+      id
+    });
+
+    if (res && res.records.length === 0) {
+      logger.debug('--------');
+      res = await tx.run(`CREATE (user:User {id: {id}}) RETURN user`, { id });
+    }
+
+    logger.debug('---');
+    logger.debug(JSON.stringify(res));
+    logger.debug('---');
   }
+
   return res.records[0]._fields[0].properties;
 }
 

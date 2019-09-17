@@ -26,6 +26,7 @@ async function addGroupMember(currentUser, groupId, data) {
     logger.debug(`Check for groupId ${groupId} exist or not`);
     const group = await helper.ensureExists(tx, 'Group', groupId);
     data.param.oldId = group.oldId;
+    groupId = group.id;
 
     if (
       currentUser !== 'M2M' &&
@@ -213,6 +214,7 @@ deleteGroupMember.schema = {
 async function getGroupMembers(currentUser, groupId, criteria) {
   const session = helper.createDBSession();
   const group = await helper.ensureExists(session, 'Group', groupId);
+  groupId = group.id;
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
@@ -272,6 +274,7 @@ getGroupMembers.schema = {
  */
 async function getGroupMemberWithSession(session, groupId, memberId) {
   const group = await helper.ensureExists(session, 'Group', groupId);
+  groupId = group.id;
 
   const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r';
   const membershipRes = await session.run(query, { groupId, memberId });
@@ -341,7 +344,8 @@ async function getAllGroupMembers(session, groupId) {
  */
 async function getGroupMembersCount(groupId, query) {
   const session = helper.createDBSession();
-  await helper.ensureExists(session, 'Group', groupId);
+  const group = await helper.ensureExists(session, 'Group', groupId);
+  groupId = group.id;
 
   // get distinct users using breadth first search algorithm,
   // this is equivalent to recursive algorithm, but more efficient than latter,

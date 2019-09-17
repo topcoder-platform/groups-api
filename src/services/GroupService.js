@@ -28,9 +28,7 @@ async function searchGroups(criteria) {
   const session = helper.createDBSession();
   let matchClause;
   if (criteria.memberId) {
-    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${
-      criteria.memberId
-    }"})`;
+    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`;
   } else {
     matchClause = `MATCH (g:Group)`;
   }
@@ -237,6 +235,7 @@ async function getGroup(currentUser, groupId, criteria) {
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true');
   }
+
   if (_.isNil(criteria.oneLevel)) {
     if (criteria.includeSubGroups) {
       criteria.oneLevel = false;
@@ -248,6 +247,7 @@ async function getGroup(currentUser, groupId, criteria) {
   let fieldNames = null;
   if (criteria.fields) {
     fieldNames = criteria.fields.split(',');
+
     const allowedFieldNames = [
       'id',
       'createdAt',
@@ -261,6 +261,7 @@ async function getGroup(currentUser, groupId, criteria) {
       'domain',
       'oldId'
     ];
+
     for (let i = 0; i < fieldNames.length; i += 1) {
       if (!_.includes(allowedFieldNames, fieldNames[i])) {
         throw new errors.BadRequestError(
@@ -281,9 +282,11 @@ async function getGroup(currentUser, groupId, criteria) {
 
   const session = helper.createDBSession();
 
-  let group = validate(groupId, 4)
-    ? await helper.ensureExists(session, 'Group', groupId)
-    : await retrieveGroupByOldId(session, groupId);
+  let group = await helper.ensureExists(session, 'Group', groupId);
+  // commented the block as updated the `ensureExists
+  // let group = validate(groupId, 4)
+  //   ? await helper.ensureExists(session, 'Group', groupId)
+  //   : await retrieveGroupByOldId(session, groupId);
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
