@@ -92,6 +92,7 @@ async function searchGroups(criteria) {
   }
 
   session.close();
+  
   return result;
 }
 
