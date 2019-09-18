@@ -252,7 +252,7 @@ async function getGroupMembers(currentUser, groupId, criteria) {
 
   session.close();
 
-  return { total, page: criteria.page, perPage: criteria.perPage, result };
+  return result;
 }
 
 getGroupMembers.schema = {

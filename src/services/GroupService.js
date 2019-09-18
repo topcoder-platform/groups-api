@@ -37,6 +37,23 @@ async function searchGroups(criteria) {
   if (criteria.oldId) {
     whereClause = ` WHERE g.oldId = "${criteria.oldId}"`;
   }
+
+  if (criteria.name) {
+    if (whereClause === '') {
+      whereClause = ` WHERE LOWER(g.name) = "${criteria.name.toLowerCase()}"`;
+    } else {
+      whereClause = whereClause.concat(` AND LOWER(g.name) = "${criteria.name.toLowerCase()}"`);
+    }
+  }
+
+  if (criteria.ssoId) {
+    if (whereClause === '') {
+      whereClause = ` WHERE LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`;
+    } else {
+      whereClause = whereClause.concat(` AND LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`);
+    }
+  }
+
   if (criteria.selfRegister !== undefined) {
     if (whereClause === '') {
       whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`;
@@ -44,6 +61,7 @@ async function searchGroups(criteria) {
       whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`);
     }
   }
+
   if (criteria.privateGroup !== undefined) {
     if (whereClause === '') {
       whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`;
@@ -81,9 +99,11 @@ searchGroups.schema = {
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
     membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
+    name: Joi.string(),
     page: Joi.page(),
     perPage: Joi.perPage(),
     oldId: Joi.string(),
+    ssoId: Joi.string(),
     selfRegister: Joi.boolean(),
     privateGroup: Joi.boolean()
   })
