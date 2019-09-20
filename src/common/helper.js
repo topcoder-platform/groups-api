@@ -200,9 +200,6 @@ function checkIfExists (source, term) {
     throw new Error('Term argument should be either a string or an array')
   }
 
-  logger.debug(term)
-  logger.debug(terms)
-  logger.debug(source)
   for (let i = 0; i < terms.length; i++) {
     if (source.includes(terms[i])) {
       return true
