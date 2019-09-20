@@ -89,7 +89,7 @@ async function addGroupMember(currentUser, groupId, data) {
       membershipId,
       membershipType: data.param.membershipType,
       createdAt,
-      createdBy: currentUser === 'M2M' ? undefined : currentUser.userId
+      createdBy: currentUser === 'M2M' ? "00000000" : currentUser.userId
     };
 
     logger.debug(`quey for adding membership ${query} with params ${JSON.stringify(params)}`);
@@ -101,7 +101,7 @@ async function addGroupMember(currentUser, groupId, data) {
       oldId: data.param.oldId,
       name: group.name,
       createdAt,
-      createdBy: currentUser === 'M2M' ? undefined : currentUser.userId,
+      ...(currentUser === 'M2M' ? {} : {createdBy: currentUser.userId}),
       memberId: data.param.memberId,
       ...(data.param.memberOldId ? { memberOldId: data.param.memberOldId } : {}),
       membershipType: data.param.membershipType
