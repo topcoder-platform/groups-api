@@ -28,9 +28,7 @@ async function searchGroups(criteria) {
   const session = helper.createDBSession();
   let matchClause;
   if (criteria.memberId) {
-    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${
-      criteria.memberId
-    }"})`;
+    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`;
   } else {
     matchClause = `MATCH (g:Group)`;
   }
@@ -39,6 +37,23 @@ async function searchGroups(criteria) {
   if (criteria.oldId) {
     whereClause = ` WHERE g.oldId = "${criteria.oldId}"`;
   }
+
+  if (criteria.name) {
+    if (whereClause === '') {
+      whereClause = ` WHERE LOWER(g.name) = "${criteria.name.toLowerCase()}"`;
+    } else {
+      whereClause = whereClause.concat(` AND LOWER(g.name) = "${criteria.name.toLowerCase()}"`);
+    }
+  }
+
+  if (criteria.ssoId) {
+    if (whereClause === '') {
+      whereClause = ` WHERE LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`;
+    } else {
+      whereClause = whereClause.concat(` AND LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`);
+    }
+  }
+
   if (criteria.selfRegister !== undefined) {
     if (whereClause === '') {
       whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`;
@@ -46,6 +61,7 @@ async function searchGroups(criteria) {
       whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`);
     }
   }
+
   if (criteria.privateGroup !== undefined) {
     if (whereClause === '') {
       whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`;
@@ -76,6 +92,7 @@ async function searchGroups(criteria) {
   }
 
   session.close();
+  
   return result;
 }
 
@@ -83,9 +100,11 @@ searchGroups.schema = {
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
     membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
+    name: Joi.string(),
     page: Joi.page(),
     perPage: Joi.perPage(),
     oldId: Joi.string(),
+    ssoId: Joi.string(),
     selfRegister: Joi.boolean(),
     privateGroup: Joi.boolean()
   })
@@ -237,6 +256,7 @@ async function getGroup(currentUser, groupId, criteria) {
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true');
   }
+
   if (_.isNil(criteria.oneLevel)) {
     if (criteria.includeSubGroups) {
       criteria.oneLevel = false;
@@ -248,6 +268,7 @@ async function getGroup(currentUser, groupId, criteria) {
   let fieldNames = null;
   if (criteria.fields) {
     fieldNames = criteria.fields.split(',');
+
     const allowedFieldNames = [
       'id',
       'createdAt',
@@ -261,6 +282,7 @@ async function getGroup(currentUser, groupId, criteria) {
       'domain',
       'oldId'
     ];
+
     for (let i = 0; i < fieldNames.length; i += 1) {
       if (!_.includes(allowedFieldNames, fieldNames[i])) {
         throw new errors.BadRequestError(
@@ -281,9 +303,11 @@ async function getGroup(currentUser, groupId, criteria) {
 
   const session = helper.createDBSession();
 
-  let group = validate(groupId, 4)
-    ? await helper.ensureExists(session, 'Group', groupId)
-    : await retrieveGroupByOldId(session, groupId);
+  let group = await helper.ensureExists(session, 'Group', groupId);
+  // commented the block as updated the `ensureExists
+  // let group = validate(groupId, 4)
+  //   ? await helper.ensureExists(session, 'Group', groupId)
+  //   : await retrieveGroupByOldId(session, groupId);
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
