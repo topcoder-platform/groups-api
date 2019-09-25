@@ -7,10 +7,8 @@ const busApi = require('tc-bus-api-wrapper')
 const config = require('config')
 const neo4j = require('neo4j-driver').v1
 const querystring = require('querystring')
-const uuid = require('uuid/v4')
 let validate = require('uuid-validate')
 
-const logger = require('./logger')
 const errors = require('./errors')
 
 // Bus API Client

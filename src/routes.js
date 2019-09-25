@@ -2,7 +2,7 @@
  * Contains all routes
  */
 
-const constants = require('../app-constants');
+const constants = require('../app-constants')
 
 module.exports = {
   '/groups': {
@@ -97,4 +97,4 @@ module.exports = {
       method: 'checkHealth'
     }
   }
-};
+}

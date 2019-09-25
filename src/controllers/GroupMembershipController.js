@@ -1,22 +1,22 @@
 /**
  * Controller for group membership endpoints
  */
-const service = require("../services/GroupMembershipService");
-const helper = require("../common/helper");
+const service = require('../services/GroupMembershipService')
+const helper = require('../common/helper')
 
 /**
  * Get group members
  * @param req the request
  * @param res the response
  */
-async function getGroupMembers(req, res) {
+async function getGroupMembers (req, res) {
   const result = await service.getGroupMembers(
-    req.authUser.isMachine ? "M2M" : req.authUser,
+    req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
     req.query
-  );
-  helper.setResHeaders(req, res, result);
-  res.send(result);
+  )
+  helper.setResHeaders(req, res, result)
+  res.send(result)
 }
 
 /**
@@ -24,14 +24,14 @@ async function getGroupMembers(req, res) {
  * @param req the request
  * @param res the response
  */
-async function addGroupMember(req, res) {
+async function addGroupMember (req, res) {
   console.log(req)
   const result = await service.addGroupMember(
-    req.authUser.isMachine ? "M2M" : req.authUser,
+    req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
     req.body
-  );
-  res.send(result);
+  )
+  res.send(result)
 }
 
 /**
@@ -39,13 +39,13 @@ async function addGroupMember(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupMember(req, res) {
+async function getGroupMember (req, res) {
   const result = await service.getGroupMember(
-    req.authUser.isMachine ? "M2M" : req.authUser,
+    req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
     req.params.memberId
-  );
-  res.send(result);
+  )
+  res.send(result)
 }
 
 /**
@@ -53,13 +53,13 @@ async function getGroupMember(req, res) {
  * @param req the request
  * @param res the response
  */
-async function deleteGroupMember(req, res) {
+async function deleteGroupMember (req, res) {
   const result = await service.deleteGroupMember(
-    req.authUser.isMachine ? "M2M" : req.authUser,
+    req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
     req.params.memberId
-  );
-  res.send(result);
+  )
+  res.send(result)
 }
 
 /**
@@ -67,12 +67,12 @@ async function deleteGroupMember(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupMembersCount(req, res) {
+async function getGroupMembersCount (req, res) {
   const result = await service.getGroupMembersCount(
     req.params.groupId,
     req.query
-  );
-  res.send(result);
+  )
+  res.send(result)
 }
 
 module.exports = {
@@ -81,4 +81,4 @@ module.exports = {
   getGroupMember,
   deleteGroupMember,
   getGroupMembersCount
-};
+}
