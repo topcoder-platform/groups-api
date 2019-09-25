@@ -30,7 +30,7 @@ module.exports = {
   // health check timeout in milliseconds
   HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 3000,
 
-  //Kafka Topics
+  // Kafka Topics
   KAFKA_GROUP_CREATE_TOPIC: process.env.KAFKA_GROUP_CREATE_TOPIC,
   KAFKA_GROUP_UPDATE_TOPIC: process.env.KAFKA_GROUP_UPDATE_TOPIC,
   KAFKA_GROUP_DELETE_TOPIC: process.env.KAFKA_GROUP_DELETE_TOPIC,
@@ -46,4 +46,4 @@ module.exports = {
     Group: 'group',
     User: 'user'
   }
-};
+}

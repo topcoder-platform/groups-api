@@ -253,6 +253,10 @@ async function getGroupMembers (currentUser, groupId, criteria) {
 
   session.close()
 
+  result.total = total
+  result.perPage = criteria.perPage
+  result.page = criteria.page
+
   return result
 }
 
@@ -320,24 +324,6 @@ getGroupMember.schema = {
 }
 
 /**
- * Get all group members.
- * @param {String} groupId the group id
- * @returns {Array} all group members
- */
-async function getAllGroupMembers (session, groupId) {
-  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o) RETURN r, o'
-  const res = await session.run(query, { groupId })
-  return _.map(res.records, record => {
-    const r = record.get(0).properties
-    const o = record.get(1).properties
-    return {
-      memberId: o.id,
-      membershipType: r.type
-    }
-  })
-}
-
-/**
  * Get distinct user members count of given group. Optionally may include sub groups.
  * @param {String} groupId the group id
  * @param {Object} query the query parameters
@@ -348,30 +334,17 @@ async function getGroupMembersCount (groupId, query) {
   const group = await helper.ensureExists(session, 'Group', groupId)
   groupId = group.id
 
-  // get distinct users using breadth first search algorithm,
-  // this is equivalent to recursive algorithm, but more efficient than latter,
-  // see https://en.wikipedia.org/wiki/Breadth-first_search
-  const groupIds = [groupId]
-  const userIds = []
-  let index = 0
-  while (index < groupIds.length) {
-    const gId = groupIds[index]
-    index += 1
-    const members = await getAllGroupMembers(session, gId)
-    _.forEach(members, member => {
-      if (member.membershipType === config.MEMBERSHIP_TYPES.User) {
-        if (!_.includes(userIds, member.memberId)) {
-          userIds.push(member.memberId)
-        }
-      } else if (!_.includes(groupIds, member.memberId) && query.includeSubGroups) {
-        // only handle group that was not handled yet, reduce duplicate processing
-        groupIds.push(member.memberId)
-      }
-    })
+  let queryToExecute = ''
+  if (query.includeSubGroups) {
+    queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains*1..10]->(o:User) RETURN COUNT(o) AS count'
+  } else {
+    queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:User) RETURN COUNT(o) AS count'
   }
 
+  const res = await session.run(queryToExecute, { groupId })
+
   session.close()
-  return { count: userIds.length }
+  return { count: res.records[0]._fields[0].low }
 }
 
 getGroupMembersCount.schema = {

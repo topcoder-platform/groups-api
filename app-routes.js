@@ -96,4 +96,4 @@ module.exports = app => {
         .json({ message: 'The requested resource cannot be found.' })
     }
   })
-};
+}
