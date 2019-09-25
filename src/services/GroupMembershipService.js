@@ -336,15 +336,15 @@ async function getGroupMembersCount (groupId, query) {
 
   let queryToExecute = ''
   if (query.includeSubGroups) {
-    queryToExecute = 'MATCH (g:Group {oldId: {groupId}})-[r:GroupContains*1..10]->(o:User) RETURN COUNT(o)'
+    queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains*1..10]->(o:User) RETURN COUNT(o) AS count'
   } else {
-    queryToExecute = 'MATCH (g:Group {oldId: {groupId}})-[r:GroupContains]->(o:User) RETURN COUNT(o)'
+    queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:User) RETURN COUNT(o) AS count'
   }
 
   const res = await session.run(queryToExecute, { groupId })
 
   session.close()
-  return { count: res }
+  return { count: res.records[0]._fields[0].low }
 }
 
 getGroupMembersCount.schema = {
