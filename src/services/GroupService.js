@@ -183,7 +183,8 @@ createGroup.schema = {
             .max(2048),
           privateGroup: Joi.boolean().required(),
           selfRegister: Joi.boolean().required(),
-          domain: Joi.string()
+          domain: Joi.string(),
+          ssoId: Joi.string()
         })
         .required()
     })
