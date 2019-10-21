@@ -139,14 +139,12 @@ async function createGroup (currentUser, data) {
     // generate next group id
     groupData.id = uuid()
     groupData.createdAt = new Date().toISOString()
-    if (currentUser !== 'M2M') {
-      groupData.createdBy = currentUser.userId
-    }
+    groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
+    groupData.domain = groupData.domain ? groupData.domain : ''
+    groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
 
     const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}${
-        currentUser !== 'M2M' ? ', createdBy: {createdBy}' : ''
-      }${groupData.domain ? ', domain: {domain}' : ''}}) RETURN group`,
+      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}}) RETURN group`,
       groupData
     )
 
@@ -208,18 +206,12 @@ async function updateGroup (currentUser, groupId, data) {
     const groupData = data.param
     groupData.id = groupId
     groupData.updatedAt = new Date().toISOString()
-    if (currentUser !== 'M2M') {
-      groupData.updatedBy = currentUser.userId
-    }
-
-    if (data.param.domain) {
-      groupData.domain = data.param.domain
-    } else {
-      groupData.domain = ''
-    }
+    groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
+    groupData.domain = data.param.domain ? data.param.domain : ''
+    groupData.ssoId = data.param.ssoId ? data.param.ssoId : ''
 
     const updateRes = await tx.run(
-      `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain} RETURN g`,
+      `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
       groupData
     )
 
@@ -308,10 +300,6 @@ async function getGroup (currentUser, groupId, criteria) {
   const session = helper.createDBSession()
 
   let group = await helper.ensureExists(session, 'Group', groupId)
-  // commented the block as updated the `ensureExists
-  // let group = validate(groupId, 4)
-  //   ? await helper.ensureExists(session, 'Group', groupId)
-  //   : await retrieveGroupByOldId(session, groupId);
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
@@ -377,24 +365,6 @@ getGroup.schema = {
   }),
   isOldId: Joi.boolean()
 }
-
-// /**
-//  * Retrieve group by old id. Throw error if not exist.
-//  * @param {Object} session the db session
-//  * @param {String} oldId the old id
-//  * @returns {Object} the found entity
-//  */
-// async function retrieveGroupByOldId (session, oldId) {
-//   logger.debug(`retrieveGroupByOldId - ${oldId}`)
-
-//   const res = await session.run(`MATCH (g:Group {oldId: {oldId}}) RETURN g`, {
-//     oldId
-//   })
-//   if (!res || res.records.length === 0 || !res.records[0] || !res.records[0].get(0)) {
-//     throw new errors.NotFoundError(`Not found Group with old id ${oldId}`)
-//   }
-//   return res.records[0].get(0).properties
-// }
 
 /**
  * Delete group
