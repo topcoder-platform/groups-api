@@ -128,13 +128,9 @@ addGroupMember.schema = {
   groupId: Joi.id(), // defined in app-bootstrap
   data: Joi.object()
     .keys({
-      param: Joi.object()
-        .keys({
-          memberId: Joi.id(),
-          membershipType: Joi.string()
-            .valid(_.values(config.MEMBERSHIP_TYPES))
-            .required()
-        })
+      memberId: Joi.id(),
+      membershipType: Joi.string()
+        .valid(_.values(config.MEMBERSHIP_TYPES))
         .required()
     })
     .required()

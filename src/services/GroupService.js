@@ -170,21 +170,17 @@ createGroup.schema = {
   currentUser: Joi.any(),
   data: Joi.object()
     .keys({
-      param: Joi.object()
-        .keys({
-          name: Joi.string()
-            .min(3)
-            .max(150)
-            .required(),
-          description: Joi.string()
-            .min(3)
-            .max(2048),
-          privateGroup: Joi.boolean().required(),
-          selfRegister: Joi.boolean().required(),
-          domain: Joi.string(),
-          ssoId: Joi.string()
-        })
-        .required()
+      name: Joi.string()
+        .min(3)
+        .max(150)
+        .required(),
+      description: Joi.string()
+        .min(3)
+        .max(2048),
+      privateGroup: Joi.boolean().required(),
+      selfRegister: Joi.boolean().required(),
+      domain: Joi.string(),
+      ssoId: Joi.string()
     })
     .required()
 }
