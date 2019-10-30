@@ -1,0 +1,402 @@
+openapi: "3.0.0"
+info:
+  title: New Groups API
+  description: |
+    The new Groups API
+​
+    ### Pagination
+      Requests that return multiple items will be paginated to 20 items by default. You can specify
+      further pages with the `page` parameter. You can also set a custom page
+      size up to 100 with the `perPage` parameter.
+​
+      Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
+  version: "v5"
+​
+servers:
+  - url: https://api.topcoder-dev.com/v5
+​
+paths:
+  /groups/{groupId}/members:
+    get:
+      description: |
+        Get members by group id
+​
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - Group membership
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+      responses:
+        200:
+          $ref: '#/components/responses/GroupMembershipArrayResponse'
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: |
+        Add a member to the specified group
+​
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - Group membership
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewGroupMembershipBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupMembershipResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+​
+  /groups/{groupId}/members/{memberId}:
+    get:
+      description: Get membership by group id and member id
+      tags:
+        - Group membership
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/memberId'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupMembershipResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: |
+        Remove a member from specified group
+​
+        The user has to have admin role and the group allows self registration.
+      tags:
+        - Group membership
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/memberId'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupMembershipResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+​
+  /groups/{groupId}/membersCount:
+    get:
+      description: Get distinct user members count by group id.
+      tags:
+        - Group membership
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/includeSubGroups'
+      responses:
+        200:
+          description: OK. Response will contain count of members.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+​
+  /groups/{groupId}:
+    get:
+      description: |
+        Fetch a particular group
+​
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - Groups
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/includeSubGroups'
+        - $ref: '#/components/parameters/includeParentGroups'
+        - $ref: '#/components/parameters/oneLevel'
+        - name: fields
+          in: query
+          required: false
+          description: |
+            fields=fieldName1,fieldName2,...,fieldN  - parameter for
+            choosing which fields of group that will be included in response.
+​
+            + id
+            + createdAt
+            + createdBy
+            + updatedAt
+            + updatedBy
+            + name
+            + description
+            + domain
+            + privateGroup
+            + selfRegister
+            + oldId
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      description: |
+        Delete a group
+​
+        The user has to have admin role.
+      tags:
+        - Groups
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+​
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      description: |
+        Update group
+​
+        The user has to have admin role.
+      tags:
+        - Groups
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      requestBody:
+        $ref: '#/components/requestBodies/NewGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+​
+  /groups:
+    get:
+      description: |
+        Fetch groups by user or group.
+​
+        If the user is not admin, backend will ignore memberId and membershipType. It will fetch groups which given user is belonged to.
+      tags:
+        - Groups
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: memberId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: id of membership
+        - name: membershipType
+          in: query
+          required: false
+          schema:
+            type: string
+          description: membership type. Use 'group' if memberId is an id of a group, otherwise 'user'
+        - name: oldId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: old group id (legacy data)
+        - name: selfRegister
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if the group allows self register
+        - name: privateGroup
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if the group is private
+        - name: ssoId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: SSO ID
+      responses:
+        200:
+          $ref: "#/components/responses/GroupArrayResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      description: |
+        Creation of new group
+​
+        The user has to have admin role.
+      tags:
+        - Groups
+      security:
+        - bearer: []
+      requestBody:
+        $ref: '#/components/requestBodies/NewGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+​
+  /groups/{oldId}:
+    get:
+      description: |
+        Fetch a particular group by old id (legacy id)
+​
+        If the group is private, the user needs to be a member of the group, or an admin.
+      tags:
+        - Groups
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/oldId'
+        - $ref: '#/components/parameters/includeSubGroups'
+        - $ref: '#/components/parameters/includeParentGroups'
+        - $ref: '#/components/parameters/oneLevel'
+        - name: fields
+          in: query
+          required: false
+          description: |
+            fields=fieldName1,fieldName2,...,fieldN  - parameter for
+            choosing which fields of group that will be included in response.
+​
+            + id
+            + createdAt
+            + createdBy
+            + updatedAt
+            + updatedBy
+            + name
+            + description
+            + domain
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: "#/components/responses/GroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+​
+  /groups/securityGroups:
+    post:
+      description: |
+        Creation of new security group
+​
+        The user has to have admin role.
+      tags:
+        - Groups
+      security:
+        - BearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/SecurityGroupBodyParam'
+      responses:
+        200:
+          $ref: "#/components/responses/SecurityGroupResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /health:
+    get:
