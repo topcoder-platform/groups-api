@@ -127,14 +127,14 @@ async function createGroup (currentUser, data) {
 
     // check whether group name is already used
     const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
-      name: data.param.name
+      name: data.name
     })
     if (nameCheckRes.records.length > 0) {
-      throw new errors.ConflictError(`The group name ${data.param.name} is already used`)
+      throw new errors.ConflictError(`The group name ${data.name} is already used`)
     }
 
     // create group
-    const groupData = data.param
+    const groupData = data
 
     // generate next group id
     groupData.id = uuid()
@@ -203,12 +203,12 @@ async function updateGroup (currentUser, groupId, data) {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(tx, 'Group', groupId)
 
-    const groupData = data.param
+    const groupData = data
     groupData.id = groupId
     groupData.updatedAt = new Date().toISOString()
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
-    groupData.domain = data.param.domain ? data.param.domain : ''
-    groupData.ssoId = data.param.ssoId ? data.param.ssoId : ''
+    groupData.domain = data.domain ? data.domain : ''
+    groupData.ssoId = data.ssoId ? data.ssoId : ''
 
     const updateRes = await tx.run(
       `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
