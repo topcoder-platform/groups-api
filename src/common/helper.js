@@ -130,7 +130,7 @@ async function getChildGroups (session, groupId) {
  */
 async function getParentGroups (session, groupId) {
   const res = await session.run(
-    'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.name',
+    'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
     { groupId }
   )
   return _.map(res.records, record => record.get(0).properties)

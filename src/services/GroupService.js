@@ -77,7 +77,7 @@ async function searchGroups (criteria) {
   let result = []
   if (criteria.page <= Math.ceil(total / criteria.perPage)) {
     const pageRes = await session.run(
-      `${matchClause}${whereClause} RETURN g ORDER BY g.name SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
+      `${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
         criteria.perPage
       }`
     )
