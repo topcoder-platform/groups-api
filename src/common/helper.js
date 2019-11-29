@@ -116,7 +116,7 @@ async function ensureGroupMember (session, groupId, userId) {
  */
 async function getChildGroups (session, groupId) {
   const res = await session.run(
-    'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.name',
+    'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId',
     { groupId }
   )
   return _.map(res.records, record => record.get(0).properties)
