@@ -25,7 +25,7 @@ async function addGroupMember (currentUser, groupId, data) {
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
     const group = await helper.ensureExists(tx, 'Group', groupId)
-    data.param.oldId = group.oldId
+    data.oldId = group.oldId
     groupId = group.id
 
     if (
@@ -33,45 +33,45 @@ async function addGroupMember (currentUser, groupId, data) {
       !helper.hasAdminRole(currentUser) &&
       !(
         group.selfRegister &&
-        data.param.membershipType === config.MEMBERSHIP_TYPES.User &&
-        Number(currentUser.userId) === Number(data.param.memberId)
+        data.membershipType === config.MEMBERSHIP_TYPES.User &&
+        Number(currentUser.userId) === Number(data.memberId)
       )
     ) {
       throw new errors.ForbiddenError('You are not allowed to perform this action!')
     }
 
-    if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
-      if (data.param.memberId === groupId) {
+    if (data.membershipType === config.MEMBERSHIP_TYPES.Group) {
+      if (data.memberId === groupId) {
         throw new errors.BadRequestError('A group can not add to itself.')
       }
-      logger.debug(`Check for groupId ${data.param.memberId} exist or not`)
-      const childGroup = await helper.ensureExists(tx, 'Group', data.param.memberId)
+      logger.debug(`Check for groupId ${data.memberId} exist or not`)
+      const childGroup = await helper.ensureExists(tx, 'Group', data.memberId)
 
-      data.param.memberOldId = childGroup.oldId
+      data.memberOldId = childGroup.oldId
       // if parent group is private, the sub group must be private too
       if (group.privateGroup && !childGroup.privateGroup) {
         throw new errors.ConflictError('Parent group is private, the child group must be private too.')
       }
     } else {
-      logger.debug(`Check for memberId ${data.param.memberId} exist or not`)
-      await helper.ensureExists(tx, 'User', data.param.memberId)
+      logger.debug(`Check for memberId ${data.memberId} exist or not`)
+      await helper.ensureExists(tx, 'User', data.memberId)
     }
 
-    logger.debug(`check member ${data.param.memberId} is part of group ${groupId}`)
-    const targetObjectType = data.param.membershipType === config.MEMBERSHIP_TYPES.Group ? 'Group' : 'User'
+    logger.debug(`check member ${data.memberId} is part of group ${groupId}`)
+    const targetObjectType = data.membershipType === config.MEMBERSHIP_TYPES.Group ? 'Group' : 'User'
     const memberCheckRes = await tx.run(
       `MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:${targetObjectType} {id: {memberId}}) RETURN o`,
-      { groupId, memberId: data.param.memberId }
+      { groupId, memberId: data.memberId }
     )
     if (memberCheckRes.records.length > 0) {
       throw new errors.ConflictError('The member is already in the group')
     }
 
     // check cyclical reference
-    if (data.param.membershipType === config.MEMBERSHIP_TYPES.Group) {
+    if (data.membershipType === config.MEMBERSHIP_TYPES.Group) {
       const pathRes = await tx.run(
         'MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p',
-        { fromId: data.param.memberId, toId: groupId }
+        { fromId: data.memberId, toId: groupId }
       )
       if (pathRes.records.length > 0) {
         throw new errors.ConflictError('There is cyclical group reference')
@@ -85,9 +85,9 @@ async function addGroupMember (currentUser, groupId, data) {
 
     const params = {
       groupId,
-      memberId: data.param.memberId,
+      memberId: data.memberId,
       membershipId,
-      membershipType: data.param.membershipType,
+      membershipType: data.membershipType,
       createdAt,
       createdBy: currentUser === 'M2M' ? '00000000' : currentUser.userId
     }
@@ -98,13 +98,13 @@ async function addGroupMember (currentUser, groupId, data) {
     const result = {
       id: membershipId,
       groupId,
-      oldId: data.param.oldId,
+      oldId: data.oldId,
       name: group.name,
       createdAt,
       ...(currentUser === 'M2M' ? {} : { createdBy: currentUser.userId }),
-      memberId: data.param.memberId,
-      ...(data.param.memberOldId ? { memberOldId: data.param.memberOldId } : {}),
-      membershipType: data.param.membershipType
+      memberId: data.memberId,
+      ...(data.memberOldId ? { memberOldId: data.memberOldId } : {}),
+      membershipType: data.membershipType
     }
 
     logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_ADD_TOPIC}`)
@@ -128,13 +128,9 @@ addGroupMember.schema = {
   groupId: Joi.id(), // defined in app-bootstrap
   data: Joi.object()
     .keys({
-      param: Joi.object()
-        .keys({
-          memberId: Joi.id(),
-          membershipType: Joi.string()
-            .valid(_.values(config.MEMBERSHIP_TYPES))
-            .required()
-        })
+      memberId: Joi.id(),
+      membershipType: Joi.string()
+        .valid(_.values(config.MEMBERSHIP_TYPES))
         .required()
     })
     .required()

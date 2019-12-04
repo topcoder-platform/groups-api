@@ -29,7 +29,7 @@ async function searchGroups (req, res) {
  */
 async function createGroup (req, res) {
   const result = await service.createGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.body)
-  res.send({ result })
+  res.send(result)
 }
 
 /**
@@ -60,7 +60,7 @@ async function getGroup (req, res) {
  */
 async function deleteGroup (req, res) {
   const result = await service.deleteGroup(req.params.groupId)
-  res.send({ result })
+  res.send(result)
 }
 
 /**
