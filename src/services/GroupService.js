@@ -83,10 +83,19 @@ async function searchGroups (criteria) {
     )
     result = _.map(pageRes.records, record => record.get(0).properties)
     // populate parent/sub groups
-    for (let i = 0; i < result.length; i += 1) {
-      const group = result[i]
-      group.parentGroups = await helper.getParentGroups(session, group.id)
-      group.subGroups = await helper.getChildGroups(session, group.id)
+
+    if (criteria.includeParentGroup) {
+      for (let i = 0; i < result.length; i += 1) {
+        const group = result[i]
+        group.parentGroups = await helper.getParentGroups(session, group.id)
+      }
+    }
+
+    if (criteria.includeSubGroups) {
+      for (let i = 0; i < result.length; i += 1) {
+        const group = result[i]
+        group.subGroups = await helper.getChildGroups(session, group.id)
+      }
     }
   }
 
@@ -109,7 +118,10 @@ searchGroups.schema = {
     oldId: Joi.string(),
     ssoId: Joi.string(),
     selfRegister: Joi.boolean(),
-    privateGroup: Joi.boolean()
+    privateGroup: Joi.boolean(),
+    includeSubGroups: Joi.boolean().default(false),
+    includeParentGroup: Joi.boolean().default(false),
+    oneLevel: Joi.boolean()
   })
 }
 
