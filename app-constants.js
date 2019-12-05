@@ -24,10 +24,16 @@ const Topics = {
   GroupMemberDeleted: 'test.new.bus.events' // 'user.action.group.member.deleted'
 }
 
+const GroupStatus = {
+  Active: 'active',
+  InActive: 'inactive'
+}
+
 module.exports = {
   UserRoles,
   MembershipTypes,
   EVENT_ORIGINATOR,
   EVENT_MIME_TYPE,
-  Topics
+  Topics,
+  GroupStatus
 }

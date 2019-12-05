@@ -8,13 +8,14 @@ const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
+const constants = require('../../app-constants')
 
 /**
  * Search groups
  * @param {Object} criteria the search criteria
  * @returns {Object} the search result
  */
-async function searchGroups (criteria) {
+async function searchGroups (isAdmin, criteria) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
   if (criteria.memberId && !criteria.membershipType) {
@@ -69,6 +70,20 @@ async function searchGroups (criteria) {
     }
   }
 
+  if (whereClause === '') {
+    whereClause = ' WHERE exists(g.oldId)'
+  } else {
+    whereClause = whereClause.concat(' AND exists(g.oldId)')
+  }
+
+  if(!isAdmin) {
+    if (whereClause === '') {
+      whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
+    } else {
+      whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
+    }
+  }
+
   // query total record count
   const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
   const total = totalRes.records[0].get(0).low || 0
@@ -85,6 +100,7 @@ async function searchGroups (criteria) {
     // populate parent/sub groups
     for (let i = 0; i < result.length; i += 1) {
       const group = result[i]
+      if(!isAdmin) delete group.status
       group.parentGroups = await helper.getParentGroups(session, group.id)
       group.subGroups = await helper.getChildGroups(session, group.id)
     }
@@ -100,6 +116,7 @@ async function searchGroups (criteria) {
 }
 
 searchGroups.schema = {
+  isAdmin: Joi.boolean().required(),
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
     membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
@@ -142,13 +159,17 @@ async function createGroup (currentUser, data) {
     groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.domain = groupData.domain ? groupData.domain : ''
     groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
+    groupData.status = constants.GroupStatus.Active
 
     const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}}) RETURN group`,
+      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, status: {status}}) RETURN group`,
       groupData
     )
 
     const group = createRes.records[0]._fields[0].properties
+
+    // We don't want to show status field to user, so deleting it before returning
+    delete group.status
     logger.debug(`Group = ${JSON.stringify(group)}`)
 
     // post bus event
@@ -232,7 +253,9 @@ async function updateGroup (currentUser, groupId, data) {
 updateGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
-  data: createGroup.schema.data
+  data: createGroup.schema.data.keys({
+    status: Joi.string().valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
+  })
 }
 
 /**
@@ -243,7 +266,8 @@ updateGroup.schema = {
  * @returns {Object} the group
  */
 async function getGroup (currentUser, groupId, criteria) {
-  logger.debug(`Get Group - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(criteria)}`)
+  const isAdmin = currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+  logger.debug(`Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(criteria)}`)
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
@@ -295,7 +319,9 @@ async function getGroup (currentUser, groupId, criteria) {
 
   const session = helper.createDBSession()
 
-  let group = await helper.ensureExists(session, 'Group', groupId)
+  let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+
+  if(!isAdmin) delete group.status
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {

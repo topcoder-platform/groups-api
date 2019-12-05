@@ -12,7 +12,10 @@ const cors = require('cors')
 const logger = require('./src/common/logger')
 const HttpStatus = require('http-status-codes')
 const morgan = require('morgan')
+const swaggerUi = require('swagger-ui-express')
+const YAML = require('yamljs')
 
+const swaggerDocument = YAML.load('./docs/swagger.yml')
 // setup express app
 const app = express()
 
@@ -24,8 +27,14 @@ app.set('port', config.PORT)
 // Request logger
 app.use(morgan('common', { skip: (req, res) => res.statusCode < 400 }))
 
+// Serve Swagger Docs after setting host and base path
+swaggerDocument.host = config.HOST
+swaggerDocument.basePath = config.API_PREFIX
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
 // Register routes
 require('./app-routes')(app)
+
 
 // The error handler
 // eslint-disable-next-line no-unused-vars

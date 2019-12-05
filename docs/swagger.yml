@@ -3,24 +3,24 @@ info:
   title: New Groups API
   description: |
     The new Groups API
-​
+
     ### Pagination
       Requests that return multiple items will be paginated to 20 items by default. You can specify
       further pages with the `page` parameter. You can also set a custom page
       size up to 100 with the `perPage` parameter.
-​
+
       Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
   version: "v5"
-​
+
 servers:
   - url: https://api.topcoder-dev.com/v5
-​
+
 paths:
   /groups/{groupId}/members:
     get:
       description: |
         Get members by group id
-​
+
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
         - Group membership
@@ -46,7 +46,7 @@ paths:
     post:
       description: |
         Add a member to the specified group
-​
+
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
         - Group membership
@@ -69,7 +69,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
-​
+
   /groups/{groupId}/members/{memberId}:
     get:
       description: Get membership by group id and member id
@@ -94,7 +94,7 @@ paths:
     delete:
       description: |
         Remove a member from specified group
-​
+
         The user has to have admin role and the group allows self registration.
       tags:
         - Group membership
@@ -116,7 +116,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
-​
+
   /groups/{groupId}/membersCount:
     get:
       description: Get distinct user members count by group id.
@@ -141,12 +141,12 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
-​
+
   /groups/{groupId}:
     get:
       description: |
         Fetch a particular group
-​
+
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
         - Groups
@@ -163,7 +163,7 @@ paths:
           description: |
             fields=fieldName1,fieldName2,...,fieldN  - parameter for
             choosing which fields of group that will be included in response.
-​
+
             + id
             + createdAt
             + createdBy
@@ -193,7 +193,7 @@ paths:
     delete:
       description: |
         Delete a group
-​
+
         The user has to have admin role.
       tags:
         - Groups
@@ -204,7 +204,7 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/GroupResponse"
-​
+
         400:
           $ref: "#/components/responses/BadRequest"
         401:
@@ -218,7 +218,7 @@ paths:
     put:
       description: |
         Update group
-​
+
         The user has to have admin role.
       tags:
         - Groups
@@ -241,12 +241,12 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
-​
+
   /groups:
     get:
       description: |
         Fetch groups by user or group.
-​
+
         If the user is not admin, backend will ignore memberId and membershipType. It will fetch groups which given user is belonged to.
       tags:
         - Groups
@@ -307,7 +307,7 @@ paths:
     post:
       description: |
         Creation of new group
-​
+
         The user has to have admin role.
       tags:
         - Groups
@@ -328,12 +328,12 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
-​
+
   /groups/{oldId}:
     get:
       description: |
         Fetch a particular group by old id (legacy id)
-​
+
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
         - Groups
@@ -350,7 +350,7 @@ paths:
           description: |
             fields=fieldName1,fieldName2,...,fieldN  - parameter for
             choosing which fields of group that will be included in response.
-​
+
             + id
             + createdAt
             + createdBy
@@ -374,12 +374,12 @@ paths:
           $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
-​
+
   /groups/securityGroups:
     post:
       description: |
         Creation of new security group
-​
+
         The user has to have admin role.
       tags:
         - Groups

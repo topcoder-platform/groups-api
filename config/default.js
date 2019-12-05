@@ -14,6 +14,7 @@ module.exports = {
   VALID_ISSUERS: process.env.VALID_ISSUERS
     ? process.env.VALID_ISSUERS.replace(/\\"/g, '')
     : '["https://api.topcoder-dev.com", "https://api.topcoder.com","https://topcoder-dev.auth0.com/"]',
+  HOST: process.env.HOST || 'localhost:3000',
 
   // Auth0 config params
   AUTH0_URL: process.env.AUTH0_URL || 'https://topcoder-dev.auth0.com/oauth/token',

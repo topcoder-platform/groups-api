@@ -24,7 +24,7 @@ async function addGroupMember (currentUser, groupId, data) {
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
-    const group = await helper.ensureExists(tx, 'Group', groupId)
+    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
     data.oldId = group.oldId
     groupId = group.id
 
@@ -210,7 +210,7 @@ deleteGroupMember.schema = {
  */
 async function getGroupMembers (currentUser, groupId, criteria) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId)
+  const group = await helper.ensureExists(session, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
   groupId = group.id
 
   // if the group is private, the user needs to be a member of the group, or an admin
@@ -303,7 +303,7 @@ async function getGroupMemberWithSession (session, groupId, memberId) {
  */
 async function getGroupMember (currentUser, groupId, memberId) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId)
+  const group = await helper.ensureExists(session, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
     await helper.ensureGroupMember(session, groupId, currentUser.userId)
   }
