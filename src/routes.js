@@ -91,7 +91,7 @@ module.exports = {
       method: 'getGroupMembersCount'
     }
   },
-  '/health': {
+  '/groups/health': {
     get: {
       controller: 'HealthController',
       method: 'checkHealth'
