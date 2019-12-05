@@ -30,7 +30,7 @@ app.use(morgan('common', { skip: (req, res) => res.statusCode < 400 }))
 // Serve Swagger Docs after setting host and base path
 swaggerDocument.host = config.HOST
 swaggerDocument.basePath = config.API_PREFIX
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/groups/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Register routes
 require('./app-routes')(app)

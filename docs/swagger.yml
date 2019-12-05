@@ -13,7 +13,7 @@ info:
   version: "v5"
 
 servers:
-  - url: https://api.topcoder-dev.com/v5
+  - url: api.topcoder.com/v5
 
 paths:
   /groups/{groupId}/members:
@@ -23,9 +23,9 @@ paths:
 
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
-        - Group membership
+        - group membership
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/page'
@@ -49,9 +49,9 @@ paths:
 
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
-        - Group membership
+        - group membership
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
       requestBody:
@@ -74,9 +74,9 @@ paths:
     get:
       description: Get membership by group id and member id
       tags:
-        - Group membership
+        - group membership
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/memberId'
@@ -97,9 +97,9 @@ paths:
 
         The user has to have admin role and the group allows self registration.
       tags:
-        - Group membership
+        - group membership
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/memberId'
@@ -121,7 +121,7 @@ paths:
     get:
       description: Get distinct user members count by group id.
       tags:
-        - Group membership
+        - group membership
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/includeSubGroups'
@@ -133,8 +133,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  count:
-                    type: integer
+                  result:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
         400:
           $ref: "#/components/responses/BadRequest"
         404:
@@ -149,9 +152,9 @@ paths:
 
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
-        - Groups
+        - groups
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/includeSubGroups'
@@ -172,9 +175,6 @@ paths:
             + name
             + description
             + domain
-            + privateGroup
-            + selfRegister
-            + oldId
           schema:
             type: string
       responses:
@@ -196,9 +196,9 @@ paths:
 
         The user has to have admin role.
       tags:
-        - Groups
+        - groups
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
       responses:
@@ -221,9 +221,9 @@ paths:
 
         The user has to have admin role.
       tags:
-        - Groups
+        - groups
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/groupId'
       requestBody:
@@ -249,9 +249,9 @@ paths:
 
         If the user is not admin, backend will ignore memberId and membershipType. It will fetch groups which given user is belonged to.
       tags:
-        - Groups
+        - groups
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/perPage'
@@ -285,12 +285,6 @@ paths:
           schema:
             type: boolean
           description: Flag indicates if the group is private
-        - name: ssoId
-          in: query
-          required: false
-          schema:
-            type: string
-          description: SSO ID
       responses:
         200:
           $ref: "#/components/responses/GroupArrayResponse"
@@ -310,7 +304,7 @@ paths:
 
         The user has to have admin role.
       tags:
-        - Groups
+        - groups
       security:
         - bearer: []
       requestBody:
@@ -329,16 +323,16 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
-  /groups/{oldId}:
+  /groups/oldId/{oldId}:
     get:
       description: |
         Fetch a particular group by old id (legacy id)
 
         If the group is private, the user needs to be a member of the group, or an admin.
       tags:
-        - Groups
+        - groups
       security:
-        - BearerAuth: []
+        - bearer: []
       parameters:
         - $ref: '#/components/parameters/oldId'
         - $ref: '#/components/parameters/includeSubGroups'
@@ -382,9 +376,9 @@ paths:
 
         The user has to have admin role.
       tags:
-        - Groups
+        - groups
       security:
-        - BearerAuth: []
+        - bearer: []
       requestBody:
         $ref: '#/components/requestBodies/SecurityGroupBodyParam'
       responses:
@@ -400,3 +394,419 @@ paths:
           $ref: "#/components/responses/InternalServerError"
   /health:
     get:
+      description: |
+        Get app health status
+      tags:
+        - health
+      responses:
+        200:
+          description: success, the service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksRun:
+                    type: integer
+        503:
+          $ref: "#/components/responses/ServiceUnavailableError"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  parameters:
+    groupId:
+      name: groupId
+      in: path
+      description: The group id.
+      required: true
+      schema:
+        type: string
+      example: '10ba038e-48da-123b-96e8-8d3b99b6d18a'
+    oldId:
+      name: oldId
+      in: path
+      description: The old group id.
+      required: true
+      schema:
+        type: string
+      example: '12345678'
+    memberId:
+      name: memberId
+      in: path
+      description: The member id.
+      required: true
+      schema:
+        type: string
+      example: '10ba038e-48da-123b-96e8-8d3b99b6d18a'
+    includeSubGroups:
+      name: includeSubGroups
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: |
+        a flag to indicate whether or not include the sub groups, default to false
+        includeSubGroups and includeParentGroups could not be true at the same time
+    includeParentGroups:
+      name: includeParentGroup
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: |
+        a flag to indicate whether to include parent groups, default to false
+        includeSubGroups and includeParentGroups could not be true at the same time
+    oneLevel:
+      name: oneLevel
+      in: query
+      required: false
+      schema:
+        type: boolean
+      description: |
+        when includeSubGroups is true, it's a flag to indicate whether or not get one level of sub groups or all the sub groups recursively, default to false
+        when includeParentGroups is true, it's a flag to indicate whether or not get one level of parent groups or all the parent groups recursively, default to true
+        includeSubGroups and includeParentGroups could not be true at the same time
+    page:
+      name: page
+      in: query
+      description: The page number. 1 based.
+      required: false
+      schema:
+        type: integer
+        default: 1
+    perPage:
+      name: perPage
+      in: query
+      description: The number of entities shown in one page.
+      required: false
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+  responses:
+    BadRequest:
+      description: BAD REQUEST - if there was problem with the request (e.g. malformed or some parameters are missing).
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The bad request error message.
+                example: Invalid input.
+    NotFound:
+      description: NOT FOUND - if the resource in request did not exist
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The not found error message.
+                example: A resource with the name could not be found.
+    Unauthenticated:
+      description: UNAUTHENTICATED - if user is unauthenticated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The unauthorized error message.
+                example: Unable to authenticate the user.
+    Forbidden:
+      description: FORBIDDEN - if it's forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The forbidden error message.
+                example: You are not allowed to access the request.
+    InternalServerError:
+      description: INTERNAL SERVER ERROR - if the request was properly formatted, but the operation failed on the server side
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The server error message.
+                example: Something went wrong while processing your request. We’re sorry for the trouble. We’ve been notified of the error and will correct it as soon as possible. Please try your request again in a moment.
+    ServiceUnavailableError:
+      description: service is unavailable, e.g. database is down, or database access is very slow
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The server error message.
+                example: the database operation is slow
+
+    GroupMembershipArrayResponse:
+      description: The group members response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GroupMembership"
+      headers:
+        X-Next-Page:
+          schema:
+            type: integer
+          description: The index of the next page
+        X-Page:
+          schema:
+            type: integer
+          description: The index of the current page (starting at 1)
+        X-Per-Page:
+          schema:
+            type: integer
+          description: The number of items to list per page
+        X-Total:
+          schema:
+            type: integer
+          description: The total number of items
+        X-Total-Pages:
+          schema:
+            type: integer
+          description: The total number of pages
+        Link:
+          schema:
+            type: string
+          description: Pagination link header
+
+    GroupMembershipResponse:
+      description: The group member response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: '#/components/schemas/GroupMembership'
+    GroupArrayResponse:
+      description: The group response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+      headers:
+        X-Next-Page:
+          schema:
+            type: integer
+          description: The index of the next page
+        X-Page:
+          schema:
+            type: integer
+          description: The index of the current page (starting at 1)
+        X-Per-Page:
+          schema:
+            type: integer
+          description: The number of items to list per page
+        X-Total:
+          schema:
+            type: integer
+          description: The total number of items
+        X-Total-Pages:
+          schema:
+            type: integer
+          description: The total number of pages
+        Link:
+          schema:
+            type: string
+          description: Pagination link header
+
+    GroupResponse:
+      description: The group response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                $ref: '#/components/schemas/Group'
+
+    SecurityGroupResponse:
+      description: The security group response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The security group id
+                  name:
+                    type: string
+                    description: The security group name
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: The time the group created at
+                  createdBy:
+                    type: string
+                    description: The id of the user who created the group
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    description: The time the group updated at
+                  updatedBy:
+                    type: string
+                    description: The id of the user who updated the group
+
+  schemas:
+    GroupMembership:
+      description: The group membership entity
+      properties:
+        id:
+          type: string
+          description: The group membership id
+        groupId:
+          type: string
+          description: The group id
+        groupName:
+          type: string
+          description: The group name
+        createdAt:
+          type: string
+          format: date-time
+          description: The time the group membership created at
+        createdBy:
+          type: string
+          description: The id of the user who created the group membership
+        memberId:
+          type: string
+          description: The member id
+        membershipType:
+          type: string
+          enum: ['user', 'group']
+          description: The membership type
+
+    Group:
+      description: The group entity
+      properties:
+        id:
+          type: string
+          description: The group id
+        createdAt:
+          type: string
+          format: date-time
+          description: The time the group created at
+        createdBy:
+          type: string
+          description: The id of the user who created the group
+        updatedAt:
+          type: string
+          format: date-time
+          description: The time the group updated at
+        updatedBy:
+          type: string
+          description: The id of the user who updated the group
+        name:
+          type: string
+          description: The group name
+        description:
+          type: string
+          description: The group description
+        privateGroup:
+          type: boolean
+          description: Flag indicates if the group is private
+        selfRegister:
+          type: boolean
+          description: Flag indicates if the group allows self register
+        domain:
+          type: string
+          description: Domain to indicate what tc web site that the group belongs to
+        subGroups:
+          description: Sub groups array
+          type: array
+          items:
+              $ref: '#/components/schemas/Group'
+        parentGroups:
+          description: Parent groups array
+          type: array
+          items:
+              $ref: '#/components/schemas/Group'
+
+  requestBodies:
+    NewGroupMembershipBodyParam:
+      description: A JSON object containing group membership body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              param:
+                type: object
+                properties:
+                  memberId:
+                    type: string
+                    description: The id of the user which is being added to the group
+                  membershipType:
+                    type: string
+                    enum: ['user', 'group']
+                    description: The membership type
+    NewGroupBodyParam:
+      description: A JSON object containing group body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              param:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The group name
+                  description:
+                    type: string
+                    description: The group description
+                  privateGroup:
+                    type: boolean
+                    description: Flag indicte if the group is private or not
+                  selfRegister:
+                    type: boolean
+                    description: Flag indicte if the group allows self register
+                  domain:
+                    type: string
+                    description: Domain to indicate what tc web site that the group belongs to
+
+    SecurityGroupBodyParam:
+      description: A JSON object containing security group body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The security group name
