@@ -83,14 +83,17 @@ async function searchGroups (criteria) {
     )
     result = _.map(pageRes.records, record => record.get(0).properties)
     // populate parent/sub groups
-    for (let i = 0; i < result.length; i += 1) {
-      const group = result[i]
 
-      if (criteria.includeParentGroup) {
+    if (criteria.includeParentGroup) {
+      for (let i = 0; i < result.length; i += 1) {
+        const group = result[i]
         group.parentGroups = await helper.getParentGroups(session, group.id)
       }
+    }
 
-      if (criteria.includeSubGroups) {
+    if (criteria.includeSubGroups) {
+      for (let i = 0; i < result.length; i += 1) {
+        const group = result[i]
         group.subGroups = await helper.getChildGroups(session, group.id)
       }
     }
