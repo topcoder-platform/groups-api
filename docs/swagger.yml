@@ -369,30 +369,7 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
-  /groups/securityGroups:
-    post:
-      description: |
-        Creation of new security group
-
-        The user has to have admin role.
-      tags:
-        - groups
-      security:
-        - bearer: []
-      requestBody:
-        $ref: '#/components/requestBodies/SecurityGroupBodyParam'
-      responses:
-        200:
-          $ref: "#/components/responses/SecurityGroupResponse"
-        400:
-          $ref: "#/components/responses/BadRequest"
-        401:
-          $ref: "#/components/responses/Unauthenticated"
-        403:
-          $ref: "#/components/responses/Forbidden"
-        500:
-          $ref: "#/components/responses/InternalServerError"
-  /health:
+  /groups/health:
     get:
       description: |
         Get app health status
@@ -762,16 +739,13 @@ components:
           schema:
             type: object
             properties:
-              param:
-                type: object
-                properties:
-                  memberId:
-                    type: string
-                    description: The id of the user which is being added to the group
-                  membershipType:
-                    type: string
-                    enum: ['user', 'group']
-                    description: The membership type
+              memberId:
+                type: string
+                description: The id of the user which is being added to the group
+              membershipType:
+                type: string
+                enum: ['user', 'group']
+                description: The membership type
     NewGroupBodyParam:
       description: A JSON object containing group body information
       required: true
@@ -780,24 +754,25 @@ components:
           schema:
             type: object
             properties:
-              param:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    description: The group name
-                  description:
-                    type: string
-                    description: The group description
-                  privateGroup:
-                    type: boolean
-                    description: Flag indicte if the group is private or not
-                  selfRegister:
-                    type: boolean
-                    description: Flag indicte if the group allows self register
-                  domain:
-                    type: string
-                    description: Domain to indicate what tc web site that the group belongs to
+              name:
+                type: string
+                description: The group name
+              description:
+                type: string
+                description: The group description
+              privateGroup:
+                type: boolean
+                description: Flag indicte if the group is private or not
+              selfRegister:
+                type: boolean
+                description: Flag indicte if the group allows self register
+              domain:
+                type: string
+                description: Domain to indicate what tc web site that the group belongs to
+              status:
+                type: string
+                enum: ['active', 'inactive']
+                description: Value indicating the status of the group
 
     SecurityGroupBodyParam:
       description: A JSON object containing security group body information

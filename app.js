@@ -35,7 +35,6 @@ app.use('/groups/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 // Register routes
 require('./app-routes')(app)
 
-
 // The error handler
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

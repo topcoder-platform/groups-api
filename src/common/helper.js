@@ -10,7 +10,7 @@ const querystring = require('querystring')
 let validate = require('uuid-validate')
 
 const errors = require('./errors')
-const constants = require('../../app-constants');
+const constants = require('../../app-constants')
 
 // Bus API Client
 let busApiClient
@@ -64,11 +64,11 @@ function createDBSession () {
  * @param {String} id the entity id
  * @returns {Object} the found entity
  */
-async function ensureExists (tx, model, id, isAdmin=false) {
+async function ensureExists (tx, model, id, isAdmin = false) {
   let res
   if (model === 'Group') {
     if (validate(id, 4)) {
-      if(!isAdmin) {
+      if (!isAdmin) {
         res = await tx.run(`MATCH (e:${model} {id: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
           id
         })
@@ -78,7 +78,7 @@ async function ensureExists (tx, model, id, isAdmin=false) {
         })
       }
     } else {
-      if(!isAdmin) {
+      if (!isAdmin) {
         res = await tx.run(`MATCH (e:${model} {oldId: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
           id
         })

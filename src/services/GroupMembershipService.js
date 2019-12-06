@@ -150,7 +150,7 @@ async function deleteGroupMember (currentUser, groupId, memberId) {
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
-    const group = await helper.ensureExists(tx, 'Group', groupId)
+    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
     groupId = group.id
     const oldId = group.oldId
     const name = group.name
