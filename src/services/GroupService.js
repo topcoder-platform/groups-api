@@ -81,7 +81,7 @@ async function searchGroups (criteria, isAdmin = false) {
     if (whereClause === '') {
       whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
     } else {
-      whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
+      whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
     }
   }
 
@@ -186,8 +186,6 @@ async function createGroup (currentUser, data) {
 
     const group = createRes.records[0]._fields[0].properties
 
-    // We don't want to show status field to user, so deleting it before returning
-    delete group.status
     logger.debug(`Group = ${JSON.stringify(group)}`)
 
     // post bus event

@@ -15,15 +15,6 @@ const EVENT_ORIGINATOR = 'topcoder-groups-api'
 
 const EVENT_MIME_TYPE = 'application/json'
 
-// using a testing topc, should be changed to use real topics in comments when they are created
-const Topics = {
-  GroupCreated: 'test.new.bus.events', // 'user.action.group.created',
-  GroupUpdated: 'test.new.bus.events', // 'user.action.group.updated',
-  GroupDeleted: 'test.new.bus.events', // 'user.action.group.deleted',
-  GroupMemberCreated: 'test.new.bus.events', // 'user.action.group.member.created',
-  GroupMemberDeleted: 'test.new.bus.events' // 'user.action.group.member.deleted'
-}
-
 const GroupStatus = {
   Active: 'active',
   InActive: 'inactive'
@@ -34,6 +25,5 @@ module.exports = {
   MembershipTypes,
   EVENT_ORIGINATOR,
   EVENT_MIME_TYPE,
-  Topics,
   GroupStatus
 }

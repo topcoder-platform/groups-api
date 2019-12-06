@@ -32,11 +32,11 @@ module.exports = {
   HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 3000,
 
   // Kafka Topics
-  KAFKA_GROUP_CREATE_TOPIC: process.env.KAFKA_GROUP_CREATE_TOPIC,
-  KAFKA_GROUP_UPDATE_TOPIC: process.env.KAFKA_GROUP_UPDATE_TOPIC,
-  KAFKA_GROUP_DELETE_TOPIC: process.env.KAFKA_GROUP_DELETE_TOPIC,
-  KAFKA_GROUP_MEMBER_ADD_TOPIC: process.env.KAFKA_GROUP_MEMBER_ADD_TOPIC,
-  KAFKA_GROUP_MEMBER_DELETE_TOPIC: process.env.KAFKA_GROUP_MEMBER_DELETE_TOPIC,
+  KAFKA_GROUP_CREATE_TOPIC: process.env.KAFKA_GROUP_CREATE_TOPIC || 'groups.notification.create',
+  KAFKA_GROUP_UPDATE_TOPIC: process.env.KAFKA_GROUP_UPDATE_TOPIC || 'groups.notification.update',
+  KAFKA_GROUP_DELETE_TOPIC: process.env.KAFKA_GROUP_DELETE_TOPIC || 'groups.notification.delete',
+  KAFKA_GROUP_MEMBER_ADD_TOPIC: process.env.KAFKA_GROUP_MEMBER_ADD_TOPIC || 'groups.notification.member.add',
+  KAFKA_GROUP_MEMBER_DELETE_TOPIC: process.env.KAFKA_GROUP_MEMBER_DELETE_TOPIC || 'groups.notification.member.delete',
 
   USER_ROLES: {
     Admin: 'Administrator',

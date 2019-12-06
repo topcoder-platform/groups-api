@@ -12,9 +12,6 @@ info:
       Pagination response data is included in http headers. By Default, the response header contains links with `next`, `last`, `first`, `prev` resource links.
   version: "v5"
 
-servers:
-  - url: api.topcoder.com/v5
-
 paths:
   /groups/{groupId}/members:
     get:
@@ -390,10 +387,10 @@ paths:
 
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     groupId:
       name: groupId
@@ -625,37 +622,6 @@ components:
               result:
                 $ref: '#/components/schemas/Group'
 
-    SecurityGroupResponse:
-      description: The security group response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              result:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: The security group id
-                  name:
-                    type: string
-                    description: The security group name
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: The time the group created at
-                  createdBy:
-                    type: string
-                    description: The id of the user who created the group
-                  updatedAt:
-                    type: string
-                    format: date-time
-                    description: The time the group updated at
-                  updatedBy:
-                    type: string
-                    description: The id of the user who updated the group
-
   schemas:
     GroupMembership:
       description: The group membership entity
@@ -773,15 +739,3 @@ components:
                 type: string
                 enum: ['active', 'inactive']
                 description: Value indicating the status of the group
-
-    SecurityGroupBodyParam:
-      description: A JSON object containing security group body information
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                description: The security group name
