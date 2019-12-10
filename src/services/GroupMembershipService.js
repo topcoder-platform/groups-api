@@ -350,12 +350,31 @@ getGroupMembersCount.schema = {
   })
 }
 
+/**
+ * Get member groups
+ * @param {Object} currentUser the current user
+ * @param {Object} memberId
+ * @param {Object} criteria the search criteria
+ * @returns {Object} the search result
+ */
+async function getMemberGroups (currentUser, memberId, depth) {
+  const session = helper.createDBSession()
+  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*0..${depth}]->(o {id: "${memberId}"}) RETURN g.oldId order by g.oldId`)
+
+  return _.uniq(_.map(res.records, record => record.get(0)))
+}
+
+getGroupMembers.schema = {
+  currentUser: Joi.any()
+}
+
 module.exports = {
   getGroupMembers,
   addGroupMember,
   getGroupMember,
   deleteGroupMember,
-  getGroupMembersCount
+  getGroupMembersCount,
+  getMemberGroups
 }
 
 logger.buildService(module.exports)

@@ -75,10 +75,26 @@ async function getGroupMembersCount (req, res) {
   res.send(result)
 }
 
+/**
+ * Get group members
+ * @param req the request
+ * @param res the response
+ */
+async function getMemberGroups (req, res) {
+  const result = await service.getMemberGroups(
+    req.authUser.isMachine ? 'M2M' : req.authUser,
+    req.params.memberId,
+    req.query.depth ? Number(req.query.depth) : 50
+  )
+  helper.setResHeaders(req, res, result)
+  res.send(result)
+}
+
 module.exports = {
   getGroupMembers,
   addGroupMember,
   getGroupMember,
   deleteGroupMember,
-  getGroupMembersCount
+  getGroupMembersCount,
+  getMemberGroups
 }

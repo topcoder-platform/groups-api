@@ -96,5 +96,20 @@ module.exports = {
       controller: 'GroupMembershipController',
       method: 'getGroupMembersCount'
     }
+  },
+  '/memberGroups/:memberId': {
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'getMemberGroups',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups']
+    }
+  },
+  '/health': {
+    get: {
+      controller: 'HealthController',
+      method: 'checkHealth'
+    }
   }
 }
