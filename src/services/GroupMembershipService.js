@@ -364,7 +364,9 @@ async function getMemberGroups (currentUser, memberId, depth) {
 }
 
 getMemberGroups.schema = {
-  currentUser: Joi.any()
+  currentUser: Joi.any(),
+  memberId: Joi.id(),
+  depth: Joi.number()
 }
 
 module.exports = {
