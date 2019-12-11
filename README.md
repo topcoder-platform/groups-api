@@ -40,14 +40,18 @@ The following parameters can be set in config files or in env variables:
 - follow (https://neo4j.com/download-thanks-desktop/?edition=desktop&flavour=winstall64&release=1.1.13&offline=true) to add graph database
 - configure graph database connection details in config file
 
+
 ## Local Deployment
 
 - Install dependencies `npm install`
 - Run lint `npm run lint`
 - Run lint fix `npm run lint:fix`
+- Clear and init db `npm run init-db`
+- Add db indices `npm run create-index`
+- Insert test data `npm run test-data`
 - Start app `npm start`
-- App will be running at `http://localhost:3000`
-- Application can be run in development mode using the command `npm run dev`
+- App is running at `http://localhost:3000`
+
 
 ## Heroku deployment
 - git init
@@ -59,11 +63,32 @@ The following parameters can be set in config files or in env variables:
 - to set some environment variables in heroku, run command like:
   `heroku config:set LOG_LEVEL=info`
 - git push heroku master // push code to Heroku
+- to initialize db, run `heroku run npm run init-db`
+- to create db indices, run `heroku run npm run create-index`
+- to insert test data, run `heroku run npm run test-data`
+
+
+I deployed the code to:
+https://thawing-savannah-55254.herokuapp.com
+
+
 
 ## Graph Database Structure
 
-The graph database consists of 3 node types: Group and User, and one relation type: GroupContains.
+The graph database consists of 3 node types: SecurityGroup, Group and User, and one relation type: GroupContains.
 The GroupContains relation links from a group to a child group or user.
+
+### SecurityGroup node
+
+The security group node contains these fields:
+
+- id: the group UUID corresponding to the security group
+- name: the security group name, should be unique (usually the same as the group)
+- createdAt: the created at date string
+- createdBy: the created by user id
+- updatedAt: the updated at date string
+- updatedBy: the updated by user id
+
 
 ### Group node
 
@@ -88,6 +113,7 @@ The user node contains these fields:
 - id: the user UUID
 - handle: the user handle, should be unique
 
+
 ### GroupContains relation
 
 The GroupContains relation contains these fields:
@@ -96,3 +122,9 @@ The GroupContains relation contains these fields:
 - type: the relationship type, 'group' or 'user'
 - createdAt: the created at date string
 - createdBy: the created by user id
+
+## Notes
+
+In the app-constants.js Topics field, the used topics are using a test topic,
+the suggested ones are commented out, because these topics are not created in TC dev Kafka yet.
+

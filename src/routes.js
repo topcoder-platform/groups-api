@@ -21,12 +21,6 @@ module.exports = {
       scopes: ['write:groups', 'all:groups']
     }
   },
-  '/groups/health': {
-    get: {
-      controller: 'HealthController',
-      method: 'checkHealth'
-    }
-  },
   '/groups/:groupId': {
     get: {
       controller: 'GroupController',
@@ -95,15 +89,6 @@ module.exports = {
     get: {
       controller: 'GroupMembershipController',
       method: 'getGroupMembersCount'
-    }
-  },
-  '/groups/memberGroups/:memberId': {
-    get: {
-      controller: 'GroupMembershipController',
-      method: 'getMemberGroups',
-      auth: 'jwt',
-      access: [constants.UserRoles.Admin, constants.UserRoles.User],
-      scopes: ['read:groups']
     }
   },
   '/health': {
