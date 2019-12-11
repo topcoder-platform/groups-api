@@ -262,8 +262,7 @@ getGroupMembers.schema = {
   criteria: Joi.object().keys({
     page: Joi.page(),
     perPage: Joi.perPage()
-  }),
-  isAnonymous: Joi.boolean()
+  })
 }
 
 /**
@@ -364,7 +363,7 @@ async function getMemberGroups (currentUser, memberId, depth) {
   return _.uniq(_.map(res.records, record => record.get(0)))
 }
 
-getGroupMembers.schema = {
+getMemberGroups.schema = {
   currentUser: Joi.any()
 }
 

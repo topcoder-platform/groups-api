@@ -25,7 +25,6 @@ async function getGroupMembers (req, res) {
  * @param res the response
  */
 async function addGroupMember (req, res) {
-  console.log(req)
   const result = await service.addGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
