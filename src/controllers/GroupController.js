@@ -17,7 +17,7 @@ async function searchGroups (req, res) {
     criteria.memberId = req.authUser.userId
     criteria.membershipType = config.MEMBERSHIP_TYPES.User
   }
-  const result = await service.searchGroups(criteria)
+  const result = await service.searchGroups(criteria, !req.authUser.isMachine && helper.hasAdminRole(req.authUser))
   helper.setResHeaders(req, res, result)
   res.send(result)
 }
@@ -59,7 +59,7 @@ async function getGroup (req, res) {
  * @param res the response
  */
 async function deleteGroup (req, res) {
-  const result = await service.deleteGroup(req.params.groupId)
+  const result = await service.deleteGroup(req.params.groupId, !req.authUser.isMachine && helper.hasAdminRole(req.authUser))
   res.send(result)
 }
 
