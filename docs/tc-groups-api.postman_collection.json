@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "16bcf9b8-7442-41da-8beb-7307a72359a3",
+		"_postman_id": "b77e52b5-ae63-45fd-b5aa-b72dbba52673",
 		"name": "tc-groups-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -47,7 +47,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1\",\n    \"description\": \"desc1\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1\",\n\t    \"description\": \"desc1\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -97,7 +97,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group2\",\n    \"description\": \"desc2\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group2\",\n\t    \"description\": \"desc2\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -147,7 +147,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group3\",\n    \"description\": \"desc3\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group3\",\n\t    \"description\": \"desc3\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -197,7 +197,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group4\",\n    \"description\": \"desc4\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group4\",\n\t    \"description\": \"desc4\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -249,7 +249,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group5\",\n    \"description\": \"desc5\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"test_domain\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"test_domain\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -260,44 +260,6 @@
 										"groups"
 									]
 								}
-							},
-							"response": []
-						},
-						{
-							"name": "create group with status",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"group6\",\n    \"description\": \"desc6\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"test_domain\",\n    \"status\": \"inactive\"\n}"
-								},
-								"url": {
-									"raw": "{{URL}}/groups",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups"
-									]
-								},
-								"description": "create group with status"
 							},
 							"response": []
 						},
@@ -336,7 +298,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group_fail\",\n    \"description\": \"desc_fail\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group_fail\",\n\t    \"description\": \"desc_fail\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -385,7 +347,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group_fail\",\n    \"description\": \"desc_fail\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group_fail\",\n\t    \"description\": \"desc_fail\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -434,7 +396,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group_fail\",\n    \"description\": \"desc_fail\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group_fail\",\n\t    \"description\": \"desc_fail\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -478,7 +440,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group_fail\",\n    \"description\": \"desc_fail\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group_fail\",\n\t    \"description\": \"desc_fail\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -493,7 +455,694 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "create security group",
+					"item": [
+						{
+							"name": "failure",
+							"item": [
+								{
+									"name": "failure create group via user",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER2_USER_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "failure create group via M2M Read",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{M2M_R_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "failure create group with invalid token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer invalid"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "failure create group without token",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 403\", function () {",
+													"    pm.response.to.have.status(403);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - missing id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - invalid id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"123\",\n\t    \"name\": \"group1\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - missing name",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n\t    \"id\": \"{{TEST_GROUP_ID}}\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - name already used",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"{{TEST_GROUP_NAME1}}\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create group - id already used",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"type": "text",
+												"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID1}}\",\n\t    \"name\": \"some-group\"\n    }\n}"
+										},
+										"url": {
+											"raw": "{{URL}}/groups/securityGroups",
+											"host": [
+												"{{URL}}"
+											],
+											"path": [
+												"groups",
+												"securityGroups"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "create group via admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID}}\",\n\t    \"name\": \"group1\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group via M2M Read And Write",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID2\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_RW_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID2}}\",\n\t    \"name\": \"group2\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group via M2M Write",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID3\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_W_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID3}}\",\n\t    \"name\": \"group3\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group via M2M All",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"GROUP_ID4\", pm.response.json().result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_ALL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"param\": {\n    \t\"id\": \"{{TEST_GROUP_ID4}}\",\n\t    \"name\": \"group4\"\n    }\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/securityGroups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"securityGroups"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "d267b1d4-c503-4e1e-96e4-fa96c658a721",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1818feec-4788-4997-952e-2848a7b1c0dc",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
 					"_postman_isSubFolder": true
 				},
 				{
@@ -520,7 +1169,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-1\",\n    \"description\": \"desc1-updated-1\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"domain\": \"add_domain\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-1\",\n\t    \"description\": \"desc1-updated-1\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false,\n\t    \"domain\": \"add_domain\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -556,7 +1205,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-2\",\n    \"description\": \"desc1-updated-2\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-2\",\n\t    \"description\": \"desc1-updated-2\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -592,7 +1241,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-3\",\n    \"description\": \"desc1-updated-3\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-3\",\n\t    \"description\": \"desc1-updated-3\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -628,7 +1277,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-4\",\n    \"description\": \"desc1-updated-4\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-4\",\n\t    \"description\": \"desc1-updated-4\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -665,7 +1314,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group5\",\n    \"description\": \"desc5\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"update_domain\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group5\",\n\t    \"description\": \"desc5\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true,\n\t    \"domain\": \"update_domain\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
@@ -702,7 +1351,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group2-update\",\n    \"description\": \"desc2-update\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group2-update\",\n\t    \"description\": \"desc2-update\",\n\t    \"privateGroup\": false,\n\t    \"selfRegister\": true\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
@@ -712,50 +1361,6 @@
 									"path": [
 										"groups",
 										"{{GROUP_ID2}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Update group without status",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-5\",\n    \"description\": \"desc1-updated-5\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID}}",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups",
-										"{{GROUP_ID}}"
 									]
 								}
 							},
@@ -796,7 +1401,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-fail\",\n    \"description\": \"desc1-updated-fail\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-fail\",\n\t    \"description\": \"desc1-updated-fail\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -846,7 +1451,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-fail\",\n    \"description\": \"desc1-updated-fail\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-fail\",\n\t    \"description\": \"desc1-updated-fail\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -896,7 +1501,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-fail\",\n    \"description\": \"desc1-updated-fail\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-fail\",\n\t    \"description\": \"desc1-updated-fail\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -941,51 +1546,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-fail\",\n    \"description\": \"desc1-updated-fail\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
-								},
-								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID}}",
-									"host": [
-										"{{URL}}"
-									],
-									"path": [
-										"groups",
-										"{{GROUP_ID}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "update group with status",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Accept",
-										"name": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-5\",\n    \"description\": \"desc1-updated-5\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"status\": \"inactive\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									"raw": "{\n    \"param\": {\n\t    \"name\": \"group1-updated-fail\",\n\t    \"description\": \"desc1-updated-fail\",\n\t    \"privateGroup\": true,\n\t    \"selfRegister\": false\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -1001,7 +1562,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1026,6 +1586,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&memberId=11ab038e-48da-123b-96e8-8d3b99b6d183&membershipType=group",
 									"host": [
@@ -1075,6 +1639,10 @@
 										"value": "Bearer {{USER4_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&memberId=11ab038e-48da-123b-96e8-8d3b99b6d183&membershipType=group",
 									"host": [
@@ -1125,6 +1693,10 @@
 										"value": "Bearer {{M2M_R_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&memberId=11ab038e-48da-123b-96e8-8d3b99b6d183&membershipType=group",
 									"host": [
@@ -1174,6 +1746,10 @@
 										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10",
 									"host": [
@@ -1215,6 +1791,10 @@
 										"value": "Bearer {{USER4_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&oldId=12345",
 									"host": [
@@ -1260,6 +1840,10 @@
 										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&privateGroup=false&selfRegister=true",
 									"host": [
@@ -1333,6 +1917,10 @@
 										"value": "Bearer {{M2M_R_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&memberId=11ab038e-48da-123b-96e8-8d3b99b6d183",
 									"host": [
@@ -1397,6 +1985,10 @@
 										"value": "Bearer {{M2M_R_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups?page=1&perPage=10&membershipType=group",
 									"host": [
@@ -1429,7 +2021,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1454,6 +2045,10 @@
 										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
 									"host": [
@@ -1486,6 +2081,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
 									"host": [
@@ -1518,6 +2117,10 @@
 										"value": "Bearer {{M2M_RW_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
 									"host": [
@@ -1550,6 +2153,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -1601,6 +2208,10 @@
 										"value": "Bearer {{M2M_R_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -1652,6 +2263,10 @@
 										"value": "Bearer {{USER4_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -1703,6 +2318,10 @@
 										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
 									"host": [
@@ -1749,6 +2368,10 @@
 										"value": "Bearer {{USER2_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -1782,7 +2405,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2081,7 +2703,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2106,6 +2727,10 @@
 										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12346",
 									"host": [
@@ -2139,6 +2764,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12346",
 									"host": [
@@ -2172,6 +2801,10 @@
 										"value": "Bearer {{M2M_RW_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12346",
 									"host": [
@@ -2205,6 +2838,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -2257,6 +2894,10 @@
 										"value": "Bearer {{M2M_R_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -2309,6 +2950,10 @@
 										"value": "Bearer {{USER4_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -2375,6 +3020,10 @@
 										"value": "Bearer {{USER2_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
@@ -2409,7 +3058,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
 			],
@@ -2434,8 +3082,7 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "group membership",
@@ -2462,6 +3109,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2505,6 +3156,10 @@
 										"value": "Bearer {{M2M_ALL_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2548,6 +3203,10 @@
 										"value": "Bearer {{USER2_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2591,6 +3250,10 @@
 										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2634,6 +3297,10 @@
 										"value": "Bearer {{USER4_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2677,6 +3344,10 @@
 										"value": "Bearer {{M2M_W_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2734,6 +3405,10 @@
 										"value": "Bearer {{USER2_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
@@ -2759,7 +3434,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2800,7 +3474,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_USER_ID}}\",\n\t    \"membershipType\": \"user\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -2851,7 +3525,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_USER_ID}}\",\n\t    \"membershipType\": \"user\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -2902,7 +3576,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_USER_ID}}\",\n\t    \"membershipType\": \"user\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_NON_SELFREG_GROUP_ID}}/members",
@@ -2951,7 +3625,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_USER_ID}}\",\n\t    \"membershipType\": \"user\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -3000,7 +3674,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID2}}\",\n    \"membershipType\": \"user\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_USER_ID2}}\",\n\t    \"membershipType\": \"user\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -3051,7 +3725,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n    \"membershipType\": \"group\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n\t    \"membershipType\": \"group\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -3102,7 +3776,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n    \"membershipType\": \"group\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n\t    \"membershipType\": \"group\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -3151,7 +3825,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n    \"membershipType\": \"group\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n\t    \"membershipType\": \"group\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -3200,7 +3874,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_PRIVATE_GROUP_ID}}\",\n    \"membershipType\": \"group\"\n}"
+									"raw": "{\n    \"param\": {\n\t    \"memberId\": \"{{TEST_PRIVATE_GROUP_ID}}\",\n\t    \"membershipType\": \"group\"\n    }\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
@@ -3217,7 +3891,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -3242,6 +3915,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_USER_ID}}",
 									"host": [
@@ -3276,6 +3953,10 @@
 										"type": "text"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
 									"host": [
@@ -3324,6 +4005,10 @@
 										"value": "Bearer {{USER2_USER_TOKEN}}"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
 								"url": {
 									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members/{{TEST_USER_ID}}",
 									"host": [
@@ -3340,7 +4025,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -3631,7 +4315,6 @@
 							"response": []
 						}
 					],
-					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -3648,6 +4331,10 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/membersCount?includeSubGroups=true",
 							"host": [
@@ -3690,8 +4377,7 @@
 						]
 					}
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		},
 		{
 			"name": "health check",
@@ -3710,21 +4396,23 @@
 								"value": "application/json"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
-							"raw": "{{URL}}/groups/health",
+							"raw": "{{URL}}/health",
 							"host": [
 								"{{URL}}"
 							],
 							"path": [
-								"groups",
 								"health"
 							]
 						}
 					},
 					"response": []
 				}
-			],
-			"protocolProfileBehavior": {}
+			]
 		}
 	],
 	"event": [
@@ -3748,6 +4436,5 @@
 				]
 			}
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

@@ -8,15 +8,13 @@ const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
-const constants = require('../../app-constants')
 
 /**
  * Search groups
  * @param {Object} criteria the search criteria
- * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups (criteria, isAdmin = false) {
+async function searchGroups (criteria) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
   if (criteria.memberId && !criteria.membershipType) {
@@ -71,20 +69,6 @@ async function searchGroups (criteria, isAdmin = false) {
     }
   }
 
-  if (whereClause === '') {
-    whereClause = ' WHERE exists(g.oldId)'
-  } else {
-    whereClause = whereClause.concat(' AND exists(g.oldId)')
-  }
-
-  if (!isAdmin) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
-    } else {
-      whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-    }
-  }
-
   // query total record count
   const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
   const total = totalRes.records[0].get(0).low || 0
@@ -98,15 +82,8 @@ async function searchGroups (criteria, isAdmin = false) {
       }`
     )
     result = _.map(pageRes.records, record => record.get(0).properties)
-
-    if (!isAdmin) {
-      for (let i = 0; i < result.length; i += 1) {
-        const group = result[i]
-        delete group.status
-      }
-    }
-
     // populate parent/sub groups
+
     if (criteria.includeParentGroup) {
       for (let i = 0; i < result.length; i += 1) {
         const group = result[i]
@@ -132,7 +109,6 @@ async function searchGroups (criteria, isAdmin = false) {
 }
 
 searchGroups.schema = {
-  isAdmin: Joi.boolean(),
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
     membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
@@ -180,12 +156,11 @@ async function createGroup (currentUser, data) {
     groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
 
     const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, status: {status}}) RETURN group`,
+      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}}) RETURN group`,
       groupData
     )
 
     const group = createRes.records[0]._fields[0].properties
-
     logger.debug(`Group = ${JSON.stringify(group)}`)
 
     // post bus event
@@ -217,8 +192,7 @@ createGroup.schema = {
       privateGroup: Joi.boolean().required(),
       selfRegister: Joi.boolean().required(),
       domain: Joi.string(),
-      ssoId: Joi.string(),
-      status: Joi.string().valid([constants.GroupStatus.Active, constants.GroupStatus.InActive]).default(constants.GroupStatus.Active)
+      ssoId: Joi.string()
     })
     .required()
 }
@@ -235,7 +209,7 @@ async function updateGroup (currentUser, groupId, data) {
   let tx = session.beginTransaction()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(tx, 'Group', groupId)
 
     const groupData = data
     groupData.id = groupId
@@ -244,18 +218,10 @@ async function updateGroup (currentUser, groupId, data) {
     groupData.domain = data.domain ? data.domain : ''
     groupData.ssoId = data.ssoId ? data.ssoId : ''
 
-    let updateRes
-    if (groupData.status) {
-      updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.status={status} RETURN g`,
-        groupData
-      )
-    } else {
-      updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
-        groupData
-      )
-    }
+    const updateRes = await tx.run(
+      `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
+      groupData
+    )
 
     let updatedGroup = updateRes.records[0].get(0).properties
     updatedGroup.oldName = group.name
@@ -278,9 +244,7 @@ async function updateGroup (currentUser, groupId, data) {
 updateGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
-  data: createGroup.schema.data.keys({
-    status: Joi.string().valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
-  })
+  data: createGroup.schema.data
 }
 
 /**
@@ -291,8 +255,7 @@ updateGroup.schema = {
  * @returns {Object} the group
  */
 async function getGroup (currentUser, groupId, criteria) {
-  const isAdmin = currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
-  logger.debug(`Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(criteria)}`)
+  logger.debug(`Get Group - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(criteria)}`)
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
@@ -344,9 +307,7 @@ async function getGroup (currentUser, groupId, criteria) {
 
   const session = helper.createDBSession()
 
-  let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
-
-  if (!isAdmin) delete group.status
+  let group = await helper.ensureExists(session, 'Group', groupId)
 
   // if the group is private, the user needs to be a member of the group, or an admin
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
@@ -416,15 +377,14 @@ getGroup.schema = {
 /**
  * Delete group
  * @param {String} groupId the group id
- * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the deleted group
  */
-async function deleteGroup (groupId, isAdmin) {
+async function deleteGroup (groupId) {
   let session = helper.createDBSession()
   let tx = session.beginTransaction()
   try {
     logger.debug(`Delete Group - ${groupId}`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
+    const group = await helper.ensureExists(tx, 'Group', groupId)
 
     const groupsToDelete = [group]
     let index = 0
@@ -479,7 +439,6 @@ async function deleteGroup (groupId, isAdmin) {
 }
 
 deleteGroup.schema = {
-  isAdmin: Joi.boolean().required(),
   groupId: Joi.id() // defined in app-bootstrap
 }
 

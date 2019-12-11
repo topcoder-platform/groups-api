@@ -24,7 +24,7 @@ async function addGroupMember (currentUser, groupId, data) {
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(tx, 'Group', groupId)
     data.oldId = group.oldId
     groupId = group.id
 
@@ -150,7 +150,7 @@ async function deleteGroupMember (currentUser, groupId, memberId) {
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(tx, 'Group', groupId)
     groupId = group.id
     const oldId = group.oldId
     const name = group.name
@@ -210,7 +210,7 @@ deleteGroupMember.schema = {
  */
 async function getGroupMembers (currentUser, groupId, criteria) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+  const group = await helper.ensureExists(session, 'Group', groupId)
   groupId = group.id
 
   // if the group is private, the user needs to be a member of the group, or an admin
@@ -262,7 +262,8 @@ getGroupMembers.schema = {
   criteria: Joi.object().keys({
     page: Joi.page(),
     perPage: Joi.perPage()
-  })
+  }),
+  isAnonymous: Joi.boolean()
 }
 
 /**
@@ -302,7 +303,7 @@ async function getGroupMemberWithSession (session, groupId, memberId) {
  */
 async function getGroupMember (currentUser, groupId, memberId) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+  const group = await helper.ensureExists(session, 'Group', groupId)
   if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
     await helper.ensureGroupMember(session, groupId, currentUser.userId)
   }
@@ -349,33 +350,12 @@ getGroupMembersCount.schema = {
   })
 }
 
-/**
- * Get member groups
- * @param {Object} currentUser the current user
- * @param {Object} memberId
- * @param {Object} criteria the search criteria
- * @returns {Object} the search result
- */
-async function getMemberGroups (currentUser, memberId, depth) {
-  const session = helper.createDBSession()
-  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*0..${depth}]->(o {id: "${memberId}"}) RETURN g.oldId order by g.oldId`)
-
-  return _.uniq(_.map(res.records, record => record.get(0)))
-}
-
-getMemberGroups.schema = {
-  currentUser: Joi.any(),
-  memberId: Joi.id(),
-  depth: Joi.number()
-}
-
 module.exports = {
   getGroupMembers,
   addGroupMember,
   getGroupMember,
   deleteGroupMember,
-  getGroupMembersCount,
-  getMemberGroups
+  getGroupMembersCount
 }
 
 logger.buildService(module.exports)
