@@ -359,7 +359,7 @@ getGroupMembersCount.schema = {
 async function getMemberGroups (currentUser, memberId, depth) {
   const session = helper.createDBSession()
   const res = await session.run(`MATCH (g:Group)-[r:GroupContains*0..${depth}]->(o {id: "${memberId}"}) RETURN g.oldId order by g.oldId`)
-
+  session.close()
   return _.uniq(_.map(res.records, record => record.get(0)))
 }
 
