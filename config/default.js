@@ -29,7 +29,7 @@ module.exports = {
   KAFKA_ERROR_TOPIC: process.env.KAFKA_ERROR_TOPIC || 'common.error.reporting',
 
   // health check timeout in milliseconds
-  HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 3000,
+  HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 60000,
 
   // Kafka Topics
   KAFKA_GROUP_CREATE_TOPIC: process.env.KAFKA_GROUP_CREATE_TOPIC || 'groups.notification.create',
