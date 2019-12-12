@@ -17,8 +17,8 @@ let busApiClient
 
 const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD), {
   maxConnectionLifetime: 20 * 60 * 1000,
-  connectionTimeout: 120000,
-  connectionAcquisitionTimeout: 120000,
+  connectionTimeout: 240000,
+  connectionAcquisitionTimeout: 240000,
   maxTransactionRetryTime: 10000,
   connectionPoolSize: 300
 })
