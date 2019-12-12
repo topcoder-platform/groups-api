@@ -16,10 +16,10 @@ const constants = require('../../app-constants')
 let busApiClient
 
 const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD), {
-  maxConnectionLifetime: 20 * 60 * 1000,
+  maxConnectionLifetime: 3 * 60 * 60 * 1000,
   connectionTimeout: 240000,
   connectionAcquisitionTimeout: 240000,
-  maxTransactionRetryTime: 10000,
+  maxTransactionRetryTime: 15000,
   connectionPoolSize: 300
 })
 
