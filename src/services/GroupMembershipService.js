@@ -357,7 +357,7 @@ getGroupMembersCount.schema = {
  * @param {Object} criteria the search criteria
  * @returns {Object} the search result
  */
-async function getMemberGroups (currentUser, memberId, depth) {
+async function getMemberGroups (currentUser, memberId) {
   const session = helper.createDBSession()
   const res = await session.run(`MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`)
   session.close()
@@ -366,8 +366,7 @@ async function getMemberGroups (currentUser, memberId, depth) {
 
 getMemberGroups.schema = {
   currentUser: Joi.any(),
-  memberId: Joi.id(),
-  depth: Joi.number()
+  memberId: Joi.id()
 }
 
 module.exports = {

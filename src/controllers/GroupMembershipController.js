@@ -82,8 +82,7 @@ async function getGroupMembersCount (req, res) {
 async function getMemberGroups (req, res) {
   const result = await service.getMemberGroups(
     req.authUser.isMachine ? 'M2M' : req.authUser,
-    req.params.memberId,
-    req.query.depth ? Number(req.query.depth) : 50
+    req.params.memberId
   )
   helper.setResHeaders(req, res, result)
   res.send(result)
