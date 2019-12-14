@@ -8,7 +8,8 @@ const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
-let validate = require('uuid-validate')
+const validate = require('uuid-validate')
+const constants = require('../../app-constants')
 
 /**
  * Add group member.
@@ -358,7 +359,7 @@ getGroupMembersCount.schema = {
  */
 async function getMemberGroups (currentUser, memberId, depth) {
   const session = helper.createDBSession()
-  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) RETURN g.oldId order by g.oldId`)
+  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`)
   session.close()
   return _.uniq(_.map(res.records, record => record.get(0)))
 }
