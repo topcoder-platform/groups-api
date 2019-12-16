@@ -359,7 +359,7 @@ getGroupMembersCount.schema = {
  */
 async function getMemberGroups (currentUser, memberId) {
   const session = helper.createDBSession()
-  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`)
+  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`)
   session.close()
   return _.uniq(_.map(res.records, record => record.get(0)))
 }
