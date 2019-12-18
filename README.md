@@ -1,4 +1,4 @@
-# TopCoder Groups API
+# Topcoder Groups API
 
 ## Prerequisites
 
@@ -7,7 +7,6 @@
 - git
 - Heroku CLI
 - Heroku account
-
 
 ## Configuration
 
@@ -32,11 +31,13 @@ The following parameters can be set in config files or in env variables:
 - KAFKA_ERROR_TOPIC: Kafka error topic used by bus API wrapper
 - HEALTH_CHECK_TIMEOUT: health check timeout in milliseconds
 
-
 ## Local graph database setup
 
-- download the Neo4j Desktop https://neo4j.com/download/
-- install the tool
+There are 2 ways to set up the Neo4j database instance.
+
+1. download the Neo4j Desktop https://neo4j.com/download/ and install it locally
+2. Use the docker version of Neo4j https://hub.docker.com/_/neo4j
+
 - follow (https://neo4j.com/download-thanks-desktop/?edition=desktop&flavour=winstall64&release=1.1.13&offline=true) to add graph database
 - configure graph database connection details in config file
 
@@ -45,6 +46,8 @@ The following parameters can be set in config files or in env variables:
 - Install dependencies `npm install`
 - Run lint `npm run lint`
 - Run lint fix `npm run lint:fix`
+- Clear database by running `npm run init-db`
+- Insert test data by running `npm run test-data`
 - Start app `npm start`
 - App will be running at `http://localhost:3000`
 - Application can be run in development mode using the command `npm run dev`
@@ -59,6 +62,8 @@ The following parameters can be set in config files or in env variables:
 - to set some environment variables in heroku, run command like:
   `heroku config:set LOG_LEVEL=info`
 - git push heroku master // push code to Heroku
+- to initialize db, run `heroku run npm run init-db`
+- to insert test data, run `heroku run npm run test-data`
 
 ## Graph Database Structure
 
@@ -80,7 +85,6 @@ The group node contains these fields:
 - updatedAt: the updated at date string
 - updatedBy: the updated by user id
 
-
 ### User node
 
 The user node contains these fields:
@@ -96,3 +100,8 @@ The GroupContains relation contains these fields:
 - type: the relationship type, 'group' or 'user'
 - createdAt: the created at date string
 - createdBy: the created by user id
+
+## E2E Testing
+- Run the command: `npm run test`
+- For coverage: `npm run test:cov`
+- Coverage will be printed to console and it will also be available as html at `coverage/index.html`

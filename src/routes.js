@@ -87,7 +87,7 @@ module.exports = {
       controller: 'GroupMembershipController',
       method: 'deleteGroupMember',
       auth: 'jwt',
-      access: [constants.UserRoles.Admin],
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
       scopes: ['write:groups', 'all:groups']
     }
   },

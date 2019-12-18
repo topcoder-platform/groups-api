@@ -1,14 +1,22 @@
 /**
- * This service provides operations of groups
+ * CRUD service for Groups
  */
+
 const _ = require('lodash')
 const config = require('config')
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
 const constants = require('../../app-constants')
+
+function queryConditionConcat (query, condition) {
+  if (query === '') {
+    return `${query} WHERE ${condition}`
+  }
+  return `${query} AND ${condition}`
+}
 
 /**
  * Search groups
@@ -31,7 +39,7 @@ async function searchGroups (criteria, isAdmin = false) {
   if (criteria.memberId) {
     matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
   } else {
-    matchClause = `MATCH (g:Group)`
+    matchClause = 'MATCH (g:Group)'
   }
 
   let whereClause = ''
@@ -40,49 +48,25 @@ async function searchGroups (criteria, isAdmin = false) {
   }
 
   if (criteria.name) {
-    if (whereClause === '') {
-      whereClause = ` WHERE LOWER(g.name) = "${criteria.name.toLowerCase()}"`
-    } else {
-      whereClause = whereClause.concat(` AND LOWER(g.name) = "${criteria.name.toLowerCase()}"`)
-    }
+    whereClause = queryConditionConcat(whereClause, `LOWER(g.name) = "${criteria.name.toLowerCase()}"`)
   }
 
   if (criteria.ssoId) {
-    if (whereClause === '') {
-      whereClause = ` WHERE LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`
-    } else {
-      whereClause = whereClause.concat(` AND LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
-    }
+    whereClause = queryConditionConcat(whereClause, `LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
   }
 
   if (criteria.selfRegister !== undefined) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`
-    } else {
-      whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`)
-    }
+    whereClause = queryConditionConcat(whereClause, `g.selfRegister = ${criteria.selfRegister}`)
   }
 
   if (criteria.privateGroup !== undefined) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`
-    } else {
-      whereClause = whereClause.concat(` AND g.privateGroup = ${criteria.privateGroup}`)
-    }
+    whereClause = queryConditionConcat(whereClause, `g.privateGroup = ${criteria.privateGroup}`)
   }
 
-  if (whereClause === '') {
-    whereClause = ' WHERE exists(g.oldId)'
-  } else {
-    whereClause = whereClause.concat(' AND exists(g.oldId)')
-  }
+  whereClause = queryConditionConcat(whereClause, 'exists(g.oldId)')
 
   if (!isAdmin) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
-    } else {
-      whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-    }
+    whereClause = queryConditionConcat(whereClause, `g.status = '${constants.GroupStatus.Active}'`)
   }
 
   // query total record count
@@ -156,8 +140,8 @@ searchGroups.schema = {
  * @returns {Object} the created group
  */
 async function createGroup (currentUser, data) {
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
 
@@ -180,7 +164,7 @@ async function createGroup (currentUser, data) {
     groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
 
     const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, status: {status}}) RETURN group`,
+      'CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, status: {status}}) RETURN group',
       groupData
     )
 
@@ -231,8 +215,8 @@ createGroup.schema = {
  * @returns {Object} the updated group
  */
 async function updateGroup (currentUser, groupId, data) {
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
@@ -247,17 +231,17 @@ async function updateGroup (currentUser, groupId, data) {
     let updateRes
     if (groupData.status) {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.status={status} RETURN g`,
+        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.status={status} RETURN g',
         groupData
       )
     } else {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
+        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g',
         groupData
       )
     }
 
-    let updatedGroup = updateRes.records[0].get(0).properties
+    const updatedGroup = updateRes.records[0].get(0).properties
     updatedGroup.oldName = group.name
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`)
 
@@ -409,8 +393,7 @@ getGroup.schema = {
     includeParentGroup: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
-  }),
-  isOldId: Joi.boolean()
+  })
 }
 
 /**
@@ -420,8 +403,8 @@ getGroup.schema = {
  * @returns {Object} the deleted group
  */
 async function deleteGroup (groupId, isAdmin) {
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
   try {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)

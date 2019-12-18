@@ -3,7 +3,7 @@
  */
 const _ = require('lodash')
 const config = require('config')
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
@@ -20,8 +20,8 @@ const constants = require('../../app-constants')
  */
 async function addGroupMember (currentUser, groupId, data) {
   logger.debug(`Enter in addGroupMember - Group = ${groupId} Criteria = ${data}`)
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
@@ -146,8 +146,8 @@ addGroupMember.schema = {
  */
 async function deleteGroupMember (currentUser, groupId, memberId) {
   logger.debug(`Enter in deleteGroupMember - Group = ${groupId} memberId = ${memberId}`)
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)

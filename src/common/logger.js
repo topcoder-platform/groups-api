@@ -4,7 +4,7 @@
 
 const _ = require('lodash')
 const config = require('config')
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 const getParams = require('get-parameter-names')
 const util = require('util')
 const { createLogger, format, transports } = require('winston')

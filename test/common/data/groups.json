@@ -1,0 +1,105 @@
+{
+  "PRE_CREATED": {
+    "PUBLIC": {
+      "id": "5b5bf07c-1855-4ceb-99e4-39dde037cc56",
+      "name": "Test Group",
+      "description": "Just a Test Group",
+      "privateGroup": false,
+      "selfRegister": false,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "45647",
+      "status": "active"
+    },
+    "PRIVATE": {
+      "id": "66af56e0-6a2b-4337-b283-beedda3a900f",
+      "name": "Test Group 2",
+      "description": "Just another Test Group",
+      "privateGroup": true,
+      "selfRegister": false,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "76456",
+      "status": "active"
+    },
+    "SELF_REGISTER": {
+      "id": "f492e9d9-02ca-400a-83c2-75e51966b320",
+      "name": "Self registerable test group",
+      "description": "Just a Test Group",
+      "privateGroup": false,
+      "selfRegister": true,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "52314",
+      "status": "active"
+    },
+    "SELF_REGISTER2": {
+      "id": "fda54089-2316-41a9-9f15-9cf8400a0c1e",
+      "name": "Self registerable test group 2",
+      "description": "Just a Test Group",
+      "privateGroup": false,
+      "selfRegister": true,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "52310",
+      "status": "active"
+    },
+    "PRIVATE2": {
+      "id": "3f0e15a2-ffed-46b8-87e4-7389cacaceb7",
+      "name": "Test Group 2",
+      "description": "Just another Test Group",
+      "privateGroup": true,
+      "selfRegister": false,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "76451",
+      "status": "active"
+    },
+    "PUBLIC_CHILD": {
+      "id": "8b431835-f823-4ed4-982d-0301216893a2",
+      "name": "Child Test Group",
+      "description": "Just a Test Group",
+      "privateGroup": false,
+      "selfRegister": false,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "98076",
+      "status": "active"
+    },
+    "PUBLIC_GRANDCHILD": {
+      "id": "5d405456-073d-4bc4-a043-9a72d524d72e",
+      "name": "Grancdchild Test Group",
+      "description": "Just a Test Group",
+      "privateGroup": false,
+      "selfRegister": false,
+      "createdBy": 12345,
+      "createdAt": "2019-12-08T07:43:25.444Z",
+      "domain": "test.com",
+      "ssoId": "12343",
+      "oldId": "98040",
+      "status": "active"
+    }
+  },
+  "VALID": {
+    "name": "Test Group 3",
+    "description": "Third Test Group",
+    "privateGroup": true,
+    "selfRegister": false,
+    "domain": "test.com",
+    "ssoId": "12343",
+    "status": "active"
+  },
+  "NON_EXISTENT_ID": "7266e5e1-b68b-4574-8e1a-f7d973d276ad"
+}

@@ -12,7 +12,7 @@ const logger = require('../common/logger')
  * @param res the response
  */
 async function searchGroups (req, res) {
-  let criteria = req.query
+  const criteria = req.query
   if (!req.authUser.isMachine && !helper.hasAdminRole(req.authUser) && criteria) {
     criteria.memberId = req.authUser.userId
     criteria.membershipType = config.MEMBERSHIP_TYPES.User
@@ -72,8 +72,7 @@ async function getGroupByOldId (req, res) {
   const result = await service.getGroup(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.oldId,
-    req.query,
-    true
+    req.query
   )
   res.send(result)
 }

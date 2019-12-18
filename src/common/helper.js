@@ -7,7 +7,7 @@ const busApi = require('tc-bus-api-wrapper')
 const config = require('config')
 const neo4j = require('neo4j-driver').v1
 const querystring = require('querystring')
-let validate = require('uuid-validate')
+const validate = require('uuid-validate')
 
 const errors = require('./errors')
 const constants = require('../../app-constants')
@@ -104,7 +104,7 @@ async function ensureExists (tx, model, id, isAdmin = false) {
     })
 
     if (res && res.records.length === 0) {
-      res = await tx.run(`CREATE (user:User {id: {id}}) RETURN user`, { id })
+      res = await tx.run('CREATE (user:User {id: {id}}) RETURN user', { id })
     }
   }
 
@@ -123,7 +123,7 @@ async function ensureGroupMember (session, groupId, userId) {
     { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
   )
   if (memberCheckRes.records.length === 0) {
-    throw new errors.ForbiddenError(`User is not member of the group`)
+    throw new errors.ForbiddenError('User is not member of the group')
   }
 }
 

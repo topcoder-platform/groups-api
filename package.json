@@ -6,12 +6,23 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
+    "init-db": "node scripts/init-db.js",
+    "test-data": "node scripts/test-data.js",
     "lint": "standard",
-    "lint:fix": "standard --fix"
+    "lint:fix": "standard --fix",
+    "test": "mocha test/e2e/HealthCheck.test.js test/e2e/*.test.js --exit",
+    "test:cov": "nyc --reporter=html --reporter=text npm run test"
   },
   "author": "Topcoder",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-http": "^4.3.0",
+    "mocha": "^6.2.2",
     "nodemon": "^2.0.1",
+    "nyc": "^14.1.1",
+    "sinon": "^7.5.0",
+    "sinon-chai": "^3.3.0",
     "standard": "^14.3.1"
   },
   "dependencies": {
@@ -22,13 +33,13 @@
     "express": "^4.17.1",
     "get-parameter-names": "^0.3.0",
     "http-status-codes": "^1.4.0",
-    "joi": "^14.0.0",
+    "@hapi/joi": "^15.1.1",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "morgan": "^1.7.0",
     "neo4j-driver": "^1.7.6",
     "swagger-ui-express": "^4.1.2",
-    "tc-bus-api-wrapper": "topcoder-platform/tc-bus-api-wrapper.git#feature/auth0-proxy-server",
+    "tc-bus-api-wrapper": "topcoder-platform/tc-bus-api-wrapper.git#v1.2.0",
     "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.6.4",
     "uuid": "^3.3.3",
     "uuid-validate": "0.0.3",

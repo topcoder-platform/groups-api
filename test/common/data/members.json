@@ -1,0 +1,67 @@
+{
+  "PRE_CREATED": {
+    "User": [
+      {
+        "groupId": "5b5bf07c-1855-4ceb-99e4-39dde037cc56",
+        "memberId": "12346",
+        "membershipId": "d282c736-d1b2-4667-8727-ae8139a6377d",
+        "membershipType": "user",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      },
+      {
+        "groupId": "66af56e0-6a2b-4337-b283-beedda3a900f",
+        "memberId": "4561",
+        "membershipId": "062e7e5f-bca6-4f8a-ace5-ba56ba2a154a",
+        "membershipType": "user",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      },
+      {
+        "groupId": "8b431835-f823-4ed4-982d-0301216893a2",
+        "memberId": "4553",
+        "membershipId": "b41d76ca-ff7a-4470-a311-b89ac2a440bf",
+        "membershipType": "user",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      },
+      {
+        "groupId": "f492e9d9-02ca-400a-83c2-75e51966b320",
+        "memberId": "12346",
+        "membershipId": "855bc178-4fb4-4909-929d-91ae8753e146",
+        "membershipType": "user",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      },
+      {
+        "groupId": "3f0e15a2-ffed-46b8-87e4-7389cacaceb7",
+        "memberId": "12346",
+        "membershipId": "2c3e2fc6-af0f-439e-88cc-efd8f60d9973",
+        "membershipType": "user",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      }
+    ],
+    "Group": [
+      {
+        "groupId": "5b5bf07c-1855-4ceb-99e4-39dde037cc56",
+        "memberId": "8b431835-f823-4ed4-982d-0301216893a2",
+        "membershipId": "747c8e0a-ecf9-4572-bad5-811412e0b763",
+        "membershipType": "group",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      },
+      {
+        "groupId": "8b431835-f823-4ed4-982d-0301216893a2",
+        "memberId": "5d405456-073d-4bc4-a043-9a72d524d72e",
+        "membershipId": "007a8fd7-2368-4698-b7a5-97ad4e78358e",
+        "membershipType": "group",
+        "createdAt": "2019-12-08T07:43:25.444Z",
+        "createdBy": 12345
+      }
+    ]
+  },
+  "VALID": "1234",
+  "NON_EXISTENT_ID": "9898",
+  "USER_TOKEN_MEMBER": "12346"
+}
