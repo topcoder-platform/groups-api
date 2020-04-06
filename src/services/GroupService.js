@@ -243,16 +243,17 @@ async function updateGroup (currentUser, groupId, data) {
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.domain = data.domain ? data.domain : ''
     groupData.ssoId = data.ssoId ? data.ssoId : ''
+    groupData.oldId = data.oldId ? data.oldId : ''
 
     let updateRes
     if (groupData.status) {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.status={status} RETURN g`,
+        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.oldId={oldId}, g.status={status} RETURN g`,
         groupData
       )
     } else {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
+        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.oldId={oldId}, g.status={status} RETURN g`,
         groupData
       )
     }
