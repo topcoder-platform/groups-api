@@ -280,6 +280,7 @@ updateGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
   data: createGroup.schema.data.keys({
+    oldId: Joi.string(),
     status: Joi.string().valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
   })
 }
