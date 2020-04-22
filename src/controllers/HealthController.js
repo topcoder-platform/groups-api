@@ -14,7 +14,7 @@ let checksRun = 0
  * @param req the request
  * @param res the response
  */
-async function checkHealth (req, res) {
+async function checkHealth(req, res) {
   // perform a quick database access operation, if there is no error and is quick, then consider it healthy;
   // it will search any single group, this should be efficient operation
   checksRun += 1

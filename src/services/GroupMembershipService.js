@@ -18,14 +18,19 @@ const constants = require('../../app-constants')
  * @param {Object} data the data to add member
  * @returns {Object} the added group membership
  */
-async function addGroupMember (currentUser, groupId, data) {
+async function addGroupMember(currentUser, groupId, data) {
   logger.debug(`Enter in addGroupMember - Group = ${groupId} Criteria = ${data}`)
   let session = helper.createDBSession()
   let tx = session.beginTransaction()
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(
+      tx,
+      'Group',
+      groupId,
+      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+    )
     data.oldId = group.oldId
     groupId = group.id
 
@@ -120,7 +125,7 @@ async function addGroupMember (currentUser, groupId, data) {
     throw error
   } finally {
     logger.debug('Session Close')
-    session.close()
+    await session.close()
   }
 }
 
@@ -130,9 +135,7 @@ addGroupMember.schema = {
   data: Joi.object()
     .keys({
       memberId: Joi.id(),
-      membershipType: Joi.string()
-        .valid(_.values(config.MEMBERSHIP_TYPES))
-        .required()
+      membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)).required()
     })
     .required()
 }
@@ -144,14 +147,19 @@ addGroupMember.schema = {
  * @param {String} memberId the member id
  * @returns {Object} the deleted group membership
  */
-async function deleteGroupMember (currentUser, groupId, memberId) {
+async function deleteGroupMember(currentUser, groupId, memberId) {
   logger.debug(`Enter in deleteGroupMember - Group = ${groupId} memberId = ${memberId}`)
   let session = helper.createDBSession()
   let tx = session.beginTransaction()
 
   try {
     logger.debug(`Check for groupId ${groupId} exist or not`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(
+      tx,
+      'Group',
+      groupId,
+      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+    )
     groupId = group.id
     const oldId = group.oldId
     const name = group.name
@@ -192,7 +200,7 @@ async function deleteGroupMember (currentUser, groupId, memberId) {
     throw error
   } finally {
     logger.debug('Session Close')
-    session.close()
+    await session.close()
   }
 }
 
@@ -209,52 +217,64 @@ deleteGroupMember.schema = {
  * @param {Object} criteria the search criteria
  * @returns {Object} the search result
  */
-async function getGroupMembers (currentUser, groupId, criteria) {
+async function getGroupMembers(currentUser, groupId, criteria) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
-  groupId = group.id
 
-  // if the group is private, the user needs to be a member of the group, or an admin
-  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-    await helper.ensureGroupMember(session, groupId, currentUser.userId)
-  }
-
-  const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)'
-  const params = { groupId }
-
-  // query total record count
-  const totalRes = await session.run(`${matchClause} RETURN COUNT(o)`, params)
-  const total = totalRes.records[0].get(0).low || 0
-
-  // query page of records
-  let result = []
-  if (criteria.page <= Math.ceil(total / criteria.perPage)) {
-    const pageRes = await session.run(
-      `${matchClause} RETURN r, o SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`,
-      params
+  try {
+    const group = await helper.ensureExists(
+      session,
+      'Group',
+      groupId,
+      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
     )
-    result = _.map(pageRes.records, record => {
-      const r = record.get(0).properties
-      const o = record.get(1).properties
-      return {
-        id: r.id,
-        groupId,
-        groupName: group.name,
-        createdAt: r.createdAt,
-        createdBy: r.createdBy,
-        memberId: o.id,
-        membershipType: r.type
-      }
-    })
+    groupId = group.id
+
+    // if the group is private, the user needs to be a member of the group, or an admin
+    if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      await helper.ensureGroupMember(session, groupId, currentUser.userId)
+    }
+
+    const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)'
+    const params = { groupId }
+
+    // query total record count
+    const totalRes = await session.run(`${matchClause} RETURN COUNT(o)`, params)
+    const total = totalRes.records[0].get(0).low || 0
+
+    // query page of records
+    let result = []
+    if (criteria.page <= Math.ceil(total / criteria.perPage)) {
+      const pageRes = await session.run(
+        `${matchClause} RETURN r, o SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`,
+        params
+      )
+      result = _.map(pageRes.records, (record) => {
+        const r = record.get(0).properties
+        const o = record.get(1).properties
+        return {
+          id: r.id,
+          groupId,
+          groupName: group.name,
+          createdAt: r.createdAt,
+          createdBy: r.createdBy,
+          memberId: o.id,
+          membershipType: r.type
+        }
+      })
+    }
+
+    result.total = total
+    result.perPage = criteria.perPage
+    result.page = criteria.page
+
+    return result
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
   }
-
-  session.close()
-
-  result.total = total
-  result.perPage = criteria.perPage
-  result.page = criteria.page
-
-  return result
 }
 
 getGroupMembers.schema = {
@@ -273,24 +293,29 @@ getGroupMembers.schema = {
  * @param {String} memberId the member id
  * @returns {Object} the group membership
  */
-async function getGroupMemberWithSession (session, groupId, memberId) {
-  const group = await helper.ensureExists(session, 'Group', groupId)
-  groupId = group.id
+async function getGroupMemberWithSession(session, groupId, memberId) {
+  try {
+    const group = await helper.ensureExists(session, 'Group', groupId)
+    groupId = group.id
 
-  const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r'
-  const membershipRes = await session.run(query, { groupId, memberId })
-  if (membershipRes.records.length === 0) {
-    throw new errors.NotFoundError('The member is not in the group')
-  }
-  const r = membershipRes.records[0].get(0).properties
-  return {
-    id: r.id,
-    groupId,
-    groupName: group.name,
-    createdAt: r.createdAt,
-    createdBy: r.createdBy,
-    memberId,
-    membershipType: r.type
+    const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r'
+    const membershipRes = await session.run(query, { groupId, memberId })
+    if (membershipRes.records.length === 0) {
+      throw new errors.NotFoundError('The member is not in the group')
+    }
+    const r = membershipRes.records[0].get(0).properties
+    return {
+      id: r.id,
+      groupId,
+      groupName: group.name,
+      createdAt: r.createdAt,
+      createdBy: r.createdBy,
+      memberId,
+      membershipType: r.type
+    }
+  } catch (error) {
+    logger.error(error)
+    throw error
   }
 }
 
@@ -301,16 +326,28 @@ async function getGroupMemberWithSession (session, groupId, memberId) {
  * @param {String} memberId the member id
  * @returns {Object} the group membership
  */
-async function getGroupMember (currentUser, groupId, memberId) {
+async function getGroupMember(currentUser, groupId, memberId) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
-  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-    await helper.ensureGroupMember(session, groupId, currentUser.userId)
-  }
-  const membership = await getGroupMemberWithSession(session, groupId, memberId)
+  try {
+    const group = await helper.ensureExists(
+      session,
+      'Group',
+      groupId,
+      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+    )
+    if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      await helper.ensureGroupMember(session, groupId, currentUser.userId)
+    }
+    const membership = await getGroupMemberWithSession(session, groupId, memberId)
 
-  session.close()
-  return membership
+    return membership
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
 }
 
 getGroupMember.schema = {
@@ -325,22 +362,29 @@ getGroupMember.schema = {
  * @param {Object} query the query parameters
  * @returns {Object} the group members count data
  */
-async function getGroupMembersCount (groupId, query) {
+async function getGroupMembersCount(groupId, query) {
   const session = helper.createDBSession()
-  const group = await helper.ensureExists(session, 'Group', groupId)
-  groupId = group.id
+  try {
+    const group = await helper.ensureExists(session, 'Group', groupId)
+    groupId = group.id
 
-  let queryToExecute = ''
-  if (query.includeSubGroups) {
-    queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains*1..10]->(o:User) RETURN COUNT(o) AS count'
-  } else {
-    queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:User) RETURN COUNT(o) AS count'
+    let queryToExecute = ''
+    if (query.includeSubGroups) {
+      queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains*1..10]->(o:User) RETURN COUNT(o) AS count'
+    } else {
+      queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:User) RETURN COUNT(o) AS count'
+    }
+
+    const res = await session.run(queryToExecute, { groupId })
+
+    return { count: res.records[0]._fields[0].low }
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
   }
-
-  const res = await session.run(queryToExecute, { groupId })
-
-  session.close()
-  return { count: res.records[0]._fields[0].low }
 }
 
 getGroupMembersCount.schema = {
@@ -357,11 +401,21 @@ getGroupMembersCount.schema = {
  * @param {Object} criteria the search criteria
  * @returns {Object} the search result
  */
-async function getMemberGroups (currentUser, memberId) {
+async function getMemberGroups(currentUser, memberId) {
   const session = helper.createDBSession()
-  const res = await session.run(`MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`)
-  session.close()
-  return _.uniq(_.map(res.records, record => record.get(0)))
+  try {
+    const res = await session.run(
+      `MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`
+    )
+
+    return _.uniq(_.map(res.records, (record) => record.get(0)))
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
 }
 
 getMemberGroups.schema = {
