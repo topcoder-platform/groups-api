@@ -56,6 +56,14 @@ async function searchGroups(criteria, isAdmin = false) {
       }
     }
 
+    if (criteria.organizationId) {
+      if (whereClause === '') {
+        whereClause = ` WHERE LOWER(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`
+      } else {
+        whereClause = whereClause.concat(` AND LOWER(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`)
+      }
+    }
+
     if (criteria.selfRegister !== undefined) {
       if (whereClause === '') {
         whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`
@@ -147,6 +155,7 @@ searchGroups.schema = {
     perPage: Joi.perPage(),
     oldId: Joi.string(),
     ssoId: Joi.string(),
+    organizationId: Joi.id(),
     selfRegister: Joi.boolean(),
     privateGroup: Joi.boolean(),
     includeSubGroups: Joi.boolean().default(false),
@@ -184,9 +193,10 @@ async function createGroup(currentUser, data) {
     groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.domain = groupData.domain ? groupData.domain : ''
     groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
+    groupData.organizationId = groupData.organizationId ? groupData.organizationId : ''
 
     const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, status: {status}}) RETURN group`,
+      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, organizationId: {organizationId}, status: {status}}) RETURN group`,
       groupData
     )
 
@@ -219,6 +229,7 @@ createGroup.schema = {
       selfRegister: Joi.boolean().required(),
       domain: Joi.string(),
       ssoId: Joi.string(),
+      organizationId: Joi.id(),
       status: Joi.string()
         .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
         .default(constants.GroupStatus.Active)
@@ -251,17 +262,18 @@ async function updateGroup(currentUser, groupId, data) {
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.domain = data.domain ? data.domain : ''
     groupData.ssoId = data.ssoId ? data.ssoId : ''
+    groupData.organizationId = data.organizationId ? data.organizationId : ''
     groupData.oldId = data.oldId ? data.oldId : ''
 
     let updateRes
     if (groupData.status) {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.oldId={oldId}, g.status={status} RETURN g`,
+        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g`,
         groupData
       )
     } else {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.oldId={oldId}, g.status={status} RETURN g`,
+        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g`,
         groupData
       )
     }
@@ -335,6 +347,7 @@ async function getGroup(currentUser, groupId, criteria) {
       'privateGroup',
       'selfRegister',
       'domain',
+      'organizationId',
       'oldId'
     ]
 
