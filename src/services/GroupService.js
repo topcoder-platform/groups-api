@@ -155,7 +155,7 @@ searchGroups.schema = {
     perPage: Joi.perPage(),
     oldId: Joi.string(),
     ssoId: Joi.string(),
-    organizationId: Joi.id(),
+    organizationId: Joi.optionalId(),
     selfRegister: Joi.boolean(),
     privateGroup: Joi.boolean(),
     includeSubGroups: Joi.boolean().default(false),
@@ -229,7 +229,7 @@ createGroup.schema = {
       selfRegister: Joi.boolean().required(),
       domain: Joi.string(),
       ssoId: Joi.string(),
-      organizationId: Joi.id(),
+      organizationId: Joi.optionalId(),
       status: Joi.string()
         .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
         .default(constants.GroupStatus.Active)
