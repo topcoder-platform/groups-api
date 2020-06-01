@@ -26,7 +26,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "morgan": "^1.7.0",
-    "neo4j-driver": "^1.7.6",
+    "neo4j-driver": "^4.0.2",
     "swagger-ui-express": "^4.1.2",
     "tc-bus-api-wrapper": "topcoder-platform/tc-bus-api-wrapper.git#feature/auth0-proxy-server",
     "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.6.4",

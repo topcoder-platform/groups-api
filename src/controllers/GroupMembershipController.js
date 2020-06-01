@@ -9,7 +9,7 @@ const helper = require('../common/helper')
  * @param req the request
  * @param res the response
  */
-async function getGroupMembers (req, res) {
+async function getGroupMembers(req, res) {
   const result = await service.getGroupMembers(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -24,7 +24,7 @@ async function getGroupMembers (req, res) {
  * @param req the request
  * @param res the response
  */
-async function addGroupMember (req, res) {
+async function addGroupMember(req, res) {
   const result = await service.addGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -38,7 +38,7 @@ async function addGroupMember (req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupMember (req, res) {
+async function getGroupMember(req, res) {
   const result = await service.getGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -52,7 +52,7 @@ async function getGroupMember (req, res) {
  * @param req the request
  * @param res the response
  */
-async function deleteGroupMember (req, res) {
+async function deleteGroupMember(req, res) {
   const result = await service.deleteGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -66,11 +66,8 @@ async function deleteGroupMember (req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupMembersCount (req, res) {
-  const result = await service.getGroupMembersCount(
-    req.params.groupId,
-    req.query
-  )
+async function getGroupMembersCount(req, res) {
+  const result = await service.getGroupMembersCount(req.params.groupId, req.query)
   res.send(result)
 }
 
@@ -79,12 +76,8 @@ async function getGroupMembersCount (req, res) {
  * @param req the request
  * @param res the response
  */
-async function getMemberGroups (req, res) {
-  const result = await service.getMemberGroups(
-    req.authUser.isMachine ? 'M2M' : req.authUser,
-    req.params.memberId,
-    req.query.depth ? Number(req.query.depth) : 50
-  )
+async function getMemberGroups(req, res) {
+  const result = await service.getMemberGroups(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.memberId)
   helper.setResHeaders(req, res, result)
   res.send(result)
 }

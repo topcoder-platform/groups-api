@@ -16,7 +16,7 @@ const constants = require('../../app-constants')
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups (criteria, isAdmin = false) {
+async function searchGroups(criteria, isAdmin = false) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
   if (criteria.memberId && !criteria.membershipType) {
@@ -27,108 +27,122 @@ async function searchGroups (criteria, isAdmin = false) {
   }
 
   const session = helper.createDBSession()
-  let matchClause
-  if (criteria.memberId) {
-    matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
-  } else {
-    matchClause = `MATCH (g:Group)`
-  }
-
-  let whereClause = ''
-  if (criteria.oldId) {
-    whereClause = ` WHERE g.oldId = "${criteria.oldId}"`
-  }
-
-  if (criteria.name) {
-    if (whereClause === '') {
-      whereClause = ` WHERE LOWER(g.name) = "${criteria.name.toLowerCase()}"`
+  try {
+    let matchClause
+    if (criteria.memberId) {
+      matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
     } else {
-      whereClause = whereClause.concat(` AND LOWER(g.name) = "${criteria.name.toLowerCase()}"`)
+      matchClause = `MATCH (g:Group)`
     }
-  }
 
-  if (criteria.ssoId) {
+    let whereClause = ''
+    if (criteria.oldId) {
+      whereClause = ` WHERE g.oldId = "${criteria.oldId}"`
+    }
+
+    if (criteria.name) {
+      if (whereClause === '') {
+        whereClause = ` WHERE LOWER(g.name) = "${criteria.name.toLowerCase()}"`
+      } else {
+        whereClause = whereClause.concat(` AND LOWER(g.name) = "${criteria.name.toLowerCase()}"`)
+      }
+    }
+
+    if (criteria.ssoId) {
+      if (whereClause === '') {
+        whereClause = ` WHERE LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`
+      } else {
+        whereClause = whereClause.concat(` AND LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
+      }
+    }
+
+    if (criteria.organizationId) {
+      if (whereClause === '') {
+        whereClause = ` WHERE LOWER(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`
+      } else {
+        whereClause = whereClause.concat(` AND LOWER(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`)
+      }
+    }
+
+    if (criteria.selfRegister !== undefined) {
+      if (whereClause === '') {
+        whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`
+      } else {
+        whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`)
+      }
+    }
+
+    if (criteria.privateGroup !== undefined) {
+      if (whereClause === '') {
+        whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`
+      } else {
+        whereClause = whereClause.concat(` AND g.privateGroup = ${criteria.privateGroup}`)
+      }
+    }
+
     if (whereClause === '') {
-      whereClause = ` WHERE LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`
+      whereClause = ' WHERE exists(g.oldId)'
     } else {
-      whereClause = whereClause.concat(` AND LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
+      whereClause = whereClause.concat(' AND exists(g.oldId)')
     }
-  }
-
-  if (criteria.selfRegister !== undefined) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`
-    } else {
-      whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`)
-    }
-  }
-
-  if (criteria.privateGroup !== undefined) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`
-    } else {
-      whereClause = whereClause.concat(` AND g.privateGroup = ${criteria.privateGroup}`)
-    }
-  }
-
-  if (whereClause === '') {
-    whereClause = ' WHERE exists(g.oldId)'
-  } else {
-    whereClause = whereClause.concat(' AND exists(g.oldId)')
-  }
-
-  if (!isAdmin) {
-    if (whereClause === '') {
-      whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
-    } else {
-      whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-    }
-  }
-
-  // query total record count
-  const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
-  const total = totalRes.records[0].get(0).low || 0
-
-  // query page of records
-  let result = []
-  if (criteria.page <= Math.ceil(total / criteria.perPage)) {
-    const pageRes = await session.run(
-      `${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
-        criteria.perPage
-      }`
-    )
-    result = _.map(pageRes.records, record => record.get(0).properties)
 
     if (!isAdmin) {
-      for (let i = 0; i < result.length; i += 1) {
-        const group = result[i]
-        delete group.status
+      if (whereClause === '') {
+        whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
+      } else {
+        whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
       }
     }
 
-    // populate parent/sub groups
-    if (criteria.includeParentGroup) {
-      for (let i = 0; i < result.length; i += 1) {
-        const group = result[i]
-        group.parentGroups = await helper.getParentGroups(session, group.id)
+    // query total record count
+    const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
+    const total = totalRes.records[0].get(0).low || 0
+
+    // query page of records
+    let result = []
+    if (criteria.page <= Math.ceil(total / criteria.perPage)) {
+      const pageRes = await session.run(
+        `${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
+          criteria.perPage
+        }`
+      )
+      result = _.map(pageRes.records, (record) => record.get(0).properties)
+
+      if (!isAdmin) {
+        for (let i = 0; i < result.length; i += 1) {
+          const group = result[i]
+          delete group.status
+        }
+      }
+
+      // populate parent/sub groups
+      if (criteria.includeParentGroup) {
+        for (let i = 0; i < result.length; i += 1) {
+          const group = result[i]
+          group.parentGroups = await helper.getParentGroups(session, group.id)
+        }
+      }
+
+      if (criteria.includeSubGroups) {
+        for (let i = 0; i < result.length; i += 1) {
+          const group = result[i]
+          group.subGroups = await helper.getChildGroups(session, group.id)
+        }
       }
     }
 
-    if (criteria.includeSubGroups) {
-      for (let i = 0; i < result.length; i += 1) {
-        const group = result[i]
-        group.subGroups = await helper.getChildGroups(session, group.id)
-      }
-    }
+    result.total = total
+    result.perPage = criteria.perPage
+    result.page = criteria.page
+
+    return result
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
   }
-
-  session.close()
-
-  result.total = total
-  result.perPage = criteria.perPage
-  result.page = criteria.page
-
-  return result
 }
 
 searchGroups.schema = {
@@ -141,6 +155,7 @@ searchGroups.schema = {
     perPage: Joi.perPage(),
     oldId: Joi.string(),
     ssoId: Joi.string(),
+    organizationId: Joi.optionalId(),
     selfRegister: Joi.boolean(),
     privateGroup: Joi.boolean(),
     includeSubGroups: Joi.boolean().default(false),
@@ -155,7 +170,7 @@ searchGroups.schema = {
  * @param {Object} data the data to create group
  * @returns {Object} the created group
  */
-async function createGroup (currentUser, data) {
+async function createGroup(currentUser, data) {
   let session = helper.createDBSession()
   let tx = session.beginTransaction()
   try {
@@ -178,9 +193,10 @@ async function createGroup (currentUser, data) {
     groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.domain = groupData.domain ? groupData.domain : ''
     groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
+    groupData.organizationId = groupData.organizationId ? groupData.organizationId : ''
 
     const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, status: {status}}) RETURN group`,
+      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, organizationId: {organizationId}, status: {status}}) RETURN group`,
       groupData
     )
 
@@ -199,7 +215,7 @@ async function createGroup (currentUser, data) {
     throw error
   } finally {
     logger.debug('Session Close')
-    session.close()
+    await session.close()
   }
 }
 
@@ -207,18 +223,16 @@ createGroup.schema = {
   currentUser: Joi.any(),
   data: Joi.object()
     .keys({
-      name: Joi.string()
-        .min(3)
-        .max(150)
-        .required(),
-      description: Joi.string()
-        .min(3)
-        .max(2048),
+      name: Joi.string().min(3).max(150).required(),
+      description: Joi.string().min(3).max(2048),
       privateGroup: Joi.boolean().required(),
       selfRegister: Joi.boolean().required(),
       domain: Joi.string(),
       ssoId: Joi.string(),
-      status: Joi.string().valid([constants.GroupStatus.Active, constants.GroupStatus.InActive]).default(constants.GroupStatus.Active)
+      organizationId: Joi.optionalId(),
+      status: Joi.string()
+        .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
+        .default(constants.GroupStatus.Active)
     })
     .required()
 }
@@ -230,12 +244,17 @@ createGroup.schema = {
  * @param {Object} data the data to update group
  * @returns {Object} the updated group
  */
-async function updateGroup (currentUser, groupId, data) {
+async function updateGroup(currentUser, groupId, data) {
   let session = helper.createDBSession()
   let tx = session.beginTransaction()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(
+      tx,
+      'Group',
+      groupId,
+      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+    )
 
     const groupData = data
     groupData.id = groupId
@@ -243,16 +262,18 @@ async function updateGroup (currentUser, groupId, data) {
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.domain = data.domain ? data.domain : ''
     groupData.ssoId = data.ssoId ? data.ssoId : ''
+    groupData.organizationId = data.organizationId ? data.organizationId : ''
+    groupData.oldId = data.oldId ? data.oldId : ''
 
     let updateRes
     if (groupData.status) {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.status={status} RETURN g`,
+        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g`,
         groupData
       )
     } else {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId} RETURN g`,
+        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g`,
         groupData
       )
     }
@@ -271,7 +292,7 @@ async function updateGroup (currentUser, groupId, data) {
     throw error
   } finally {
     logger.debug('Session Close')
-    session.close()
+    await session.close()
   }
 }
 
@@ -279,6 +300,7 @@ updateGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
   data: createGroup.schema.data.keys({
+    oldId: Joi.string(),
     status: Joi.string().valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
   })
 }
@@ -290,9 +312,13 @@ updateGroup.schema = {
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup (currentUser, groupId, criteria) {
+async function getGroup(currentUser, groupId, criteria) {
   const isAdmin = currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
-  logger.debug(`Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(criteria)}`)
+  logger.debug(
+    `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
+      criteria
+    )}`
+  )
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
@@ -321,6 +347,7 @@ async function getGroup (currentUser, groupId, criteria) {
       'privateGroup',
       'selfRegister',
       'domain',
+      'organizationId',
       'oldId'
     ]
 
@@ -344,61 +371,67 @@ async function getGroup (currentUser, groupId, criteria) {
 
   const session = helper.createDBSession()
 
-  let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+  try {
+    let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
 
-  if (!isAdmin) delete group.status
+    if (!isAdmin) delete group.status
 
-  // if the group is private, the user needs to be a member of the group, or an admin
-  if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-    await helper.ensureGroupMember(session, group.id, currentUser.userId)
-  }
+    // if the group is private, the user needs to be a member of the group, or an admin
+    if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      await helper.ensureGroupMember(session, group.id, currentUser.userId)
+    }
 
-  // get parent or sub groups using breadth first search algorithm,
-  // this is equivalent to recursive algorithm, but more efficient than latter,
-  // see https://en.wikipedia.org/wiki/Breadth-first_search
-  // handled group will be reused, won't be handled duplicately
+    // get parent or sub groups using breadth first search algorithm,
+    // this is equivalent to recursive algorithm, but more efficient than latter,
+    // see https://en.wikipedia.org/wiki/Breadth-first_search
+    // handled group will be reused, won't be handled duplicately
 
-  // pending group to expand
-  const pending = []
-  const expanded = []
-  if (criteria.includeSubGroups || criteria.includeParentGroup) {
-    pending.push(group)
-    while (pending.length > 0) {
-      const groupToExpand = pending.shift()
-      const found = _.find(expanded, g => g.id === groupToExpand.id)
-      if (found) {
-        // this group was already expanded, so re-use the fields
-        groupToExpand.subGroups = found.subGroups
-        groupToExpand.parentGroups = found.parentGroups
-        continue
-      }
-      expanded.push(groupToExpand)
-      if (criteria.includeSubGroups) {
-        // find child groups
-        groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
-        // add child groups to pending if needed
-        if (!criteria.oneLevel) {
-          _.forEach(groupToExpand.subGroups, g => pending.push(g))
+    // pending group to expand
+    const pending = []
+    const expanded = []
+    if (criteria.includeSubGroups || criteria.includeParentGroup) {
+      pending.push(group)
+      while (pending.length > 0) {
+        const groupToExpand = pending.shift()
+        const found = _.find(expanded, (g) => g.id === groupToExpand.id)
+        if (found) {
+          // this group was already expanded, so re-use the fields
+          groupToExpand.subGroups = found.subGroups
+          groupToExpand.parentGroups = found.parentGroups
+          continue
         }
-      } else {
-        // find parent groups
-        groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id)
-        // add parent groups to pending if needed
-        if (!criteria.oneLevel) {
-          _.forEach(groupToExpand.parentGroups, g => pending.push(g))
+        expanded.push(groupToExpand)
+        if (criteria.includeSubGroups) {
+          // find child groups
+          groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
+          // add child groups to pending if needed
+          if (!criteria.oneLevel) {
+            _.forEach(groupToExpand.subGroups, (g) => pending.push(g))
+          }
+        } else {
+          // find parent groups
+          groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id)
+          // add parent groups to pending if needed
+          if (!criteria.oneLevel) {
+            _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
+          }
         }
       }
     }
-  }
 
-  if (fieldNames) {
-    fieldNames.push('subGroups')
-    fieldNames.push('parentGroups')
-    group = _.pick(group, fieldNames)
+    if (fieldNames) {
+      fieldNames.push('subGroups')
+      fieldNames.push('parentGroups')
+      group = _.pick(group, fieldNames)
+    }
+    return group
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
   }
-
-  session.close()
-  return group
 }
 
 getGroup.schema = {
@@ -419,7 +452,7 @@ getGroup.schema = {
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the deleted group
  */
-async function deleteGroup (groupId, isAdmin) {
+async function deleteGroup(groupId, isAdmin) {
   let session = helper.createDBSession()
   let tx = session.beginTransaction()
   try {
@@ -435,7 +468,7 @@ async function deleteGroup (groupId, isAdmin) {
       const childGroups = await helper.getChildGroups(tx, g.id)
       for (let i = 0; i < childGroups.length; i += 1) {
         const child = childGroups[i]
-        if (_.find(groupsToDelete, gtd => gtd.id === child.id)) {
+        if (_.find(groupsToDelete, (gtd) => gtd.id === child.id)) {
           // the child was checked, ignore duplicate processing
           continue
         }
@@ -474,7 +507,7 @@ async function deleteGroup (groupId, isAdmin) {
     throw error
   } finally {
     logger.debug('Session Close')
-    session.close()
+    await session.close()
   }
 }
 

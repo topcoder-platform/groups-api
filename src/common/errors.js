@@ -10,14 +10,14 @@ const util = require('util')
  * @returns {Function} the error constructor
  * @private
  */
-function createError (name, statusCode) {
+function createError(name, statusCode) {
   /**
    * The error constructor
    * @param {String} message the error message
    * @param {String} [cause] the error cause
    * @constructor
    */
-  function ErrorCtor (message, cause) {
+  function ErrorCtor(message, cause) {
     Error.call(this)
     Error.captureStackTrace(this)
     this.message = message || name
