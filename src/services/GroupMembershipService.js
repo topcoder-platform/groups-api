@@ -67,7 +67,7 @@ async function addGroupMember(currentUser, groupId, data) {
     const targetObjectType = data.membershipType === config.MEMBERSHIP_TYPES.Group ? 'Group' : 'User'
     const memberCheckRes = await tx.run(
       `MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:${targetObjectType} {id: {memberId}}) RETURN o`,
-      { groupId, memberId: data.memberId }
+      {groupId, memberId: data.memberId}
     )
     if (memberCheckRes.records.length > 0) {
       throw new errors.ConflictError('The member is already in the group')
@@ -77,7 +77,7 @@ async function addGroupMember(currentUser, groupId, data) {
     if (data.membershipType === config.MEMBERSHIP_TYPES.Group) {
       const pathRes = await tx.run(
         'MATCH p=shortestPath( (g1:Group {id: {fromId}})-[*]->(g2:Group {id: {toId}}) ) RETURN p',
-        { fromId: data.memberId, toId: groupId }
+        {fromId: data.memberId, toId: groupId}
       )
       if (pathRes.records.length > 0) {
         throw new errors.ConflictError('There is cyclical group reference')
@@ -107,9 +107,9 @@ async function addGroupMember(currentUser, groupId, data) {
       oldId: data.oldId,
       name: group.name,
       createdAt,
-      ...(currentUser === 'M2M' ? {} : { createdBy: currentUser.userId }),
+      ...(currentUser === 'M2M' ? {} : {createdBy: currentUser.userId}),
       memberId: data.memberId,
-      ...(data.memberOldId ? { memberOldId: data.memberOldId } : {}),
+      ...(data.memberOldId ? {memberOldId: data.memberOldId} : {}),
       membershipType: data.membershipType
     }
 
@@ -174,7 +174,7 @@ async function deleteGroupMember(currentUser, groupId, memberId) {
 
     // delete membership
     const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) DELETE r'
-    await tx.run(query, { groupId, memberId })
+    await tx.run(query, {groupId, memberId})
 
     if (validate(memberId, 4)) {
       const getMember = await helper.ensureExists(tx, 'Group', memberId)
@@ -211,6 +211,103 @@ deleteGroupMember.schema = {
 }
 
 /**
+ * Add universal member.
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to add member
+ * @param {Object} data the data to add member
+ * @returns {Object} the added group membership
+ */
+async function addUniversalMember(currentUser, groupId, data) {
+  logger.debug(`Enter in addGroupMember - Group = ${groupId} Criteria = ${data}`)
+  let session = helper.createDBSession()
+  let tx = session.beginTransaction()
+
+  try {
+    logger.debug(`Check for groupId ${groupId} exist or not`)
+    const group = await helper.ensureExists(
+      tx,
+      'Group',
+      groupId,
+      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+    )
+    data.oldId = group.oldId
+    groupId = group.id
+    data.membershipType = config.MEMBERSHIP_TYPES.User
+
+    if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      throw new errors.ForbiddenError('You are not allowed to perform this action!')
+    }
+
+    logger.debug(`Check for memberId ${data.universalUID} exist or not`)
+    await helper.ensureExists(tx, 'User', data.universalUID)
+
+    logger.debug(`check member ${data.universalUID} is part of group ${groupId}`)
+    const memberCheckRes = await tx.run(
+      `MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:User {universalUID: {universalUID}}) RETURN o`,
+      {groupId, universalUID: data.universalUID}
+    )
+    if (memberCheckRes.records.length > 0) {
+      throw new errors.ConflictError('The member is already in the group')
+    }
+
+    // add membership
+    const membershipId = uuid()
+    const createdAt = new Date().toISOString()
+    const query = `MATCH (g:Group {id: {groupId}}) MATCH (o:User {universalUID: {universalUID}}) CREATE (g)-[r:GroupContains {universalUID: {universalUID}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r`
+
+    const params = {
+      groupId,
+      universalUID: data.universalUID,
+      membershipId,
+      membershipType: data.membershipType,
+      createdAt,
+      createdBy: currentUser === 'M2M' ? '00000000' : currentUser.userId
+    }
+
+    logger.debug(`quey for adding membership ${query} with params ${JSON.stringify(params)}`)
+    await tx.run(query, params)
+
+    const result = {
+      id: membershipId,
+      groupId,
+      oldId: data.oldId,
+      name: group.name,
+      createdAt,
+      ...(currentUser === 'M2M' ? {} : {createdBy: currentUser.userId}),
+      memberId: '00000000',
+      universalUID: data.universalUID,
+      handle: data.handle,
+      ...(data.memberOldId ? {memberOldId: data.memberOldId} : {}),
+      membershipType: data.membershipType
+    }
+
+    logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_ADD_TOPIC}`)
+    await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ADD_TOPIC, result)
+
+    await tx.commit()
+    return result
+  } catch (error) {
+    logger.error(error)
+    logger.debug('Transaction Rollback')
+    await tx.rollback()
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
+}
+
+addUniversalMember.schema = {
+  currentUser: Joi.any(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  data: Joi.object()
+    .keys({
+      universalUID: Joi.id(),
+      handle: Joi.string().required()
+    })
+    .required()
+}
+/**
  * Get group members
  * @param {Object} currentUser the current user
  * @param {String} groupId the id of group to get members
@@ -235,7 +332,7 @@ async function getGroupMembers(currentUser, groupId, criteria) {
     }
 
     const matchClause = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o)'
-    const params = { groupId }
+    const params = {groupId}
 
     // query total record count
     const totalRes = await session.run(`${matchClause} RETURN COUNT(o)`, params)
@@ -299,7 +396,7 @@ async function getGroupMemberWithSession(session, groupId, memberId) {
     groupId = group.id
 
     const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r'
-    const membershipRes = await session.run(query, { groupId, memberId })
+    const membershipRes = await session.run(query, {groupId, memberId})
     if (membershipRes.records.length === 0) {
       throw new errors.NotFoundError('The member is not in the group')
     }
@@ -375,9 +472,9 @@ async function getGroupMembersCount(groupId, query) {
       queryToExecute = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o:User) RETURN COUNT(o) AS count'
     }
 
-    const res = await session.run(queryToExecute, { groupId })
+    const res = await session.run(queryToExecute, {groupId})
 
-    return { count: res.records[0]._fields[0].low }
+    return {count: res.records[0]._fields[0].low}
   } catch (error) {
     logger.error(error)
     throw error
@@ -426,6 +523,7 @@ getMemberGroups.schema = {
 module.exports = {
   getGroupMembers,
   addGroupMember,
+  addUniversalMember,
   getGroupMember,
   deleteGroupMember,
   getGroupMembersCount,

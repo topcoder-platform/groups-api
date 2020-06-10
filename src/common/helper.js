@@ -74,13 +74,9 @@ async function ensureExists(tx, model, id, isAdmin = false) {
     if (model === 'Group') {
       if (validate(id, 4)) {
         if (!isAdmin) {
-          res = await tx.run(`MATCH (e:${model} {id: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
-            id
-          })
+          res = await tx.run(`MATCH (e:${model} {id: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {id})
         } else {
-          res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {
-            id
-          })
+          res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {id})
         }
       } else {
         if (!isAdmin) {
@@ -88,9 +84,7 @@ async function ensureExists(tx, model, id, isAdmin = false) {
             id
           })
         } else {
-          res = await tx.run(`MATCH (e:${model} {oldId: {id}}) RETURN e`, {
-            id
-          })
+          res = await tx.run(`MATCH (e:${model} {oldId: {id}}) RETURN e`, {id})
         }
       }
 
@@ -98,12 +92,18 @@ async function ensureExists(tx, model, id, isAdmin = false) {
         throw new errors.NotFoundError(`Not found ${model} of id ${id}`)
       }
     } else if (model === 'User') {
-      res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {
-        id
-      })
+      if (validate(id, 4)) {
+        res = await tx.run(`MATCH (e:${model} {universalUID: {id}}) RETURN e`, {id})
 
-      if (res && res.records.length === 0) {
-        res = await tx.run(`CREATE (user:User {id: {id}}) RETURN user`, { id })
+        if (res && res.records.length === 0) {
+          res = await tx.run(`CREATE (user:User {id: '00000000', universalUID: {id}}) RETURN user`, {id})
+        }
+      } else {
+        res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {id})
+
+        if (res && res.records.length === 0) {
+          res = await tx.run(`CREATE (user:User {id: {id}, universalUID: '00000000'}) RETURN user`, {id})
+        }
       }
     }
 
@@ -123,7 +123,7 @@ async function ensureGroupMember(session, groupId, userId) {
   try {
     const memberCheckRes = await session.run(
       'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
-      { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
+      {groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId}
     )
     if (memberCheckRes.records.length === 0) {
       throw new errors.ForbiddenError(`User is not member of the group`)
@@ -143,7 +143,7 @@ async function getChildGroups(session, groupId) {
   try {
     const res = await session.run(
       'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId',
-      { groupId }
+      {groupId}
     )
     return _.map(res.records, (record) => record.get(0).properties)
   } catch (error) {
@@ -161,7 +161,7 @@ async function getParentGroups(session, groupId) {
   try {
     const res = await session.run(
       'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
-      { groupId }
+      {groupId}
     )
     return _.map(res.records, (record) => record.get(0).properties)
   } catch (error) {
@@ -176,7 +176,7 @@ async function getParentGroups(session, groupId) {
  * @returns {String} link for the page
  */
 function getPageLink(req, page) {
-  const q = _.assignIn({}, req.query, { page })
+  const q = _.assignIn({}, req.query, {page})
   return `${req.protocol}://${req.get('Host')}${req.baseUrl}${req.path}?${querystring.stringify(q)}`
 }
 

@@ -25,12 +25,21 @@ async function getGroupMembers(req, res) {
  * @param res the response
  */
 async function addGroupMember(req, res) {
-  const result = await service.addGroupMember(
-    req.authUser.isMachine ? 'M2M' : req.authUser,
-    req.params.groupId,
-    req.body
-  )
-  res.send(result)
+  if(req.body.universalUID) {
+    const result = await service.addUniversalMember(
+      req.authUser.isMachine ? 'M2M' : req.authUser,
+      req.params.groupId,
+      req.body
+    )
+    res.send(result)  
+  } else {
+    const result = await service.addGroupMember(
+      req.authUser.isMachine ? 'M2M' : req.authUser,
+      req.params.groupId,
+      req.body
+    )
+    res.send(result)
+  }
 }
 
 /**
