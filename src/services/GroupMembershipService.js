@@ -232,7 +232,6 @@ async function addUniversalMember(currentUser, groupId, data) {
     )
     data.oldId = group.oldId
     groupId = group.id
-    data.membershipType = config.MEMBERSHIP_TYPES.User
 
     if (currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
       throw new errors.ForbiddenError('You are not allowed to perform this action!')
