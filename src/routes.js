@@ -73,6 +73,13 @@ module.exports = {
       auth: 'jwt',
       access: [constants.UserRoles.Admin, constants.UserRoles.User],
       scopes: ['write:groups', 'all:groups']
+    },
+    delete: {
+      controller: 'GroupMembershipController',
+      method: 'deleteGroupMember',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
     }
   },
   '/groups/:groupId/members/:memberId': {
@@ -97,10 +104,25 @@ module.exports = {
       method: 'getGroupMembersCount'
     }
   },
+  '/groupsMemberCount': {
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'listGroupsMemberCount'
+    }
+  },
   '/groups/memberGroups/:memberId': {
     get: {
       controller: 'GroupMembershipController',
       method: 'getMemberGroups',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['read:groups']
+    }
+  },
+  '/groups/memberGroups/': {
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'searchMemberGroups',
       auth: 'jwt',
       access: [constants.UserRoles.Admin, constants.UserRoles.User],
       scopes: ['read:groups']

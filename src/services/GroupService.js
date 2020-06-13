@@ -19,10 +19,10 @@ const constants = require('../../app-constants')
 async function searchGroups(criteria, isAdmin = false) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
-  if (criteria.memberId && !criteria.membershipType) {
+  if ((criteria.memberId || criteria.universalUID) && !criteria.membershipType) {
     throw new errors.BadRequestError('The membershipType parameter should be provided if memberId is provided.')
   }
-  if (!criteria.memberId && criteria.membershipType) {
+  if (!(criteria.memberId || criteria.universalUID) && criteria.membershipType) {
     throw new errors.BadRequestError('The memberId parameter should be provided if membershipType is provided.')
   }
 
@@ -31,6 +31,12 @@ async function searchGroups(criteria, isAdmin = false) {
     let matchClause
     if (criteria.memberId) {
       matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
+    } else {
+      matchClause = `MATCH (g:Group)`
+    }
+
+    if (criteria.universalUID) {
+      matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {universalUID: "${criteria.universalUID}"})`
     } else {
       matchClause = `MATCH (g:Group)`
     }
@@ -149,6 +155,7 @@ searchGroups.schema = {
   isAdmin: Joi.boolean(),
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
+    universalUID: Joi.optionalId(),
     membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
     name: Joi.string(),
     page: Joi.page(),
