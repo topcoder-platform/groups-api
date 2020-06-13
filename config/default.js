@@ -37,6 +37,8 @@ module.exports = {
   KAFKA_GROUP_DELETE_TOPIC: process.env.KAFKA_GROUP_DELETE_TOPIC || 'groups.notification.delete',
   KAFKA_GROUP_MEMBER_ADD_TOPIC: process.env.KAFKA_GROUP_MEMBER_ADD_TOPIC || 'groups.notification.member.add',
   KAFKA_GROUP_MEMBER_DELETE_TOPIC: process.env.KAFKA_GROUP_MEMBER_DELETE_TOPIC || 'groups.notification.member.delete',
+  KAFKA_GROUP_UNIVERSAL_MEMBER_ADD_TOPIC: process.env.KAFKA_GROUP_UNIVERSAL_MEMBER_ADD_TOPIC || 'groups.notification.universalmember.add',
+  KAFKA_GROUP_UNIVERSAL_MEMBER_DELETE_TOPIC: process.env.KAFKA_GROUP_UNIVERSAL_MEMBER_DELETE_TOPIC || 'groups.notification.universalmember.delete',
 
   USER_ROLES: {
     Admin: 'Administrator',
