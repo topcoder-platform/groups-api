@@ -29,13 +29,10 @@ async function searchGroups(criteria, isAdmin = false) {
   const session = helper.createDBSession()
   try {
     let matchClause
+
     if (criteria.memberId) {
       matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
-    } else {
-      matchClause = `MATCH (g:Group)`
-    }
-
-    if (criteria.universalUID) {
+    } else if (criteria.universalUID) {
       matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {universalUID: "${criteria.universalUID}"})`
     } else {
       matchClause = `MATCH (g:Group)`
@@ -103,6 +100,9 @@ async function searchGroups(criteria, isAdmin = false) {
     // query total record count
     const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
     const total = totalRes.records[0].get(0).low || 0
+
+    console.log(`${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} 
+    LIMIT ${criteria.perPage}`)
 
     // query page of records
     let result = []
