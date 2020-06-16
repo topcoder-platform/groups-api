@@ -16,7 +16,7 @@ const constants = require('../../app-constants')
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups(criteria, isAdmin = false) {
+async function searchGroups(criteria, isAdmin) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
   if ((criteria.memberId || criteria.universalUID) && !criteria.membershipType) {
@@ -94,7 +94,7 @@ async function searchGroups(criteria, isAdmin = false) {
         whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
       } else {
         whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-      }
+      } 
     }
 
     // query total record count
@@ -167,7 +167,10 @@ searchGroups.schema = {
     privateGroup: Joi.boolean(),
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
-    oneLevel: Joi.boolean()
+    oneLevel: Joi.boolean(),
+    status: Joi.string()
+        .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
+        .default(constants.GroupStatus.Active)
   })
 }
 
