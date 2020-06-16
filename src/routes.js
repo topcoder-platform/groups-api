@@ -104,7 +104,7 @@ module.exports = {
       method: 'getGroupMembersCount'
     }
   },
-  '/groupsMemberCount': {
+  '/groups/memberGroups/groupMembersCount': {
     get: {
       controller: 'GroupMembershipController',
       method: 'listGroupsMemberCount'
