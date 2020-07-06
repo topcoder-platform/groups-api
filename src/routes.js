@@ -78,7 +78,7 @@ module.exports = {
       controller: 'GroupMembershipController',
       method: 'deleteGroupMember',
       auth: 'jwt',
-      access: [constants.UserRoles.Admin],
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
       scopes: ['write:groups', 'all:groups']
     }
   },
@@ -94,7 +94,7 @@ module.exports = {
       controller: 'GroupMembershipController',
       method: 'deleteGroupMember',
       auth: 'jwt',
-      access: [constants.UserRoles.Admin],
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
       scopes: ['write:groups', 'all:groups']
     }
   },
@@ -102,6 +102,24 @@ module.exports = {
     get: {
       controller: 'GroupMembershipController',
       method: 'getGroupMembersCount'
+    }
+  },
+  '/groups/:groupId/subGroup': {
+    post: {
+      controller: 'SubGroupController',
+      method: 'createSubGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['write:groups', 'all:groups']
+    }
+  },
+  '/groups/:groupId/subGroup/:subGroupId': {
+    delete: {
+      controller: 'SubGroupController',
+      method: 'deleteSubGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      scopes: ['write:groups', 'all:groups']
     }
   },
   '/groups/memberGroups/groupMembersCount': {
@@ -126,6 +144,29 @@ module.exports = {
       auth: 'jwt',
       access: [constants.UserRoles.Admin, constants.UserRoles.User],
       scopes: ['read:groups']
+    }
+  },
+  '/groupRoles/users/:userId': {
+    get: {
+      controller: 'GroupRoleController',
+      method: 'getGroupRoles',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['read:groups', 'write:groups', 'all:groups']
+    },
+    post: {
+      controller: 'GroupRoleController',
+      method: 'addGroupRole',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    },
+    delete: {
+      controller: 'GroupRoleController',
+      method: 'deleteGroupRole',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
     }
   },
   '/health': {

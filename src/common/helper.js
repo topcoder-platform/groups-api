@@ -7,9 +7,11 @@ const busApi = require('tc-bus-api-wrapper')
 const config = require('config')
 const neo4j = require('neo4j-driver')
 const querystring = require('querystring')
+const uuid = require('uuid/v4')
 let validate = require('uuid-validate')
 
 const errors = require('./errors')
+const logger = require('./logger')
 const constants = require('../../app-constants')
 
 // Bus API Client
@@ -131,6 +133,26 @@ async function ensureGroupMember(session, groupId, userId) {
   } catch (error) {
     throw error
   }
+}
+
+/**
+ * Return whether the user has one of the group roles or not.
+ * @param {Object} session the db session
+ * @param {String} groupId the group id
+ * @param {String} userId the user id
+ * @param {Array} roles an array of group roles
+ * @returns {Boolean} true if user has one of the group roles
+ */
+async function hasGroupRole (session, groupId, userId, roles) {
+  const memberCheckRes = await session.run(
+    'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
+    { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
+  )
+  if (memberCheckRes.records.length === 0) {
+    return false
+  }
+  const existRoles = memberCheckRes.records[0]._fields[0].properties.roles || []
+  return _.some(existRoles, r => _.some(roles, role => JSON.parse(r).role === role))
 }
 
 /**
@@ -305,6 +327,73 @@ async function postBusEvent(topic, payload) {
   })
 }
 
+async function createGroup (tx, data, currentUser) {
+  // check whether group name is already used
+  const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
+    name: data.name
+  })
+  if (nameCheckRes.records.length > 0) {
+    throw new errors.ConflictError(`The group name ${data.name} is already used`)
+  }
+
+  // create group
+  const groupData = data
+
+  // generate next group id
+  groupData.id = uuid()
+  groupData.createdAt = new Date().toISOString()
+  groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
+  groupData.domain = groupData.domain ? groupData.domain : ''
+  groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
+  groupData.organizationId = groupData.organizationId ? groupData.organizationId : ''
+
+  const createRes = await tx.run(
+    'CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, organizationId: {organizationId}, status: {status}}) RETURN group',
+    groupData
+  )
+
+  return createRes.records[0]._fields[0].properties
+}
+
+async function deleteGroup (tx, group) {
+  const groupsToDelete = [group]
+  let index = 0
+  while (index < groupsToDelete.length) {
+    const g = groupsToDelete[index]
+    index += 1
+
+    const childGroups = await getChildGroups(tx, g.id)
+    for (let i = 0; i < childGroups.length; i += 1) {
+      const child = childGroups[i]
+      if (_.find(groupsToDelete, (gtd) => gtd.id === child.id)) {
+        // the child was checked, ignore duplicate processing
+        continue
+      }
+      // delete child if it doesn't belong to other group
+      const parents = await getParentGroups(tx, child.id)
+      if (parents.length <= 1) {
+        groupsToDelete.push(child)
+      }
+    }
+  }
+
+  logger.debug(`Groups to delete ${JSON.stringify(groupsToDelete)}`)
+
+  for (let i = 0; i < groupsToDelete.length; i += 1) {
+    const id = groupsToDelete[i].id
+    // delete group's relationships
+    await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
+      groupId: id
+    })
+
+    // delete group
+    await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
+      groupId: id
+    })
+  }
+  return groupsToDelete
+}
+
 module.exports = {
   wrapExpress,
   autoWrapExpress,
@@ -316,5 +405,8 @@ module.exports = {
   setResHeaders,
   checkIfExists,
   hasAdminRole,
-  postBusEvent
+  hasGroupRole,
+  postBusEvent,
+  createGroup,
+  deleteGroup
 }
