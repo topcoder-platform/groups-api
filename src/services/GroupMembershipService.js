@@ -40,6 +40,7 @@ async function addGroupMember(currentUser, groupId, data) {
     if (
       currentUser !== 'M2M' &&
       !helper.hasAdminRole(currentUser) &&
+      !(await helper.hasGroupRole(tx, groupId, currentUser.userId, ['groupManager', 'groupAdmin'])) &&
       !(
         group.selfRegister &&
         data.membershipType === config.MEMBERSHIP_TYPES.User &&
@@ -200,6 +201,7 @@ async function deleteGroupMember(currentUser, groupId, memberId, query) {
     if (
       currentUser !== 'M2M' &&
       !helper.hasAdminRole(currentUser) &&
+      !(await helper.hasGroupRole(tx, groupId, currentUser.userId, ['groupManager', 'groupAdmin'])) &&
       !(group.selfRegister && currentUser.userId === memberId)
     ) {
       throw new errors.ForbiddenError('You are not allowed to perform this action!')

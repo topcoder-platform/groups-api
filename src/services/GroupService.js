@@ -4,7 +4,6 @@
 const _ = require('lodash')
 const config = require('config')
 const Joi = require('joi')
-const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
@@ -186,31 +185,7 @@ async function createGroup(currentUser, data) {
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
 
-    // check whether group name is already used
-    const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
-      name: data.name
-    })
-    if (nameCheckRes.records.length > 0) {
-      throw new errors.ConflictError(`The group name ${data.name} is already used`)
-    }
-
-    // create group
-    const groupData = data
-
-    // generate next group id
-    groupData.id = uuid()
-    groupData.createdAt = new Date().toISOString()
-    groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
-    groupData.domain = groupData.domain ? groupData.domain : ''
-    groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
-    groupData.organizationId = groupData.organizationId ? groupData.organizationId : ''
-
-    const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, organizationId: {organizationId}, status: {status}}) RETURN group`,
-      groupData
-    )
-
-    const group = createRes.records[0]._fields[0].properties
+    const group = await helper.createGroup(tx, data, currentUser)
 
     logger.debug(`Group = ${JSON.stringify(group)}`)
 
@@ -469,41 +444,7 @@ async function deleteGroup(groupId, isAdmin) {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
 
-    const groupsToDelete = [group]
-    let index = 0
-    while (index < groupsToDelete.length) {
-      const g = groupsToDelete[index]
-      index += 1
-
-      const childGroups = await helper.getChildGroups(tx, g.id)
-      for (let i = 0; i < childGroups.length; i += 1) {
-        const child = childGroups[i]
-        if (_.find(groupsToDelete, (gtd) => gtd.id === child.id)) {
-          // the child was checked, ignore duplicate processing
-          continue
-        }
-        // delete child if it doesn't belong to other group
-        const parents = await helper.getParentGroups(tx, child.id)
-        if (parents.length <= 1) {
-          groupsToDelete.push(child)
-        }
-      }
-    }
-
-    logger.debug(`Groups to delete ${JSON.stringify(groupsToDelete)}`)
-
-    for (let i = 0; i < groupsToDelete.length; i += 1) {
-      const id = groupsToDelete[i].id
-      // delete group's relationships
-      await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
-        groupId: id
-      })
-
-      // delete group
-      await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
-        groupId: id
-      })
-    }
+    const groupsToDelete = await helper.deleteGroup(tx, group)
 
     const kafkaPayload = {}
     kafkaPayload.groups = groupsToDelete

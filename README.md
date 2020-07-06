@@ -94,5 +94,6 @@ The GroupContains relation contains these fields:
 
 - id: the relationship UUID
 - type: the relationship type, 'group' or 'user'
+- roles: the roles of the user in the group
 - createdAt: the created at date string
 - createdBy: the created by user id
