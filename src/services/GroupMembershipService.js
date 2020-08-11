@@ -103,7 +103,7 @@ async function addGroupMember(currentUser, groupId, data) {
     const createdAt = new Date().toISOString()
 
     let query
-    if (validate(memberId, 4)) {
+    if (validate(memberId, 4) && data.universalUID) {
       query = `MATCH (g:Group {id: {groupId}}) MATCH (o:User {universalUID: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r`
     } else {
       query = `MATCH (g:Group {id: {groupId}}) MATCH (o:${targetObjectType} {id: {memberId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r`
