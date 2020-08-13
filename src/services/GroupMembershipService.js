@@ -234,8 +234,8 @@ async function deleteGroupMember(currentUser, groupId, memberId, query) {
       memberId
     }
 
-    // logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_DELETE_TOPIC}`)
-    // await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_DELETE_TOPIC, result)
+    logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_DELETE_TOPIC}`)
+    await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_DELETE_TOPIC, result)
 
     await tx.commit()
     return result
