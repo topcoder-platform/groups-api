@@ -20,10 +20,13 @@ const GroupStatus = {
   InActive: 'inactive'
 }
 
+const GroupRoleName = ['groupManager', 'groupAdmin']
+
 module.exports = {
   UserRoles,
   MembershipTypes,
   EVENT_ORIGINATOR,
   EVENT_MIME_TYPE,
-  GroupStatus
+  GroupStatus,
+  GroupRoleName
 }

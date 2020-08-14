@@ -4,7 +4,6 @@
 const _ = require('lodash')
 const config = require('config')
 const Joi = require('joi')
-const uuid = require('uuid/v4')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
@@ -16,21 +15,24 @@ const constants = require('../../app-constants')
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups(criteria, isAdmin = false) {
+async function searchGroups(criteria, isAdmin) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
-  if (criteria.memberId && !criteria.membershipType) {
+  if ((criteria.memberId || criteria.universalUID) && !criteria.membershipType) {
     throw new errors.BadRequestError('The membershipType parameter should be provided if memberId is provided.')
   }
-  if (!criteria.memberId && criteria.membershipType) {
+  if (!(criteria.memberId || criteria.universalUID) && criteria.membershipType) {
     throw new errors.BadRequestError('The memberId parameter should be provided if membershipType is provided.')
   }
 
   const session = helper.createDBSession()
   try {
     let matchClause
+
     if (criteria.memberId) {
       matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
+    } else if (criteria.universalUID) {
+      matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {universalUID: "${criteria.universalUID}"})`
     } else {
       matchClause = `MATCH (g:Group)`
     }
@@ -91,12 +93,15 @@ async function searchGroups(criteria, isAdmin = false) {
         whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
       } else {
         whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-      }
+      } 
     }
 
     // query total record count
     const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
     const total = totalRes.records[0].get(0).low || 0
+
+    console.log(`${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} 
+    LIMIT ${criteria.perPage}`)
 
     // query page of records
     let result = []
@@ -149,6 +154,7 @@ searchGroups.schema = {
   isAdmin: Joi.boolean(),
   criteria: Joi.object().keys({
     memberId: Joi.optionalId(), // defined in app-bootstrap
+    universalUID: Joi.optionalId(),
     membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)),
     name: Joi.string(),
     page: Joi.page(),
@@ -160,7 +166,10 @@ searchGroups.schema = {
     privateGroup: Joi.boolean(),
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
-    oneLevel: Joi.boolean()
+    oneLevel: Joi.boolean(),
+    status: Joi.string()
+        .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
+        .default(constants.GroupStatus.Active)
   })
 }
 
@@ -176,31 +185,7 @@ async function createGroup(currentUser, data) {
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
 
-    // check whether group name is already used
-    const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
-      name: data.name
-    })
-    if (nameCheckRes.records.length > 0) {
-      throw new errors.ConflictError(`The group name ${data.name} is already used`)
-    }
-
-    // create group
-    const groupData = data
-
-    // generate next group id
-    groupData.id = uuid()
-    groupData.createdAt = new Date().toISOString()
-    groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
-    groupData.domain = groupData.domain ? groupData.domain : ''
-    groupData.ssoId = groupData.ssoId ? groupData.ssoId : ''
-    groupData.organizationId = groupData.organizationId ? groupData.organizationId : ''
-
-    const createRes = await tx.run(
-      `CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, organizationId: {organizationId}, status: {status}}) RETURN group`,
-      groupData
-    )
-
-    const group = createRes.records[0]._fields[0].properties
+    const group = await helper.createGroup(tx, data, currentUser)
 
     logger.debug(`Group = ${JSON.stringify(group)}`)
 
@@ -459,41 +444,7 @@ async function deleteGroup(groupId, isAdmin) {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
 
-    const groupsToDelete = [group]
-    let index = 0
-    while (index < groupsToDelete.length) {
-      const g = groupsToDelete[index]
-      index += 1
-
-      const childGroups = await helper.getChildGroups(tx, g.id)
-      for (let i = 0; i < childGroups.length; i += 1) {
-        const child = childGroups[i]
-        if (_.find(groupsToDelete, (gtd) => gtd.id === child.id)) {
-          // the child was checked, ignore duplicate processing
-          continue
-        }
-        // delete child if it doesn't belong to other group
-        const parents = await helper.getParentGroups(tx, child.id)
-        if (parents.length <= 1) {
-          groupsToDelete.push(child)
-        }
-      }
-    }
-
-    logger.debug(`Groups to delete ${JSON.stringify(groupsToDelete)}`)
-
-    for (let i = 0; i < groupsToDelete.length; i += 1) {
-      const id = groupsToDelete[i].id
-      // delete group's relationships
-      await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
-        groupId: id
-      })
-
-      // delete group
-      await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
-        groupId: id
-      })
-    }
+    const groupsToDelete = await helper.deleteGroup(tx, group)
 
     const kafkaPayload = {}
     kafkaPayload.groups = groupsToDelete
