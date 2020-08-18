@@ -146,7 +146,7 @@ module.exports = {
       scopes: ['read:groups']
     }
   },
-  '/groupRoles/users/:userId': {
+  '/group-roles/users/:userId': {
     get: {
       controller: 'GroupRoleController',
       method: 'getGroupRoles',

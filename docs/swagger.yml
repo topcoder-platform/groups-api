@@ -417,7 +417,7 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
-  /groupRoles/users/{memberId}:
+  /group-roles/users/{memberId}:
     get:
       description: |
         Returns the groups and roles of the user identified by memberId.
