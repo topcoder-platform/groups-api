@@ -231,7 +231,8 @@ async function deleteGroupMember(currentUser, groupId, memberId, query) {
       groupId,
       name,
       oldId,
-      memberId
+      memberId,
+      universalUID
     }
 
     logger.debug(`sending message ${JSON.stringify(result)} to kafka topic ${config.KAFKA_GROUP_MEMBER_DELETE_TOPIC}`)
