@@ -298,7 +298,7 @@ updateGroup.schema = {
  * @returns {Object} the group
  */
 async function getGroup(currentUser, groupId, criteria) {
-  const isAdmin = currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+  const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   logger.debug(
     `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
       criteria
