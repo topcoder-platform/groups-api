@@ -9,7 +9,7 @@ const helper = require('../common/helper')
  * @param req the request
  * @param res the response
  */
-async function getGroupMembers(req, res) {
+async function getGroupMembers (req, res) {
   const result = await service.getGroupMembers(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -24,7 +24,7 @@ async function getGroupMembers(req, res) {
  * @param req the request
  * @param res the response
  */
-async function addGroupMember(req, res) {
+async function addGroupMember (req, res) {
   const result = await service.addGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -38,7 +38,7 @@ async function addGroupMember(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupMember(req, res) {
+async function getGroupMember (req, res) {
   const result = await service.getGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -52,7 +52,7 @@ async function getGroupMember(req, res) {
  * @param req the request
  * @param res the response
  */
-async function deleteGroupMember(req, res) {
+async function deleteGroupMember (req, res) {
   const result = await service.deleteGroupMember(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.groupId,
@@ -67,7 +67,7 @@ async function deleteGroupMember(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupMembersCount(req, res) {
+async function getGroupMembersCount (req, res) {
   const result = await service.getGroupMembersCount(req.params.groupId, req.query)
   res.send(result)
 }
@@ -77,7 +77,7 @@ async function getGroupMembersCount(req, res) {
  * @param req the request
  * @param res the response
  */
-async function listGroupsMemberCount(req, res) {
+async function listGroupsMemberCount (req, res) {
   const result = await service.listGroupsMemberCount(req.query)
   res.send(result)
 }
@@ -87,8 +87,8 @@ async function listGroupsMemberCount(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getMemberGroups(req, res) {
-  const result = await service.getMemberGroups(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.memberId)
+async function getMemberGroups (req, res) {
+  const result = await service.getMemberGroups(req.params.memberId)
   helper.setResHeaders(req, res, result)
   res.send(result)
 }
@@ -98,9 +98,12 @@ async function getMemberGroups(req, res) {
  * @param req the request
  * @param res the response
  */
-async function searchMemberGroups(req, res) {
+async function searchMemberGroups (req, res) {
   console.log('sssss')
   console.log(JSON.stringify(req.query))
+  // ! This seems suspect. The function used expects a memberId, while we are not providing it here at all
+  // ! We are no longer passing the user type - removed it at the time of writing this comment, since the function
+  // ! did not make use of it at all, but the other arguments seem weird...
   const result = await service.getMemberGroups(req.authUser.isMachine ? 'M2M' : req.authUser, {}, req.query)
   helper.setResHeaders(req, res, result)
   res.send(result)

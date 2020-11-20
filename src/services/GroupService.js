@@ -15,14 +15,14 @@ const constants = require('../../app-constants')
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups(criteria, isAdmin) {
+async function searchGroups (criteria, isAdmin) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
   if ((criteria.memberId || criteria.universalUID) && !criteria.membershipType) {
     throw new errors.BadRequestError('The membershipType parameter should be provided if memberId is provided.')
   }
   if (!(criteria.memberId || criteria.universalUID) && criteria.membershipType) {
-    throw new errors.BadRequestError('The memberId parameter should be provided if membershipType is provided.')
+    throw new errors.BadRequestError('The memberId or universalUID parameter should be provided if membershipType is provided.')
   }
 
   const session = helper.createDBSession()
@@ -34,7 +34,7 @@ async function searchGroups(criteria, isAdmin) {
     } else if (criteria.universalUID) {
       matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {universalUID: "${criteria.universalUID}"})`
     } else {
-      matchClause = `MATCH (g:Group)`
+      matchClause = 'MATCH (g:Group)'
     }
 
     let whereClause = ''
@@ -93,7 +93,7 @@ async function searchGroups(criteria, isAdmin) {
         whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
       } else {
         whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-      } 
+      }
     }
 
     // query total record count
@@ -168,8 +168,8 @@ searchGroups.schema = {
     includeParentGroup: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     status: Joi.string()
-        .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
-        .default(constants.GroupStatus.Active)
+      .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
+      .default(constants.GroupStatus.Active)
   })
 }
 
@@ -179,9 +179,9 @@ searchGroups.schema = {
  * @param {Object} data the data to create group
  * @returns {Object} the created group
  */
-async function createGroup(currentUser, data) {
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+async function createGroup (currentUser, data) {
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
 
@@ -229,16 +229,16 @@ createGroup.schema = {
  * @param {Object} data the data to update group
  * @returns {Object} the updated group
  */
-async function updateGroup(currentUser, groupId, data) {
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+async function updateGroup (currentUser, groupId, data) {
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(
       tx,
       'Group',
       groupId,
-      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+      currentUser === 'M2M' || helper.hasAdminRole(currentUser)
     )
 
     const groupData = data
@@ -253,17 +253,17 @@ async function updateGroup(currentUser, groupId, data) {
     let updateRes
     if (groupData.status) {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g`,
+        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g',
         groupData
       )
     } else {
       updateRes = await tx.run(
-        `MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g`,
+        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g',
         groupData
       )
     }
 
-    let updatedGroup = updateRes.records[0].get(0).properties
+    const updatedGroup = updateRes.records[0].get(0).properties
     updatedGroup.oldName = group.name
     logger.debug(`Group = ${JSON.stringify(updatedGroup)}`)
 
@@ -297,7 +297,7 @@ updateGroup.schema = {
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup(currentUser, groupId, criteria) {
+async function getGroup (currentUser, groupId, criteria) {
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   logger.debug(
     `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
@@ -437,9 +437,9 @@ getGroup.schema = {
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the deleted group
  */
-async function deleteGroup(groupId, isAdmin) {
-  let session = helper.createDBSession()
-  let tx = session.beginTransaction()
+async function deleteGroup (groupId, isAdmin) {
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
   try {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
