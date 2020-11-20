@@ -12,12 +12,13 @@ const logger = require('../common/logger')
  * @param res the response
  */
 async function searchGroups (req, res) {
-  const criteria = req.query
-  if (!req.authUser.isMachine && !helper.hasAdminRole(req.authUser) && criteria) {
+  const criteria = req.query || {}
+  const isAdmin = req.authUser.isMachine || helper.hasAdminRole(req.authUser)
+  if (!isAdmin) {
     criteria.memberId = req.authUser.userId
     criteria.membershipType = config.MEMBERSHIP_TYPES.User
   }
-  const result = await service.searchGroups(criteria, req.authUser.isMachine || helper.hasAdminRole(req.authUser))
+  const result = await service.searchGroups(criteria, isAdmin)
   helper.setResHeaders(req, res, result)
   res.send(result)
 }
