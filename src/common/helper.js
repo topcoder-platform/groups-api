@@ -8,7 +8,7 @@ const config = require('config')
 const neo4j = require('neo4j-driver')
 const querystring = require('querystring')
 const uuid = require('uuid/v4')
-let validate = require('uuid-validate')
+const validate = require('uuid-validate')
 
 const errors = require('./errors')
 const logger = require('./logger')
@@ -28,7 +28,7 @@ const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_D
  * @param {Function} fn the async function
  * @returns {Function} the wrapped function
  */
-function wrapExpress(fn) {
+function wrapExpress (fn) {
   return function (req, res, next) {
     fn(req, res, next).catch(next)
   }
@@ -39,7 +39,7 @@ function wrapExpress(fn) {
  * @param obj the object (controller exports)
  * @returns {Object|Array} the wrapped object
  */
-function autoWrapExpress(obj) {
+function autoWrapExpress (obj) {
   if (_.isArray(obj)) {
     return obj.map(autoWrapExpress)
   }
@@ -59,7 +59,7 @@ function autoWrapExpress(obj) {
  * Create DB session.
  * @returns {Object} new db session
  */
-function createDBSession() {
+function createDBSession () {
   return driver.session()
 }
 
@@ -70,49 +70,45 @@ function createDBSession() {
  * @param {String} id the entity id
  * @returns {Object} the found entity
  */
-async function ensureExists(tx, model, id, isAdmin = false) {
-  try {
-    let res
-    if (model === 'Group') {
-      if (validate(id, 4)) {
-        if (!isAdmin) {
-          res = await tx.run(`MATCH (e:${model} {id: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {id})
-        } else {
-          res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {id})
-        }
+async function ensureExists (tx, model, id, isAdmin = false) {
+  let res
+  if (model === 'Group') {
+    if (validate(id, 4)) {
+      if (!isAdmin) {
+        res = await tx.run(`MATCH (e:${model} {id: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, { id })
       } else {
-        if (!isAdmin) {
-          res = await tx.run(`MATCH (e:${model} {oldId: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
-            id
-          })
-        } else {
-          res = await tx.run(`MATCH (e:${model} {oldId: {id}}) RETURN e`, {id})
-        }
+        res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, { id })
       }
-
-      if (res && res.records.length === 0) {
-        throw new errors.NotFoundError(`Not found ${model} of id ${id}`)
-      }
-    } else if (model === 'User') {
-      if (validate(id, 4)) {
-        res = await tx.run(`MATCH (e:${model} {universalUID: {id}}) RETURN e`, {id})
-
-        if (res && res.records.length === 0) {
-          res = await tx.run(`CREATE (user:User {id: '00000000', universalUID: {id}}) RETURN user`, {id})
-        }
+    } else {
+      if (!isAdmin) {
+        res = await tx.run(`MATCH (e:${model} {oldId: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
+          id
+        })
       } else {
-        res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, {id})
-
-        if (res && res.records.length === 0) {
-          res = await tx.run(`CREATE (user:User {id: {id}, universalUID: '00000000'}) RETURN user`, {id})
-        }
+        res = await tx.run(`MATCH (e:${model} {oldId: {id}}) RETURN e`, { id })
       }
     }
 
-    return res.records[0]._fields[0].properties
-  } catch (error) {
-    throw error
+    if (res && res.records.length === 0) {
+      throw new errors.NotFoundError(`Not found ${model} of id ${id}`)
+    }
+  } else if (model === 'User') {
+    if (validate(id, 4)) {
+      res = await tx.run(`MATCH (e:${model} {universalUID: {id}}) RETURN e`, { id })
+
+      if (res && res.records.length === 0) {
+        res = await tx.run('CREATE (user:User {id: \'00000000\', universalUID: {id}}) RETURN user', { id })
+      }
+    } else {
+      res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, { id })
+
+      if (res && res.records.length === 0) {
+        res = await tx.run('CREATE (user:User {id: {id}, universalUID: \'00000000\'}) RETURN user', { id })
+      }
+    }
   }
+
+  return res.records[0]._fields[0].properties
 }
 
 /**
@@ -121,17 +117,13 @@ async function ensureExists(tx, model, id, isAdmin = false) {
  * @param {String} groupId the group id
  * @param {String} userId the user id
  */
-async function ensureGroupMember(session, groupId, userId) {
-  try {
-    const memberCheckRes = await session.run(
-      'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
-      {groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId}
-    )
-    if (memberCheckRes.records.length === 0) {
-      throw new errors.ForbiddenError(`User is not member of the group`)
-    }
-  } catch (error) {
-    throw error
+async function ensureGroupMember (session, groupId, userId) {
+  const memberCheckRes = await session.run(
+    'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
+    { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
+  )
+  if (memberCheckRes.records.length === 0) {
+    throw new errors.ForbiddenError('User is not member of the group')
   }
 }
 
@@ -161,16 +153,12 @@ async function hasGroupRole (session, groupId, userId, roles) {
  * @param {String} groupId the group id
  * @returns {Array} the child groups
  */
-async function getChildGroups(session, groupId) {
-  try {
-    const res = await session.run(
-      'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId',
-      {groupId}
-    )
-    return _.map(res.records, (record) => record.get(0).properties)
-  } catch (error) {
-    throw error
-  }
+async function getChildGroups (session, groupId) {
+  const res = await session.run(
+    'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId',
+    { groupId }
+  )
+  return _.map(res.records, (record) => record.get(0).properties)
 }
 
 /**
@@ -179,16 +167,12 @@ async function getChildGroups(session, groupId) {
  * @param {String} groupId the group id
  * @returns {Array} the parent groups
  */
-async function getParentGroups(session, groupId) {
-  try {
-    const res = await session.run(
-      'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
-      {groupId}
-    )
-    return _.map(res.records, (record) => record.get(0).properties)
-  } catch (error) {
-    throw error
-  }
+async function getParentGroups (session, groupId) {
+  const res = await session.run(
+    'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
+    { groupId }
+  )
+  return _.map(res.records, (record) => record.get(0).properties)
 }
 
 /**
@@ -197,8 +181,8 @@ async function getParentGroups(session, groupId) {
  * @param {Number} page the page number
  * @returns {String} link for the page
  */
-function getPageLink(req, page) {
-  const q = _.assignIn({}, req.query, {page})
+function getPageLink (req, page) {
+  const q = _.assignIn({}, req.query, { page })
   return `${req.protocol}://${req.get('Host')}${req.baseUrl}${req.path}?${querystring.stringify(q)}`
 }
 
@@ -208,12 +192,12 @@ function getPageLink(req, page) {
  * @param {Object} res the HTTP response
  * @param {Object} result the operation result
  */
-function setResHeaders(req, res, result) {
+function setResHeaders (req, res, result) {
   const totalPages = Math.ceil(result.total / result.perPage)
   if (result.page > 1) {
     res.set('X-Prev-Page', result.page - 1)
   }
-  
+
   if (result.page < totalPages) {
     res.set('X-Next-Page', result.page + 1)
   }
@@ -248,7 +232,7 @@ function setResHeaders(req, res, result) {
  * @param {Array} source the array in which to search for the term
  * @param {Array | String} term the term to search
  */
-function checkIfExists(source, term) {
+function checkIfExists (source, term) {
   let terms
 
   if (!_.isArray(source)) {
@@ -278,7 +262,7 @@ function checkIfExists(source, term) {
  * Check if the user has admin role
  * @param {Object} authUser the user
  */
-function hasAdminRole(authUser) {
+function hasAdminRole (authUser) {
   for (let i = 0; i < authUser.roles.length; i++) {
     if (authUser.roles[i].toLowerCase() === config.USER_ROLES.Admin.toLowerCase()) {
       return true
@@ -291,7 +275,7 @@ function hasAdminRole(authUser) {
  * Get Bus API Client
  * @return {Object} Bus API Client Instance
  */
-function getBusApiClient() {
+function getBusApiClient () {
   // if there is no bus API client instance, then create a new instance
   if (!busApiClient) {
     busApiClient = busApi(
@@ -316,7 +300,7 @@ function getBusApiClient() {
  * @param {String} topic the event topic
  * @param {Object} payload the event payload
  */
-async function postBusEvent(topic, payload) {
+async function postBusEvent (topic, payload) {
   const client = getBusApiClient()
   await client.postEvent({
     topic,
