@@ -44,9 +44,9 @@ async function searchGroups (criteria, isAdmin) {
 
     if (criteria.name) {
       if (whereClause === '') {
-        whereClause = ` WHERE LOWER(g.name) = "${criteria.name.toLowerCase()}"`
+        whereClause = ` WHERE LOWER(g.name) CONTAINS "${criteria.name.toLowerCase()}"`
       } else {
-        whereClause = whereClause.concat(` AND LOWER(g.name) = "${criteria.name.toLowerCase()}"`)
+        whereClause = whereClause.concat(` AND LOWER(g.name) CONTAINS "${criteria.name.toLowerCase()}"`)
       }
     }
 
@@ -258,7 +258,7 @@ async function updateGroup (currentUser, groupId, data) {
       )
     } else {
       updateRes = await tx.run(
-        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g',
+        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId} RETURN g',
         groupData
       )
     }
@@ -297,7 +297,7 @@ updateGroup.schema = {
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup (currentUser, groupId, criteria) {
+async function getGroup (currentUser, groupId, criteria, isOldId) {
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   logger.debug(
     `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "16bcf9b8-7442-41da-8beb-7307a72359a3",
+		"_postman_id": "1ae86b43-0276-4a0d-8dcb-8fc98699c0e2",
 		"name": "tc-groups-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -17,11 +17,11 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "b01a81e1-7c0f-4637-832f-4e08d014ee90",
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
-											"    pm.environment.set(\"GROUP_ID\", pm.response.json().result.id);",
+											"    pm.environment.set(\"GROUP_ID\", pm.response.json().id);",
 											"});"
 										],
 										"type": "text/javascript"
@@ -47,7 +47,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1\",\n    \"description\": \"desc1\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"name\": \"group1\",\n    \"description\": \"desc1\",\n    \"privateGroup\": true,\n    \"selfRegister\": true\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -67,11 +67,11 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "82757580-ebc8-4a96-ab86-e2c906e4c64a",
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
-											"    pm.environment.set(\"GROUP_ID2\", pm.response.json().result.id);",
+											"    pm.environment.set(\"GROUP_ID2\", pm.response.json().id);",
 											"});"
 										],
 										"type": "text/javascript"
@@ -97,7 +97,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group2\",\n    \"description\": \"desc2\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"name\": \"group2\",\n    \"description\": \"desc2\",\n    \"privateGroup\": false,\n    \"selfRegister\": false\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -117,11 +117,11 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "e186dd80-b8f1-4dd1-b819-bed4820ca0e6",
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
-											"    pm.environment.set(\"GROUP_ID3\", pm.response.json().result.id);",
+											"    pm.environment.set(\"GROUP_ID3\", pm.response.json().id);",
 											"});"
 										],
 										"type": "text/javascript"
@@ -147,7 +147,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group3\",\n    \"description\": \"desc3\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"name\": \"group3\",\n    \"description\": \"desc3\",\n    \"privateGroup\": false,\n    \"selfRegister\": false\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -167,11 +167,11 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "617e944e-81b9-4ca0-8a70-94caaa34b324",
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
-											"    pm.environment.set(\"GROUP_ID4\", pm.response.json().result.id);",
+											"    pm.environment.set(\"GROUP_ID4\", pm.response.json().id);",
 											"});"
 										],
 										"type": "text/javascript"
@@ -217,11 +217,11 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "0ea6b6db-be37-42c2-83d3-38dace2819a4",
+										"id": "d97d0070-c8c8-432c-88fb-a032f6f1d5ed",
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
-											"    pm.environment.set(\"GROUP_WITH_DOMAIN_ID\", pm.response.json().result.id);",
+											"    pm.environment.set(\"GROUP_WITH_DOMAIN_ID\", pm.response.json().id);",
 											"});"
 										],
 										"type": "text/javascript"
@@ -307,7 +307,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "3c51ff50-88e2-400e-8008-2d576dd4ed60",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -356,7 +356,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "31c08282-8e1c-4299-87a9-97bf4ed77fc3",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -405,7 +405,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "ec189d37-e118-4822-a1b6-e9017da738fa",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -454,7 +454,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "f70a22ed-a29f-4ec1-a7ac-b5ed81692c58",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -520,7 +520,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-1\",\n    \"description\": \"desc1-updated-1\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"domain\": \"add_domain\"\n}"
+									"raw": "{\n    \"name\": \"group1-updated-1\",\n    \"description\": \"desc1-updated-1\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"domain\": \"add_domain\",\n    \"oldId\": \"1\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -556,7 +556,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-2\",\n    \"description\": \"desc1-updated-2\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"name\": \"group1-updated-2\",\n    \"description\": \"desc1-updated-2\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"oldId\": \"1\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -592,7 +592,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-3\",\n    \"description\": \"desc1-updated-3\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"name\": \"group1-updated-3\",\n    \"description\": \"desc1-updated-3\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"oldId\": \"1\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -628,7 +628,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-4\",\n    \"description\": \"desc1-updated-4\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}"
+									"raw": "{\n    \"name\": \"group1-updated-4\",\n    \"description\": \"desc1-updated-4\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"oldId\": \"1\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}",
@@ -665,7 +665,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group5\",\n    \"description\": \"desc5\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"update_domain\"\n}"
+									"raw": "{\n    \"name\": \"group5\",\n    \"description\": \"desc5\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"update_domain\",\n    \"oldId\": \"123\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
@@ -702,7 +702,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group2-update\",\n    \"description\": \"desc2-update\",\n    \"privateGroup\": false,\n    \"selfRegister\": true\n}"
+									"raw": "{\n    \"name\": \"group2-update\",\n    \"description\": \"desc2-update\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"oldId\": \"2\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
@@ -741,7 +741,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-5\",\n    \"description\": \"desc1-updated-5\",\n    \"privateGroup\": true,\n    \"selfRegister\": false\n}",
+									"raw": "{\n    \"name\": \"group1-updated-5\",\n    \"description\": \"desc1-updated-5\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"oldId\": \"1\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -767,7 +767,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3e1a1171-2087-4063-aebc-6e4aac144a49",
+										"id": "39b17d67-6af6-40e1-9f92-4f46987b34b7",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -817,7 +817,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3e1a1171-2087-4063-aebc-6e4aac144a49",
+										"id": "55164417-5e3d-499e-aee7-4461d2a6b8a1",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -867,7 +867,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3e1a1171-2087-4063-aebc-6e4aac144a49",
+										"id": "087fc2b2-d61c-4d42-84af-b7543e37c833",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -917,7 +917,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3e1a1171-2087-4063-aebc-6e4aac144a49",
+										"id": "eb13d1ac-b5b4-4fd0-b993-be2e220aedab",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -980,7 +980,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"group1-updated-5\",\n    \"description\": \"desc1-updated-5\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"status\": \"inactive\"\n}",
+									"raw": "{\n    \"name\": \"group1-updated-5\",\n    \"description\": \"desc1-updated-5\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"oldId\": \"1\",\n    \"status\": \"inactive\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1027,7 +1027,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups?page=1&perPage=10&memberId=11ab038e-48da-123b-96e8-8d3b99b6d183&membershipType=group",
+									"raw": "{{URL}}/groups?page=1&perPage=10&name=rOuP",
 									"host": [
 										"{{URL}}"
 									],
@@ -1045,11 +1045,17 @@
 										},
 										{
 											"key": "memberId",
-											"value": "11ab038e-48da-123b-96e8-8d3b99b6d183"
+											"value": "11ab038e-48da-123b-96e8-8d3b99b6d183",
+											"disabled": true
 										},
 										{
 											"key": "membershipType",
-											"value": "group"
+											"value": "group",
+											"disabled": true
+										},
+										{
+											"key": "name",
+											"value": "rOuP"
 										}
 									]
 								}
@@ -1212,11 +1218,11 @@
 									{
 										"key": "Authorization",
 										"type": "text",
-										"value": "Bearer {{USER4_USER_TOKEN}}"
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups?page=1&perPage=10&oldId=12345",
+									"raw": "{{URL}}/groups?page=1&perPage=10&oldId=1",
 									"host": [
 										"{{URL}}"
 									],
@@ -1234,7 +1240,7 @@
 										},
 										{
 											"key": "oldId",
-											"value": "12345"
+											"value": "1"
 										}
 									]
 								}
@@ -1306,7 +1312,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "33d0065f-b6ac-47f3-84b0-4f20241ce716",
+										"id": "38808608-84e8-41a4-a461-120d84c603c5",
 										"exec": [
 											"pm.test(\"Status code is 400\", function () {",
 											"    pm.response.to.have.status(400);",
@@ -1370,7 +1376,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "33d0065f-b6ac-47f3-84b0-4f20241ce716",
+										"id": "397fb1c6-2ec6-4c6b-a4c4-07229b8aa402",
 										"exec": [
 											"pm.test(\"Status code is 400\", function () {",
 											"    pm.response.to.have.status(400);",
@@ -1455,13 +1461,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_WITH_DOMAIN_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID3}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{GROUP_WITH_DOMAIN_ID}}"
+										"{{GROUP_ID3}}"
 									]
 								}
 							},
@@ -1487,13 +1493,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID3}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{GROUP_ID}}"
+										"{{GROUP_ID3}}"
 									]
 								}
 							},
@@ -1519,13 +1525,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID3}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{GROUP_ID}}"
+										"{{GROUP_ID3}}"
 									]
 								}
 							},
@@ -1551,13 +1557,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}"
+										"{{GROUP_ID}}"
 									],
 									"query": [
 										{
@@ -1602,13 +1608,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}"
+										"{{GROUP_ID}}"
 									],
 									"query": [
 										{
@@ -1653,13 +1659,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}"
+										"{{GROUP_ID}}"
 									],
 									"query": [
 										{
@@ -1722,7 +1728,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bb8cc82b-3efd-4454-9c21-1795ca67ddab",
+										"id": "8ca08f71-0387-4b89-a5f5-551501f6e7bf",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -1750,13 +1756,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}"
+										"{{GROUP_ID}}"
 									],
 									"query": [
 										{
@@ -1794,7 +1800,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3eb087fc-b6f3-41f1-8edc-d937e1093763",
+										"id": "d8b8ce31-af1a-4c74-b61d-db13803cbbc2",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -1844,7 +1850,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3eb087fc-b6f3-41f1-8edc-d937e1093763",
+										"id": "381ef86f-2b45-470f-b7fe-4d9570912ee8",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -1894,7 +1900,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3eb087fc-b6f3-41f1-8edc-d937e1093763",
+										"id": "51f1f8c0-cf4d-4f38-bf8d-8c098af3c209",
 										"exec": [
 											""
 										],
@@ -1942,7 +1948,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3eb087fc-b6f3-41f1-8edc-d937e1093763",
+										"id": "5b3981e9-4dda-4699-9209-4d172185f49b",
 										"exec": [
 											""
 										],
@@ -1990,7 +1996,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3eb087fc-b6f3-41f1-8edc-d937e1093763",
+										"id": "e6dc66ac-d4e6-4ac0-a0dc-7d92d92930ae",
 										"exec": [
 											""
 										],
@@ -2038,7 +2044,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "3eb087fc-b6f3-41f1-8edc-d937e1093763",
+										"id": "99b437e7-0231-41ee-becb-923ca39a5afe",
 										"exec": [
 											""
 										],
@@ -2107,14 +2113,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12346",
+									"raw": "{{URL}}/groups/oldId/2",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12346"
+										"2"
 									]
 								}
 							},
@@ -2140,14 +2146,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12346",
+									"raw": "{{URL}}/groups/oldId/2",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12346"
+										"2"
 									]
 								}
 							},
@@ -2173,14 +2179,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12346",
+									"raw": "{{URL}}/groups/oldId/2",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12346"
+										"2"
 									]
 								}
 							},
@@ -2206,14 +2212,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/oldId/1?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12345"
+										"1"
 									],
 									"query": [
 										{
@@ -2258,14 +2264,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/oldId/1?includeSubGroups=true&oneLevel=false",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12345"
+										"1"
 									],
 									"query": [
 										{
@@ -2283,7 +2289,8 @@
 										},
 										{
 											"key": "fields",
-											"value": "id,name,description"
+											"value": "id,name,description",
+											"disabled": true
 										}
 									]
 								}
@@ -2310,14 +2317,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/oldId/1?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12345"
+										"1"
 									],
 									"query": [
 										{
@@ -2348,7 +2355,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bb8cc82b-3efd-4454-9c21-1795ca67ddab",
+										"id": "1ece5d8c-c4c6-4567-89e5-04d967758773",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -2376,14 +2383,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/oldId/12345?includeSubGroups=true&oneLevel=false&fields=id,name,description",
+									"raw": "{{URL}}/groups/oldId/1?includeSubGroups=true&oneLevel=false&fields=id,name,description",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
 										"oldId",
-										"12345"
+										"1"
 									],
 									"query": [
 										{
@@ -2417,7 +2424,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "4b651537-6c26-4f18-ae6d-6f3c53aa7f18",
+						"id": "3e27cd6e-87d4-43d3-8816-18fe2a77644f",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2427,7 +2434,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "1f50ae8d-c7dd-46d6-9b99-6c69b641ee3d",
+						"id": "0d37d396-a487-4156-a777-6d0be4266623",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2463,13 +2470,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members"
 									],
 									"query": [
@@ -2506,13 +2513,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members"
 									],
 									"query": [
@@ -2549,13 +2556,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members"
 									],
 									"query": [
@@ -2592,13 +2599,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									],
 									"query": [
@@ -2635,13 +2642,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									],
 									"query": [
@@ -2678,13 +2685,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									],
 									"query": [
@@ -2707,7 +2714,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "c2975ae8-666d-4f8e-a30e-06e3c4b3e3ec",
+										"id": "7cb0e38a-f0c3-4819-93e5-d27db5c27e42",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -2735,13 +2742,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members?page=1&perPage=10",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members?page=1&perPage=10",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									],
 									"query": [
@@ -2771,7 +2778,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "1fd4d048-8d2c-406c-9fd1-3e4573dcf857",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -2803,13 +2810,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -2822,7 +2829,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "002f5955-40cc-4d72-8a1b-27c5b8d047aa",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -2854,13 +2861,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -2873,7 +2880,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "437a7e45-f8e1-43f9-bc80-6461aef62ff9",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -2905,13 +2912,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_NON_SELFREG_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_NON_SELFREG_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members"
 									]
 								}
@@ -2924,7 +2931,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "e2ee6900-95a8-4245-95eb-92a371bab765",
 										"exec": [
 											""
 										],
@@ -2954,13 +2961,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -2973,7 +2980,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "4488136a-e2bc-4fd2-a3e6-e00c349057c9",
 										"exec": [
 											""
 										],
@@ -3003,13 +3010,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_USER_ID2}}\",\n    \"membershipType\": \"user\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -3022,7 +3029,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "bb6b2a51-a639-4004-9f84-c3eb6da73429",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -3054,13 +3061,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n    \"membershipType\": \"group\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -3073,7 +3080,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "de4ec846-8433-4865-b4b6-4990818453c2",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -3105,13 +3112,13 @@
 									"raw": "{\n    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n    \"membershipType\": \"group\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -3124,7 +3131,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "13b76e4e-0927-415d-ab7c-d02e9a00f478",
 										"exec": [
 											""
 										],
@@ -3151,16 +3158,16 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_GROUP_ID2}}\",\n    \"membershipType\": \"group\"\n}"
+									"raw": "{\n    \"memberId\": \"{{GROUP_ID3}}\",\n    \"membershipType\": \"group\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members"
 									]
 								}
@@ -3173,7 +3180,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "71883186-3abb-4529-89bd-6eea09b9934e",
+										"id": "17fa8083-1945-42f5-a824-dfc532e9f73e",
 										"exec": [
 											""
 										],
@@ -3200,16 +3207,16 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"memberId\": \"{{TEST_PRIVATE_GROUP_ID}}\",\n    \"membershipType\": \"group\"\n}"
+									"raw": "{\n    \"memberId\": \"{{GROUP_ID4}}\",\n    \"membershipType\": \"group\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members"
 									]
 								}
@@ -3243,13 +3250,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_USER_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_USER_ID}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_USER_ID}}"
 									]
@@ -3277,15 +3284,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members/{{GROUP_ID3}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members",
-										"{{TEST_GROUP_ID2}}"
+										"{{GROUP_ID3}}"
 									]
 								}
 							},
@@ -3297,7 +3304,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "e4557415-deff-4dc2-840d-f6fc68f24ab9",
+										"id": "e72e8850-3104-443b-bdcb-14a2dd48b6d8",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -3325,19 +3332,431 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_PRIVATE_GROUP_ID}}/members/{{TEST_USER_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_USER_ID}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_PRIVATE_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_USER_ID}}"
 									]
 								}
 							},
 							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "get member groups",
+					"item": [
+						{
+							"name": "get member groups",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - get member groups - missing token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "20a052bd-e0ff-4aff-bc55-fce52afadffe",
+										"exec": [
+											"pm.test(\"Status code is 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "7f30c911-4361-4d1b-9397-d76f995e1c93",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "1dcd794e-cc8e-4dbd-a8d4-70407282eec9",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "get group members count",
+					"item": [
+						{
+							"name": "get group members count excluding subgroups",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/membersCount",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"membersCount"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group members count including subgroups",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/membersCount?includeSubGroups=true",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"membersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - get group members count - invalid query param",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "4591ecc9-4710-435f-b497-24874adb47e5",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/membersCount?includeSubGroups=abc",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"membersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "abc"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "7ec8833b-741f-46f1-9817-a542fe16ad6d",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "2fe69148-5cad-4c80-8b4a-66d7c8a9d1dc",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "list groups member count",
+					"item": [
+						{
+							"name": "list groups member count excluding subgroups",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/groupMembersCount",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"groupMembersCount"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "list groups member count including subgroups",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/groupMembersCount?includeSubGroups=true",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"groupMembersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - list groups member count - invalid query param",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "10b26bba-7c83-4199-b70f-1b33122e4292",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/groupMembersCount?includeSubGroups=abc",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"groupMembersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "abc"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "da9d70d2-540c-4d0e-8474-a803e34026c2",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "3e17b5dc-af75-4199-9cf4-5ec66254c8f6",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -3352,7 +3771,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bf91913f-0ce4-4ee5-9c0e-3e634481f3d8",
+										"id": "65fd74ac-8744-4957-ab41-aac04d853c2d",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -3384,13 +3803,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_GROUP_ID2}}"
 									]
@@ -3404,7 +3823,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bf91913f-0ce4-4ee5-9c0e-3e634481f3d8",
+										"id": "1e83dc67-2898-4cd7-8a93-35bb821d7fc8",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -3436,13 +3855,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_GROUP_ID2}}"
 									]
@@ -3474,13 +3893,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_USER_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_USER_ID}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_USER_ID}}"
 									]
@@ -3512,13 +3931,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_GROUP_ID2}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_GROUP_ID2}}"
 									]
@@ -3532,7 +3951,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bf91913f-0ce4-4ee5-9c0e-3e634481f3d8",
+										"id": "60c17e18-f2a7-4952-9940-9f1651757756",
 										"exec": [
 											"pm.test(\"Status code is 403\", function () {",
 											"    pm.response.to.have.status(403);",
@@ -3564,13 +3983,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_NON_SELFREG_GROUP_ID}}/members/{{TEST_USER_ID2}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{TEST_USER_ID2}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_NON_SELFREG_GROUP_ID}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{TEST_USER_ID2}}"
 									]
@@ -3584,7 +4003,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bf91913f-0ce4-4ee5-9c0e-3e634481f3d8",
+										"id": "bc50e306-5838-4888-95a8-b39998dfc13a",
 										"exec": [
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
@@ -3616,13 +4035,13 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{TEST_NON_SELFREG_GROUP_ID}}/members/{{TEST_USER_ID2}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members/{{TEST_USER_ID2}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{TEST_NON_SELFREG_GROUP_ID}}",
+										"{{GROUP_ID2}}",
 										"members",
 										"{{TEST_USER_ID2}}"
 									]
@@ -3633,47 +4052,13 @@
 					],
 					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
-				},
-				{
-					"name": "get group member count",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{URL}}/groups/{{TEST_GROUP_ID}}/membersCount?includeSubGroups=true",
-							"host": [
-								"{{URL}}"
-							],
-							"path": [
-								"groups",
-								"{{TEST_GROUP_ID}}",
-								"membersCount"
-							],
-							"query": [
-								{
-									"key": "includeSubGroups",
-									"value": "true"
-								}
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "4b651537-6c26-4f18-ae6d-6f3c53aa7f18",
+						"id": "46988799-ee17-4376-ae2b-76a53e964dc4",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -3683,7 +4068,1016 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "1f50ae8d-c7dd-46d6-9b99-6c69b641ee3d",
+						"id": "82ab7757-b2f4-4954-b665-fc68957c865b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "sub groups",
+			"item": [
+				{
+					"name": "create sub group",
+					"item": [
+						{
+							"name": "create sub group",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "2eba4635-49d3-4498-a57f-374eef46a0cf",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"    pm.environment.set(\"SUB_GROUP_ID\", pm.response.json().id);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"sub group 1\",\n    \"description\": \"desc\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"domain\",\n    \"ssoId\": \"ssoId\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - create sub group - forbidden M2M",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a09910c3-ed98-4e7e-ba8f-97bc13c3564e",
+										"exec": [
+											"pm.test(\"Status code is 403\", function () {\r",
+											"    pm.response.to.have.status(403);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_R_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"sub group 1\",\n    \"description\": \"desc\",\n    \"privateGroup\": false,\n    \"selfRegister\": true,\n    \"domain\": \"domain\",\n    \"ssoId\": \"ssoId\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - create sub group - invalid body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e66a1761-225f-44d4-b00a-eb3c6225a83f",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"sub group 1\",\n    \"invalid\": \"desc\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "acca325a-2601-4e07-98f9-63b9f63f6b00",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "f7032c28-d95d-4731-86d1-1a40367e31d2",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "delete sub group",
+					"item": [
+						{
+							"name": "delete sub group",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "933e3edc-7c97-4d59-b062-c79ee2267726",
+										"exec": [
+											"pm.test(\"Status code is 204\", function () {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_ALL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup/{{SUB_GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup",
+										"{{SUB_GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - delete sub group -  not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "d68ba111-1934-4f56-8ec9-9260aef2aa7c",
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {\r",
+											"    pm.response.to.have.status(404);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_ALL_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup/abc123",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup",
+										"abc123"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - delete sub group - not sub group",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "737f888a-039b-4cc4-86cf-4835d50d23a7",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_ALL_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup",
+										"{{GROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "88818248-bd05-4b92-b4b5-5d88eede3b2d",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "32cd6b68-2b36-4683-8a26-6a0b77cccbe2",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "4ab30456-87ab-4dc5-9f98-059671e05964",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "5b8a0c89-8357-4e76-836d-852a7e485dc7",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "group roles",
+			"item": [
+				{
+					"name": "get group roles",
+					"item": [
+						{
+							"name": "get group roles",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8d914f76-01f5-4621-8500-f6ab526d7f4b",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{M2M_ALL_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}?page=1&perPage=10",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "perPage",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - get group roles - invalid page",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e8387961-8688-4e3d-9748-d65230577486",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_ALL_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}?page=-1&perPage=10",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "-1"
+										},
+										{
+											"key": "perPage",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - get group roles - invalid perPage",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "07c7cf37-a128-4924-af51-86987f79f730",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_ALL_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}?page=1&perPage=abc",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "perPage",
+											"value": "abc"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "659f1f2f-2421-4f5b-a87e-891fabd9539d",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "ee5c91e7-4bf4-48ce-a77d-3babe53b6286",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "add group role",
+					"item": [
+						{
+							"name": "add group role",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "373aed6f-2e07-4310-9288-1587a8f4f753",
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupId\": \"{{GROUP_ID}}\",\n    \"role\": \"groupManager\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - add group role - invalid role",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "7ceb36ab-7249-4314-a5cf-0f9cc060394f",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupId\": \"{{GROUP_ID}}\",\n    \"role\": \"invalid\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - add group role - missing group id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "efa9b678-9b1c-410c-98fd-2715b615414a",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"role\": \"groupManager\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "05d28721-758d-4341-9c51-1e25af6dd999",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "d5160ada-e439-44a6-8af3-c7fd8935acce",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "delete group role",
+					"item": [
+						{
+							"name": "delete group role",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0e412250-cc57-4444-8589-a04be4e19221",
+										"exec": [
+											"pm.test(\"Status code is 204\", function () {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"groupId\": \"{{GROUP_ID}}\",\r\n    \"role\": \"groupManager\"\r\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - delete group role - invalid role",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c18b08b6-4596-414a-a45c-b8884605a3d0",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"groupId\": \"{{GROUP_ID}}\",\r\n    \"role\": \"invalid\"\r\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "failure - delete group role - group not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b19a618e-98b2-4939-9cdd-0e0a16036c4d",
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {\r",
+											"    pm.response.to.have.status(400);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{USER1_ADMIN_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"groupId\": \"abc123\",\r\n    \"role\": \"groupManager\"\r\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{TEST_USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{TEST_USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "87491343-b221-41bc-8ae8-3f5fe28ee0ad",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "71b44a8a-b4d6-45a8-91c9-7009cd9bfd78",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0124d296-7df0-4555-b251-c60b5321559f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1323c504-1726-491e-b1af-e6877fe865a8",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -3725,13 +5119,68 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "swagger UI",
+			"item": [
+				{
+					"name": "get swagger UI",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/groups/docs",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"docs"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "dad92673-8d40-4b1c-acd8-edbfbee783dc",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f5d39d86-420e-4371-9c62-98f72a6118df",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "4e396df5-d3a4-4c5f-8477-eeead6536fd5",
+				"id": "e1d44ac6-2909-454e-b06f-7f8c6b63e3b7",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -3741,7 +5190,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "683c9325-3bdf-4d2f-89f2-6e2e4f5c854f",
+				"id": "ba5fef76-28d3-4ef4-9e64-ca1ffd9a67c6",
 				"type": "text/javascript",
 				"exec": [
 					""

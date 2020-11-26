@@ -100,6 +100,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/groupId'
         - $ref: '#/components/parameters/memberId'
+        - name: universalUID
+          in: query
+          required: false
+          schema:
+            type: string
+          description: universal UID
       responses:
         200:
           $ref: "#/components/responses/GroupMembershipResponse"
@@ -130,13 +136,79 @@ paths:
               schema:
                 type: object
                 properties:
-                  result:
-                    type: object
-                    properties:
-                      count:
-                        type: integer
+                  count:
+                    type: integer
         400:
           $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /groups/memberGroups/groupMembersCount:
+    get:
+      description: Get groups member count
+      tags:
+        - group membership
+      parameters:
+        - $ref: '#/components/parameters/includeSubGroups'
+        - name: universalUID
+          in: query
+          required: false
+          schema:
+            type: string
+          description: universal UID
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: organization id
+      responses:
+        200:
+          description: OK. Response will contain count of members.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    oldId:
+                      type: string
+                    count:
+                      type: integer
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /groups/memberGroups/{memberId}:
+    get:
+      description: Get distinct group old ids of the member.
+      tags:
+        - group membership
+      security:
+        - bearer: []
+      parameters:
+        - $ref: '#/components/parameters/memberId'
+      responses:
+        200:
+          description: OK. Response will contain unique group old ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        400:
+          $ref: "#/components/responses/BadRequest"
+        401:
+          $ref: "#/components/responses/Unauthenticated"
+        403:
+          $ref: "#/components/responses/Forbidden"
         404:
           $ref: "#/components/responses/NotFound"
         500:
@@ -172,6 +244,9 @@ paths:
             + name
             + description
             + domain
+            + selfRegister
+            + privateGroup
+            + organizationId
           schema:
             type: string
       responses:
@@ -224,7 +299,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/groupId'
       requestBody:
-        $ref: '#/components/requestBodies/NewGroupBodyParam'
+        $ref: '#/components/requestBodies/UpdateGroupBodyParam'
       responses:
         200:
           $ref: "#/components/responses/GroupResponse"
@@ -258,18 +333,42 @@ paths:
           schema:
             type: string
           description: id of membership
+        - name: universalUID
+          in: query
+          required: false
+          schema:
+            type: string
+          description: universal UID
         - name: membershipType
           in: query
           required: false
           schema:
             type: string
           description: membership type. Use 'group' if memberId is an id of a group, otherwise 'user'
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: group name
         - name: oldId
           in: query
           required: false
           schema:
             type: string
           description: old group id (legacy data)
+        - name: ssoId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: sso id
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: organization id
         - name: selfRegister
           in: query
           required: false
@@ -282,6 +381,32 @@ paths:
           schema:
             type: boolean
           description: Flag indicates if the group is private
+        - name: includeSubGroups
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if sub groups are included
+        - name: includeParentGroup
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if parent groups are included
+        - name: oneLevel
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Flag indicates if only one level of sub/parent groups are included
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ['active', 'inactive']
+            default: 'active'
+          description: the group status
       responses:
         200:
           $ref: "#/components/responses/GroupArrayResponse"
@@ -350,6 +475,9 @@ paths:
             + name
             + description
             + domain
+            + selfRegister
+            + privateGroup
+            + organizationId
           schema:
             type: string
       responses:
@@ -389,6 +517,8 @@ paths:
           $ref: "#/components/responses/Unauthenticated"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
 
@@ -414,6 +544,8 @@ paths:
           $ref: "#/components/responses/Unauthenticated"
         403:
           $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
         500:
           $ref: "#/components/responses/InternalServerError"
 
@@ -667,12 +799,9 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              result:
-                type: array
-                items:
-                  $ref: "#/components/schemas/GroupMembership"
+            type: array
+            items:
+              $ref: "#/components/schemas/GroupMembership"
       headers:
         X-Next-Page:
           schema:
@@ -704,21 +833,15 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              result:
-                $ref: '#/components/schemas/GroupMembership'
+            $ref: '#/components/schemas/GroupMembership'
     GroupArrayResponse:
       description: The group response
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              result:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
+            type: array
+            items:
+              $ref: '#/components/schemas/Group'
       headers:
         X-Next-Page:
           schema:
@@ -759,6 +882,31 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/GroupRole'
+      headers:
+        X-Next-Page:
+          schema:
+            type: integer
+          description: The index of the next page
+        X-Page:
+          schema:
+            type: integer
+          description: The index of the current page (starting at 1)
+        X-Per-Page:
+          schema:
+            type: integer
+          description: The number of items to list per page
+        X-Total:
+          schema:
+            type: integer
+          description: The total number of items
+        X-Total-Pages:
+          schema:
+            type: integer
+          description: The total number of pages
+        Link:
+          schema:
+            type: string
+          description: Pagination link header
 
   schemas:
     GroupMembership:
@@ -820,6 +968,15 @@ components:
         selfRegister:
           type: boolean
           description: Flag indicates if the group allows self register
+        ssoId:
+          type: string
+          description: the SSO id
+        organizationId:
+          type: string
+          description: the organization id
+        oldId:
+          type: string
+          description: the old id
         domain:
           type: string
           description: Domain to indicate what tc web site that the group belongs to
@@ -864,6 +1021,9 @@ components:
               memberId:
                 type: string
                 description: The id of the user which is being added to the group
+              universalUID:
+                type: string
+                description: The universal UID
               membershipType:
                 type: string
                 enum: ['user', 'group']
@@ -891,6 +1051,49 @@ components:
               domain:
                 type: string
                 description: Domain to indicate what tc web site that the group belongs to
+              ssoId:
+                type: string
+                description: the SSO id
+              organizationId:
+                type: string
+                description: the organization id
+              status:
+                type: string
+                enum: ['active', 'inactive']
+                default: 'active'
+                description: Value indicating the status of the group
+    UpdateGroupBodyParam:
+      description: A JSON object containing group body information
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The group name
+              description:
+                type: string
+                description: The group description
+              privateGroup:
+                type: boolean
+                description: Flag indicte if the group is private or not
+              selfRegister:
+                type: boolean
+                description: Flag indicte if the group allows self register
+              domain:
+                type: string
+                description: Domain to indicate what tc web site that the group belongs to
+              ssoId:
+                type: string
+                description: the SSO id
+              oldId:
+                type: string
+                description: the old id
+              organizationId:
+                type: string
+                description: the organization id
               status:
                 type: string
                 enum: ['active', 'inactive']
@@ -902,6 +1105,9 @@ components:
         application/json:
           schema:
             type: object
+            required:
+              - groupId
+              - role
             properties:
               groupId:
                 type: string

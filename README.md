@@ -97,3 +97,8 @@ The GroupContains relation contains these fields:
 - roles: the roles of the user in the group
 - createdAt: the created at date string
 - createdBy: the created by user id
+
+## Swagger UI
+
+- the swagger UI may be browsed at `http://localhost:3000/groups/docs`
+
