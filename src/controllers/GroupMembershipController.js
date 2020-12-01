@@ -93,22 +93,6 @@ async function getMemberGroups (req, res) {
   res.send(result)
 }
 
-/**
- * Get group members
- * @param req the request
- * @param res the response
- */
-async function searchMemberGroups (req, res) {
-  console.log('sssss')
-  console.log(JSON.stringify(req.query))
-  // ! This seems suspect. The function used expects a memberId, while we are not providing it here at all
-  // ! We are no longer passing the user type - removed it at the time of writing this comment, since the function
-  // ! did not make use of it at all, but the other arguments seem weird...
-  const result = await service.getMemberGroups(req.authUser.isMachine ? 'M2M' : req.authUser, {}, req.query)
-  helper.setResHeaders(req, res, result)
-  res.send(result)
-}
-
 module.exports = {
   getGroupMembers,
   addGroupMember,
@@ -116,6 +100,5 @@ module.exports = {
   deleteGroupMember,
   getGroupMembersCount,
   listGroupsMemberCount,
-  getMemberGroups,
-  searchMemberGroups
+  getMemberGroups
 }
