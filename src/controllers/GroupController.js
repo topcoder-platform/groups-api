@@ -15,7 +15,7 @@ async function searchGroups (req, res) {
   const criteria = req.query || {}
   const isAdmin = req.authUser.isMachine || helper.hasAdminRole(req.authUser)
   if (!isAdmin) {
-    criteria.memberId = String(req.authUser.userId)
+    criteria.memberId = req.authUser.userId
     criteria.membershipType = config.MEMBERSHIP_TYPES.User
   }
   const result = await service.searchGroups(criteria, isAdmin)
