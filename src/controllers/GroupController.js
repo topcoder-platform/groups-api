@@ -76,8 +76,7 @@ async function getGroupByOldId (req, res) {
   const result = await service.getGroup(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.oldId,
-    req.query,
-    true
+    req.query
   )
   res.send(result)
 }

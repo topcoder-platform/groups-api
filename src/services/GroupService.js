@@ -297,7 +297,7 @@ updateGroup.schema = {
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup (currentUser, groupId, criteria, isOldId) {
+async function getGroup (currentUser, groupId, criteria) {
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   logger.debug(
     `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
@@ -427,8 +427,7 @@ getGroup.schema = {
     includeParentGroup: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
-  }),
-  isOldId: Joi.boolean()
+  })
 }
 
 /**
