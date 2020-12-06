@@ -10,7 +10,7 @@ module.exports = {
       controller: 'GroupController',
       method: 'searchGroups',
       auth: 'jwt',
-      access: [constants.UserRoles.Admin, constants.UserRoles.User],
+      access: [constants.UserRoles.Admin, constants.UserRoles.User, constants.UserRoles.CoPilot],
       scopes: ['read:groups', 'write:groups', 'all:groups']
     },
     post: {
