@@ -14,9 +14,7 @@ const logger = require('../common/logger')
 async function searchGroups (req, res) {
   const criteria = req.query || {}
   const isAdmin = req.authUser.isMachine || helper.hasAdminRole(req.authUser)
-  console.log('isAdmin', isAdmin)
   if (!isAdmin) {
-    console.log(req.authUser)
     criteria.memberId = req.authUser.userId
     criteria.membershipType = config.MEMBERSHIP_TYPES.User
   }

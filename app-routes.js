@@ -41,6 +41,7 @@ module.exports = (app) => {
           if (!req.authUser) {
             return next(new errors.UnauthorizedError('Action is not allowed for invalid token'))
           }
+          req.authUser.userId = String(req.authUser.userId)
           req.auth = req.authUser
           req.auth.sub = req.auth.userId
           if (req.authUser.roles) {

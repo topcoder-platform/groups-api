@@ -3,8 +3,7 @@
  */
 const UserRoles = {
   Admin: 'Administrator',
-  User: 'Topcoder User',
-  CoPilot: 'copilot'
+  User: 'Topcoder User'
 }
 
 const MembershipTypes = {
