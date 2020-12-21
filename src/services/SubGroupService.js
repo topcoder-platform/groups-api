@@ -21,10 +21,10 @@ async function createSubGroup (currentUser, groupId, data) {
 
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
+  const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   try {
     if (
-      currentUser !== 'M2M' &&
-      !helper.hasAdminRole(currentUser) &&
+      !isAdmin &&
       !(await helper.hasGroupRole(tx, groupId, currentUser.userId, ['groupAdmin']))
     ) {
       throw new errors.ForbiddenError('You are not allowed to perform this action!')
@@ -34,7 +34,7 @@ async function createSubGroup (currentUser, groupId, data) {
       tx,
       'Group',
       groupId,
-      currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
+      isAdmin
     )
 
     const subGroup = await helper.createGroup(tx, data, currentUser)
@@ -97,17 +97,17 @@ async function deleteSubGroup (currentUser, groupId, subGroupId) {
   logger.debug(`Delete Sub Group - ${groupId}, Sub Group - ${subGroupId}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
+  const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   try {
     if (
-      currentUser !== 'M2M' &&
-      !helper.hasAdminRole(currentUser) &&
+      !isAdmin &&
       !(await helper.hasGroupRole(tx, groupId, currentUser.userId, ['groupAdmin']))
     ) {
       throw new errors.ForbiddenError('You are not allowed to perform this action!')
     }
 
-    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
-    const subGroup = await helper.ensureExists(tx, 'Group', subGroupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
+    const subGroup = await helper.ensureExists(tx, 'Group', subGroupId, isAdmin)
 
     const res = await tx.run(`MATCH (g:Group {id: "${groupId}"})-[r:GroupContains {type: "${config.MEMBERSHIP_TYPES.Group}"}]->(o {id: "${subGroupId}"}) return r`)
     if (res.records.length === 0) {

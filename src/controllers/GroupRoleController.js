@@ -38,7 +38,7 @@ async function deleteGroupRole (req, res) {
   await service.deleteGroupRole(req.params.userId,
     req.body.groupId,
     req.body.role,
-    !req.authUser.isMachine && helper.hasAdminRole(req.authUser))
+    req.authUser.isMachine || helper.hasAdminRole(req.authUser))
   res.sendStatus(204)
 }
 

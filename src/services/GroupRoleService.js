@@ -60,9 +60,10 @@ async function addGroupRole (currentUser, userId, groupId, role) {
   logger.debug(`Add Group Role - user - ${userId} , group - ${groupId}, role - ${role}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
+  const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   try {
-    await helper.ensureExists(tx, 'Group', groupId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
-    await helper.ensureExists(tx, 'User', userId, currentUser !== 'M2M' && helper.hasAdminRole(currentUser))
+    await helper.ensureExists(tx, 'Group', groupId, isAdmin)
+    await helper.ensureExists(tx, 'User', userId, isAdmin)
 
     const res = await tx.run(`MATCH (g:Group {id: "${groupId}"})-[r:GroupContains {type: "${config.MEMBERSHIP_TYPES.User}"}]->(o {id: "${userId}"}) return r`)
 

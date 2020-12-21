@@ -29,32 +29,43 @@ module.exports = (app) => {
         next()
       })
 
+      let access = []
       // add Authenticator check if route has auth
       if (def.auth) {
+        // default access roles
+        access = def.access || []
         actions.push((req, res, next) => {
           authenticator(_.pick(config, ['AUTH_SECRET', 'VALID_ISSUERS']))(req, res, next)
         })
-
         actions.push((req, res, next) => {
-          if (req.authUser.isMachine) {
-            // M2M
-            if (!req.authUser.scopes || !helper.checkIfExists(def.scopes, req.authUser.scopes)) {
+          if (!req.authUser) {
+            return next(new errors.UnauthorizedError('Action is not allowed for invalid token'))
+          }
+          req.authUser.userId = String(req.authUser.userId)
+          req.auth = req.authUser
+          req.auth.sub = req.auth.userId
+          if (req.authUser.roles) {
+            // all access are allowed
+            if (_.isEmpty(access)) {
+              next()
+            } else if (!helper.checkIfExists(access, req.authUser.roles)) {
+              res.forbidden = true
+              next(new errors.ForbiddenError('You are not allowed to perform this action'))
+            } else {
+              next()
+            }
+          } else if (req.authUser.scopes) {
+            if (_.isNil(def.scopes) || _.isEmpty(def.scopes)) {
+              next()
+            } else if (!helper.checkIfExists(def.scopes, req.authUser.scopes)) {
               next(new errors.ForbiddenError('You are not allowed to perform this action!'))
             } else {
               next()
             }
+          } else if ((_.isArray(def.access) && def.access.length > 0) || (_.isArray(def.scopes) && def.scopes.length > 0)) {
+            next(new errors.UnauthorizedError('You are not authorized to perform this action'))
           } else {
-            req.authUser.userId = String(req.authUser.userId)
-            // User
-            if (req.authUser.roles) {
-              if (!helper.checkIfExists(def.access, req.authUser.roles)) {
-                next(new errors.ForbiddenError('You are not allowed to perform this action!'))
-              } else {
-                next()
-              }
-            } else {
-              next(new errors.ForbiddenError('You are not authorized to perform this action'))
-            }
+            next()
           }
         })
       }

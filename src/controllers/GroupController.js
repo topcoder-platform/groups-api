@@ -11,13 +11,14 @@ const logger = require('../common/logger')
  * @param req the request
  * @param res the response
  */
-async function searchGroups(req, res) {
-  let criteria = req.query
-  if (!req.authUser.isMachine && !helper.hasAdminRole(req.authUser) && criteria) {
+async function searchGroups (req, res) {
+  const criteria = req.query || {}
+  const isAdmin = req.authUser.isMachine || helper.hasAdminRole(req.authUser)
+  if (!isAdmin) {
     criteria.memberId = req.authUser.userId
     criteria.membershipType = config.MEMBERSHIP_TYPES.User
   }
-  const result = await service.searchGroups(criteria, req.authUser.isMachine || helper.hasAdminRole(req.authUser))
+  const result = await service.searchGroups(criteria, isAdmin)
   helper.setResHeaders(req, res, result)
   res.send(result)
 }
@@ -27,7 +28,7 @@ async function searchGroups(req, res) {
  * @param req the request
  * @param res the response
  */
-async function createGroup(req, res) {
+async function createGroup (req, res) {
   const result = await service.createGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.body)
   res.send(result)
 }
@@ -37,7 +38,7 @@ async function createGroup(req, res) {
  * @param req the request
  * @param res the response
  */
-async function updateGroup(req, res) {
+async function updateGroup (req, res) {
   const result = await service.updateGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId, req.body)
   res.send(result)
 }
@@ -47,7 +48,7 @@ async function updateGroup(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroup(req, res) {
+async function getGroup (req, res) {
   logger.debug(`Get group details for req = ${req}`)
   const result = await service.getGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId, req.query)
   res.send(result)
@@ -58,10 +59,10 @@ async function getGroup(req, res) {
  * @param req the request
  * @param res the response
  */
-async function deleteGroup(req, res) {
+async function deleteGroup (req, res) {
   const result = await service.deleteGroup(
     req.params.groupId,
-    !req.authUser.isMachine && helper.hasAdminRole(req.authUser)
+    req.authUser.isMachine || helper.hasAdminRole(req.authUser)
   )
   res.send(result)
 }
@@ -71,12 +72,11 @@ async function deleteGroup(req, res) {
  * @param req the request
  * @param res the response
  */
-async function getGroupByOldId(req, res) {
+async function getGroupByOldId (req, res) {
   const result = await service.getGroup(
     req.authUser.isMachine ? 'M2M' : req.authUser,
     req.params.oldId,
-    req.query,
-    true
+    req.query
   )
   res.send(result)
 }

@@ -137,15 +137,6 @@ module.exports = {
       scopes: ['read:groups']
     }
   },
-  '/groups/memberGroups/': {
-    get: {
-      controller: 'GroupMembershipController',
-      method: 'searchMemberGroups',
-      auth: 'jwt',
-      access: [constants.UserRoles.Admin, constants.UserRoles.User],
-      scopes: ['read:groups']
-    }
-  },
   '/group-roles/users/:userId': {
     get: {
       controller: 'GroupRoleController',
