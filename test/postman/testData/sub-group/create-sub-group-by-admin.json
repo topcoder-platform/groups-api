@@ -1,0 +1,13 @@
+[
+  {
+    "name": "sub-group1",
+    "description": "sub-desc1",
+    "privateGroup": false,
+    "selfRegister": true,
+    "domain": "sub_domain_1",
+    "ssoId": "sub_sso_id_1",
+    "organizationId": "org_id",
+    "status": "active",
+    "httpCode": 200
+  }
+]

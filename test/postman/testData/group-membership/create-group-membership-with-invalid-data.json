@@ -1,0 +1,101 @@
+[
+  {
+    "groupId": "{{GROUP_ID2}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType",
+    "memberId": "\"{{USER_ID}}\"",
+    "membershipType": "\"user\"",
+    "httpCode": 409,
+    "message": "The member is already in the group"
+  },
+  {
+    "groupId": "{{GROUP_ID2}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType",
+    "memberId": "\"{{GROUP_ID}}\"",
+    "membershipType": "\"group\"",
+    "httpCode": 409,
+    "message": "Parent group is private, the child group must be private too."
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId_not_provided",
+    "required_field_2": "membershipType",
+    "memberId": "\"{{USER_ID}}\"",
+    "membershipType": "\"user\"",
+    "httpCode": 400,
+    "message": "\"memberId\" is required, \"universalUID\" is required"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType_not_provided",
+    "memberId": "\"{{USER_ID}}\"",
+    "membershipType": "\"user\"",
+    "httpCode": 400,
+    "message": "\"membershipType\" is required, \"universalUID\" is required"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType",
+    "memberId": "\"\"",
+    "membershipType": "\"user\"",
+    "httpCode": 400,
+    "message": "\"memberId\" is not allowed to be empty, \"universalUID\" is required"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType",
+    "memberId": -1,
+    "membershipType": "\"user\"",
+    "httpCode": 400,
+    "message": "\"memberId\" must be a string, \"universalUID\" is required"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "universalUID",
+    "required_field_2": "membershipType",
+    "memberId": "\"\"",
+    "membershipType": "\"user\"",
+    "httpCode": 400,
+    "message": "\"memberId\" is required, \"universalUID\" is not allowed to be empty"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "universalUID",
+    "required_field_2": "membershipType",
+    "memberId": -1,
+    "membershipType": "\"user\"",
+    "httpCode": 400,
+    "message": "\"memberId\" is required, \"universalUID\" must be a string"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType",
+    "memberId": "\"member_id\"",
+    "membershipType": "\"invalid\"",
+    "httpCode": 400,
+    "message": "\"membershipType\" must be one of [group, user], \"universalUID\" is required"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId",
+    "required_field_2": "membershipType",
+    "memberId": "\"member_id\"",
+    "membershipType": false,
+    "httpCode": 400,
+    "message": "\"membershipType\" must be a string, \"universalUID\" is required"
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "required_field_1": "memberId",
+    "required_field_2": "universalUID",
+    "memberId": "\"member_id\"",
+    "membershipType": "\"group\"",
+    "httpCode": 400,
+    "message": "\"membershipType\" is required, \"membershipType\" is required"
+  }
+]

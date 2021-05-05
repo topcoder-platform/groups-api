@@ -1,0 +1,34 @@
+[
+  {
+    "includeSubGroups": 0,
+    "includeParentGroup": false,
+    "oneLevel": false,
+    "fields": "id,name,description",
+    "httpCode": 400,
+    "message": "\"includeSubGroups\" must be a boolean"
+  },
+  {
+    "includeSubGroups": false,
+    "includeParentGroup": 0,
+    "oneLevel": false,
+    "fields": "id,name,description",
+    "httpCode": 400,
+    "message": "\"includeParentGroup\" must be a boolean"
+  },
+  {
+    "includeSubGroups": false,
+    "includeParentGroup": false,
+    "oneLevel": 0,
+    "fields": "id,name,description",
+    "httpCode": 400,
+    "message": "\"oneLevel\" must be a boolean"
+  },
+  {
+    "includeSubGroups": false,
+    "includeParentGroup": false,
+    "oneLevel": false,
+    "fields": "id,name,description,invalid",
+    "httpCode": 400,
+    "message": "Field name invalid is not allowed, allowed field names: [\n    \"id\",\n    \"createdAt\",\n    \"createdBy\",\n    \"updatedAt\",\n    \"updatedBy\",\n    \"name\",\n    \"description\",\n    \"privateGroup\",\n    \"selfRegister\",\n    \"domain\",\n    \"organizationId\",\n    \"oldId\"\n]"
+  }
+]

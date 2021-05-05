@@ -1,0 +1,7 @@
+[
+  {
+    "includeSubGroups": "notaboolean", 
+    "httpCode": 400,
+    "message": "\"includeSubGroups\" must be a boolean"
+  }
+]
