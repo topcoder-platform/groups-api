@@ -1,0 +1,14 @@
+[
+  {
+    "name": "new-group2",
+    "description": "new-desc2",
+    "privateGroup": true,
+    "selfRegister": true,
+    "domain": "test_domain_updated",
+    "ssoId": "sso_id_2_new",
+    "organizationId": "new_id",
+    "status": "active",
+    "oldId": "2",
+    "httpCode": 200
+  }
+]

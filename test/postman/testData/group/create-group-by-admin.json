@@ -1,0 +1,13 @@
+[
+  {
+    "name": "group1",
+    "description": "desc1",
+    "privateGroup": false,
+    "selfRegister": true,
+    "domain": "test_domain",
+    "ssoId": "sso_id_1",
+    "organizationId": "91bda549-9933-4ce4-b8d8-97974d86c710",
+    "status": "active",
+    "httpCode": 200
+  }
+]
