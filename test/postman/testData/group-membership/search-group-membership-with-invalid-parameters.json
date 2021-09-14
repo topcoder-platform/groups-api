@@ -1,0 +1,27 @@
+  
+[
+  {
+    "page": -1,
+    "perPage": 10,
+    "httpCode": 400,
+    "message": "\"page\" must be larger than or equal to 1"
+  },
+  {
+    "page": true,
+    "perPage": 10,
+    "httpCode": 400,
+    "message": "\"page\" must be a number"
+  },
+  {
+    "page": 1,
+    "perPage": false,
+    "httpCode": 400,
+    "message": "\"perPage\" must be a number"
+  },
+  {
+    "page": 1,
+    "perPage": -10,
+    "httpCode": 400,
+    "message": "\"perPage\" must be larger than or equal to 1"
+  }
+]

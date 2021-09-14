@@ -1,0 +1,13 @@
+  
+[
+    {
+      "jwtToken": "Bearer invalid",
+      "httpCode": 403,
+      "message": "Invalid Token."
+    },
+    {
+      "httpCode": 403,
+      "message": "No token provided."
+    }
+  ]
+  

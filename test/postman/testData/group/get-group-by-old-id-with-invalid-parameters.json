@@ -1,0 +1,24 @@
+  
+[
+  {
+    "includeSubGroups": true,
+    "includeParentGroup": false,
+    "oneLevel": false,
+    "fields": "id,name,description",
+    "httpCode": 200
+  },
+  {
+    "includeSubGroups": false,
+    "includeParentGroup": true,
+    "oneLevel": false,
+    "fields": "id,name,description,privateGroup,selfRegister",
+    "httpCode": 200
+  },
+  {
+    "includeSubGroups": false,
+    "includeParentGroup": false,
+    "oneLevel": false,
+    "fields": "id,createdAt,createdBy,updatedAt,updatedBy,name,description,privateGroup,selfRegister,domain,organizationId,oldId",
+    "httpCode": 200
+  }
+]

@@ -111,7 +111,7 @@ async function deleteSubGroup (currentUser, groupId, subGroupId) {
 
     const res = await tx.run(`MATCH (g:Group {id: "${groupId}"})-[r:GroupContains {type: "${config.MEMBERSHIP_TYPES.Group}"}]->(o {id: "${subGroupId}"}) return r`)
     if (res.records.length === 0) {
-      throw new errors.BadRequestError(`The Gourp: ${subGroupId} is not the child of Group: ${subGroupId}`)
+      throw new errors.BadRequestError(`The Group: ${subGroupId} is not the child of Group: ${groupId}`)
     }
 
     // delete relationship

@@ -1,0 +1,18 @@
+  
+[
+  {
+    "groupId": "{{GROUP_ID}}",
+    "subgroupId": "invalid_id",
+    "httpCode": 404
+  },
+  {
+    "groupId": "invalid_id",
+    "subgroupId": "{{SUBGROUP_ID}}",
+    "httpCode": 404
+  },
+  {
+    "groupId": "{{GROUP_ID}}",
+    "subgroupId": "{{GROUP_ID}}",
+    "httpCode": 400
+  }
+]

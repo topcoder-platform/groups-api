@@ -1,0 +1,12 @@
+[
+    {
+        "includeSubGroups": true,
+        "universalUID": "universal_id2",
+        "organizationId": "new_id"
+    },
+    {
+        "includeSubGroups": false,
+        "universalUID": "universal_id2",
+        "organizationId": "new_id"
+    }
+]
