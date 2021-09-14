@@ -1,0 +1,9 @@
+[
+    {
+        "includeSubGroups": 12,
+        "universalUID": "universal_id2",
+        "organizationId": "new_id",
+        "httpCode": 400,
+        "message": "\"includeSubGroups\" must be a boolean"
+    }
+]

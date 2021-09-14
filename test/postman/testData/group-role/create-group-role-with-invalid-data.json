@@ -1,0 +1,90 @@
+[
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": "\"groupManager\"",
+    "httpCode": 409
+  },
+  {
+    "userId": "invalid_user",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": "\"groupManager\"",
+    "httpCode": 400
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"nonexistent_group\"",
+    "role": "\"groupManager\"",
+    "httpCode": 400,
+    "message": "Not found Group of id nonexistent_group"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId_not_provided",
+    "required_field_2": "role",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": "\"groupManager\"",
+    "httpCode": 400,
+    "message": "\"groupId\" is required"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role_not_provided",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": "\"groupManager\"",
+    "httpCode": 400,
+    "message": "\"role\" is required"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": "\"invalid_role\"",
+    "httpCode": 400,
+    "message": "\"role\" must be one of [groupManager, groupAdmin]"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": "\"\"",
+    "httpCode": 400,
+    "message": "\"role\" is not allowed to be empty"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"{{GROUP_ID2}}\"",
+    "role": 0,
+    "httpCode": 400,
+    "message": "\"role\" must be a string"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": 100,
+    "role": "\"groupManager\"",
+    "httpCode": 400,
+    "message": "\"groupId\" must be a string"
+  },
+  {
+    "userId": "{{USER_ID}}",
+    "required_field_1": "groupId",
+    "required_field_2": "role",
+    "groupId": "\"\"",
+    "role": "\"groupManager\"",
+    "httpCode": 400,
+    "message": "\"groupId\" is not allowed to be empty"
+  }
+]

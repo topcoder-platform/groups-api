@@ -21,6 +21,15 @@ module.exports = {
       scopes: ['write:groups', 'all:groups']
     }
   },
+  '/groups/internal/jobs/clean':{
+    post: {
+      controller: 'CleanUpController',
+      method: 'cleanUpTestData',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['all:groups']
+    }
+  },
   '/groups/health': {
     get: {
       controller: 'HealthController',
