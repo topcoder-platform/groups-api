@@ -27,7 +27,7 @@
     "lodash": "^4.17.19",
     "morgan": "^1.7.0",
     "neo4j-driver": "^4.0.2",
-    "swagger-ui-express": "^4.1.5",
+    "swagger-ui-express": "^4.1.6",
     "tc-bus-api-wrapper": "topcoder-platform/tc-bus-api-wrapper.git#feature/auth0-proxy-server",
     "tc-core-library-js": "appirio-tech/tc-core-library-js.git#v2.6.4",
     "uuid": "^3.3.3",
