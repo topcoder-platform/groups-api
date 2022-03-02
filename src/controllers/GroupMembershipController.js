@@ -93,6 +93,17 @@ async function getMemberGroups (req, res) {
   res.send(result)
 }
 
+/**
+* Group Validity Check for Member
+* @param {*} req
+* @param {*} res
+*/
+async function groupValidityCheck(req, res) {
+  const result = await service.groupValidityCheck(req.params.memberId, req.params.groupId)
+  res.send(result)
+}
+
+
 module.exports = {
   getGroupMembers,
   addGroupMember,
@@ -100,5 +111,6 @@ module.exports = {
   deleteGroupMember,
   getGroupMembersCount,
   listGroupsMemberCount,
-  getMemberGroups
+  getMemberGroups,
+  groupValidityCheck
 }
