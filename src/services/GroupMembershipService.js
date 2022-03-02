@@ -561,6 +561,30 @@ getMemberGroups.schema = {
   memberId: Joi.id()
 }
 
+async function groupValidityCheck(memberId, groupId) {
+  const session = helper.createDBSession()
+  try {
+    const res = await session.run(
+      `MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`
+    )
+
+    const validOrNot = _.includes(_.uniq(_.map(res.records, (record) => record.get(0))), groupId)
+
+    return {"check": validOrNot}
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
+}
+
+groupValidityCheck.schema = {
+  memberId: Joi.id(),
+  groupId: Joi.id()
+}
+
 module.exports = {
   getGroupMembers,
   addGroupMember,
@@ -568,7 +592,8 @@ module.exports = {
   deleteGroupMember,
   getGroupMembersCount,
   listGroupsMemberCount,
-  getMemberGroups
+  getMemberGroups,
+  groupValidityCheck
 }
 
 logger.buildService(module.exports)

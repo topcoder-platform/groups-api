@@ -104,6 +104,12 @@ module.exports = {
       method: 'getGroupMembersCount'
     }
   },
+  '/groups/validityCheck/:memberId/:groupId': {
+    get: {
+      controller: 'GroupMembershipController',
+      method: 'groupValidityCheck'
+    }
+  },
   '/groups/:groupId/subGroup': {
     post: {
       controller: 'SubGroupController',

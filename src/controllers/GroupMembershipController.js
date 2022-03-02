@@ -99,10 +99,18 @@ async function getMemberGroups(req, res) {
  * @param res the response
  */
 async function searchMemberGroups(req, res) {
-  console.log('sssss')
-  console.log(JSON.stringify(req.query))
   const result = await service.getMemberGroups(req.authUser.isMachine ? 'M2M' : req.authUser, {}, req.query)
   helper.setResHeaders(req, res, result)
+  res.send(result)
+}
+
+/**
+ * Group Validity Check for Member
+ * @param {*} req 
+ * @param {*} res 
+ */
+async function groupValidityCheck(req, res) {
+  const result = await service.groupValidityCheck(req.params.memberId, req.params.groupId)
   res.send(result)
 }
 
@@ -114,5 +122,6 @@ module.exports = {
   getGroupMembersCount,
   listGroupsMemberCount,
   getMemberGroups,
-  searchMemberGroups
+  searchMemberGroups,
+  groupValidityCheck
 }
