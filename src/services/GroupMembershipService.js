@@ -540,11 +540,12 @@ listGroupsMemberCount.schema = {
  * @param {Object} query the search criteria
  * @returns {Object} the search result
  */
-async function getMemberGroups (memberId) {
+async function getMemberGroups (memberId, query) {
   const session = helper.createDBSession()
   try {
+    const returnUuid = query.uuid
     const res = await session.run(
-      `MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND g.status = '${constants.GroupStatus.Active}' RETURN g.oldId order by g.oldId`
+      `MATCH (g:Group)-[r:GroupContains*1..]->(o {id: "${memberId}"}) WHERE exists(g.oldId) AND g.status = '${constants.GroupStatus.Active}' RETURN ${returnUuid ? 'g.id order by g.id' : 'g.oldId order by g.oldId'}`
     )
 
     return _.uniq(_.map(res.records, (record) => record.get(0)))
@@ -558,7 +559,10 @@ async function getMemberGroups (memberId) {
 }
 
 getMemberGroups.schema = {
-  memberId: Joi.id()
+  memberId: Joi.id(),
+  query: Joi.object().keys({
+    uuid: Joi.boolean().default(false)
+  })
 }
 
 async function groupValidityCheck(memberId, groupId) {
