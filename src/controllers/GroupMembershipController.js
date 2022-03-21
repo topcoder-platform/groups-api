@@ -88,10 +88,21 @@ async function listGroupsMemberCount (req, res) {
  * @param res the response
  */
 async function getMemberGroups (req, res) {
-  const result = await service.getMemberGroups(req.params.memberId)
+  const result = await service.getMemberGroups(req.params.memberId, req.query)
   helper.setResHeaders(req, res, result)
   res.send(result)
 }
+
+/**
+* Group Validity Check for Member
+* @param {*} req
+* @param {*} res
+*/
+async function groupValidityCheck(req, res) {
+  const result = await service.groupValidityCheck(req.params.memberId, req.params.groupId)
+  res.send(result)
+}
+
 
 module.exports = {
   getGroupMembers,
@@ -100,5 +111,6 @@ module.exports = {
   deleteGroupMember,
   getGroupMembersCount,
   listGroupsMemberCount,
-  getMemberGroups
+  getMemberGroups,
+  groupValidityCheck
 }
