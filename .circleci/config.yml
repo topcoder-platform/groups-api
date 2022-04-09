@@ -71,7 +71,7 @@ workflows:
             branches:
               only:
                 - develop
-                - feat/return-group-uuid
+                - hot-fix-driver-version
       - "build-prod":
           context : org-global
           filters:
