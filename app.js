@@ -71,7 +71,7 @@ const server = app.listen(app.get('port'), () => {
   logger.info(`Express server listening on port ${app.get('port')}`)
 })
 
-server.close(async (error) => {
+server.on('close', async (error) => {
   await closeDB()
   logger.info('server closed')
   process.exit(error ? 1 : 0)
