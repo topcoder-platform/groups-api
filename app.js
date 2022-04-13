@@ -14,6 +14,7 @@ const HttpStatus = require('http-status-codes')
 const morgan = require('morgan')
 const swaggerUi = require('swagger-ui-express')
 const YAML = require('yamljs')
+const { closeDB } = require('./src/common/helper')
 
 const swaggerDocument = YAML.load('./docs/swagger.yml')
 // setup express app
@@ -66,6 +67,12 @@ app.use((err, req, res, next) => {
   res.status(status).json(errorResponse)
 })
 
-app.listen(app.get('port'), () => {
+const server = app.listen(app.get('port'), () => {
   logger.info(`Express server listening on port ${app.get('port')}`)
+})
+
+server.close(async (error) => {
+  await closeDB()
+  logger.info('server closed')
+  process.exit(error ? 1 : 0)
 })
