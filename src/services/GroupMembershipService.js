@@ -565,7 +565,7 @@ getMemberGroups.schema = {
   })
 }
 
-async function groupValidityCheck(memberId, groupId) {
+async function groupValidityCheck (memberId, groupId) {
   const session = helper.createDBSession()
   try {
     const res = await session.run(
@@ -574,7 +574,7 @@ async function groupValidityCheck(memberId, groupId) {
 
     const validOrNot = _.includes(_.uniq(_.map(res.records, (record) => record.get(0))), groupId)
 
-    return {"check": validOrNot}
+    return { check: validOrNot }
   } catch (error) {
     logger.error(error)
     throw error

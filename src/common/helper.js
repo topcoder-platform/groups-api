@@ -64,6 +64,13 @@ function createDBSession () {
 }
 
 /**
+ * Close driver connection once the app exit
+ */
+async function closeDB () {
+  await driver.close()
+}
+
+/**
  * Ensure entity exists. Throw error if not exist.
  * @param {Object} session the db session
  * @param {String} model the model name
@@ -382,6 +389,7 @@ module.exports = {
   wrapExpress,
   autoWrapExpress,
   createDBSession,
+  closeDB,
   ensureExists,
   ensureGroupMember,
   getChildGroups,
