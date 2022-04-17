@@ -71,7 +71,6 @@ workflows:
             branches:
               only:
                 - develop
-                - hot-fix-driver-version
       - "build-prod":
           context : org-global
           filters:
