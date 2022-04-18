@@ -71,7 +71,6 @@ workflows:
             branches:
               only:
                 - develop
-                - feat/return-group-uuid
       - "build-prod":
           context : org-global
           filters:
