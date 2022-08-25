@@ -1,7 +1,8 @@
 /**
  * App bootstrap
  */
-global.Promise = require('bluebird')
+// commenting this as need to use the pure Promise features
+// global.Promise = require('bluebird')
 const Joi = require('joi')
 
 Joi.optionalId = () => Joi.string()
