@@ -1,0 +1,39 @@
+[{
+        "memberId": "6648768",
+        "is_already_added": true,
+        "membershipType": "user",
+        "status": "failed",
+        "message": "The member is already in the group"
+    },
+    {
+        "memberId": "6244768",
+        "is_already_added": true,
+        "membershipType": "user",
+        "status": "failed",
+        "message": "The member is already in the group"
+    },
+    {
+        "memberId": "8844768",
+        "is_already_added": false,
+        "membershipType": "user",
+        "status": "success"
+    },
+    {
+        "memberId": "9944768",
+        "is_already_added": false,
+        "membershipType": "user",
+        "status": "success"
+    },
+    {
+        "memberId": "5544768",
+        "is_already_added": false,
+        "membershipType": "user",
+        "status": "success"
+    },
+    {
+        "memberId": "7748768",
+        "is_already_added": false,
+        "membershipType": "user",
+        "status": "success"
+    }
+]
