@@ -7,7 +7,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jmeter-maven-plugin.version>2.9.0</jmeter-maven-plugin.version>
-		<jmeterScript>Groups API.jmx</jmeterScript>
+		<jmeterScript>Bulk members Operation.jmx</jmeterScript>
     </properties>
     <dependencies>
         <dependency>
