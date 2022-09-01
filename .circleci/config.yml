@@ -148,4 +148,4 @@ workflows:
             branches:
               only:
                 - develop
-                - Performance
+                - performance
