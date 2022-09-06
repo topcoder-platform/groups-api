@@ -1,0 +1,43 @@
+{
+    "members": [{
+            "memberId": "22905771",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40158396",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40157096",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40155579",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40153987",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40153932",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40153892",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "4015446",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40152922",
+            "membershipType": "user"
+        },
+        {
+            "memberId": "40152905",
+            "membershipType": "user"
+        }
+    ]
+}
