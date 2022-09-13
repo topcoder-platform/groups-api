@@ -25,11 +25,21 @@ async function getGroupMembers (req, res) {
  * @param res the response
  */
 async function addGroupMember (req, res) {
-  const result = await service.addGroupMember(
-    req.authUser.isMachine ? 'M2M' : req.authUser,
-    req.params.groupId,
-    req.body
-  )
+  let result
+  if (req.body.members && req.body.members.length > 0) {
+    result = await service.addGroupMemberBulk(
+      req.authUser.isMachine ? 'M2M' : req.authUser,
+      req.params.groupId,
+      req.body
+    )
+  } else {
+    result = await service.addGroupMember(
+      req.authUser.isMachine ? 'M2M' : req.authUser,
+      req.params.groupId,
+      req.body
+    )
+  }
+
   res.send(result)
 }
 
@@ -53,12 +63,22 @@ async function getGroupMember (req, res) {
  * @param res the response
  */
 async function deleteGroupMember (req, res) {
-  const result = await service.deleteGroupMember(
-    req.authUser.isMachine ? 'M2M' : req.authUser,
-    req.params.groupId,
-    req.params.memberId ? req.params.memberId : null,
-    Object.keys(req.query).length !== 0 ? req.query : null
-  )
+  let result
+  if (req.body && req.body.members && req.body.members.length > 0) {
+    result = await service.deleteGroupMemberBulk(
+      req.authUser.isMachine ? 'M2M' : req.authUser,
+      req.params.groupId,
+      req.body
+    )
+  } else {
+    result = await service.deleteGroupMember(
+      req.authUser.isMachine ? 'M2M' : req.authUser,
+      req.params.groupId,
+      req.params.memberId ? req.params.memberId : null,
+      Object.keys(req.query).length !== 0 ? req.query : null
+    )
+  }
+
   res.send(result)
 }
 

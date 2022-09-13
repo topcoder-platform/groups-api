@@ -173,6 +173,56 @@ addGroupMember.schema = Joi.alternatives().try(
 )
 
 /**
+ * Add group members in bulk.
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to add member
+ * @param {Array} data the data for members to add
+ * @returns {Object} the added group membership
+ */
+async function addGroupMemberBulk (currentUser, groupId, data) {
+  logger.debug(`Enter in addGroupMemberBulk - Group = ${groupId} Data = ${JSON.stringify(data)}`)
+
+  const membersAddRes = await Promise.allSettled(data.members.map(member => addGroupMember(currentUser, groupId, member)))
+
+  const result = {}
+  result.groupId = groupId
+
+  const members = data.members.map((member, i) => {
+    if (membersAddRes[i].status === 'fulfilled') {
+      return {
+        memberId: member.memberId,
+        status: 'success'
+      }
+    } else {
+      return {
+        memberId: member.memberId,
+        status: 'failed',
+        message: membersAddRes[i].reason.message
+      }
+    }
+  })
+
+  result.members = members
+
+  return result
+}
+
+addGroupMemberBulk.schema = Joi.object().keys({
+  currentUser: Joi.any(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  data: Joi.object()
+    .keys({
+      members: Joi.array().items(
+        Joi.object({
+          memberId: Joi.id(),
+          membershipType: Joi.string().valid(_.values(config.MEMBERSHIP_TYPES)).required()
+        })
+      )
+        .required()
+    })
+})
+
+/**
  * Delete group member.
  * @param {Object} currentUser the current user
  * @param {String} groupId the group id
@@ -256,6 +306,50 @@ deleteGroupMember.schema = {
   memberId: Joi.optionalId().allow('', null),
   query: Joi.object().allow('', null)
 }
+
+/**
+ * Delete group members in bulk.
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group from members to delete
+ * @param {Array} data the data for members to delete
+ * @returns {Object} the deleted group membership
+ */
+async function deleteGroupMemberBulk (currentUser, groupId, data) {
+  logger.debug(`Enter in deleteGroupMemberBulk - Group = ${groupId} Data = ${JSON.stringify(data)}`)
+
+  const membersAddRes = await Promise.allSettled(data.members.map(member => deleteGroupMember(currentUser, groupId, member)))
+
+  const result = {}
+  result.groupId = groupId
+
+  const members = data.members.map((member, i) => {
+    if (membersAddRes[i].status === 'fulfilled') {
+      return {
+        memberId: member,
+        status: 'success'
+      }
+    } else {
+      return {
+        memberId: member,
+        status: 'failed',
+        message: membersAddRes[i].reason.message
+      }
+    }
+  })
+
+  result.members = members
+
+  return result
+}
+
+deleteGroupMemberBulk.schema = Joi.object().keys({
+  currentUser: Joi.any(),
+  groupId: Joi.id(), // defined in app-bootstrap
+  data: Joi.object()
+    .keys({
+      members: Joi.array().required()
+    })
+})
 
 /**
  * Get group members
@@ -597,7 +691,9 @@ module.exports = {
   getGroupMembersCount,
   listGroupsMemberCount,
   getMemberGroups,
-  groupValidityCheck
+  groupValidityCheck,
+  addGroupMemberBulk,
+  deleteGroupMemberBulk
 }
 
 logger.buildService(module.exports)
