@@ -1,6 +1,6 @@
 [
   {
-    "groupId": "{{GROUP_ID2}}",
+    "groupId": "{{GROUP_ID}}",
     "role": "groupManager"
   }
 ]

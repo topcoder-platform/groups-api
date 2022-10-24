@@ -3,7 +3,7 @@
     "required_field_1": "name",
     "required_field_2": "privateGroup",
     "required_field_3": "selfRegister",
-    "name": "\"POSTMANE2E-group1\"",
+    "name": "\"group1\"",
     "description": "\"desc1\"",
     "privateGroup": true,
     "selfRegister": true,
@@ -12,7 +12,7 @@
     "organizationId": "\"91bda549-9933-4ce4-b8d8-97974d86c710\"",
     "status": "\"inactive\"",
     "httpCode": 409,
-    "message": "The group name POSTMANE2E-group1 is already used"
+    "message": "The group name group1 is already used"
   },
   {
     "required_field_1": "name_not_provided",

@@ -81,7 +81,7 @@
 											"        pm.expect(response.name).to.be.a('string')",
 											"        pm.expect(response.createdAt).to.be.a('string')",
 											"        pm.expect(response.createdBy).to.be.a('string')",
-											"        pm.expect(response.name).to.eq(iterationData.get('name'))",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
 											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
 											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
 											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
@@ -128,7 +128,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"{{name}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\"\n}"
+									"raw": "{\n    \"name\": \"{{name}}-{{$randomUUID}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -158,7 +158,7 @@
 											"        pm.expect(response.id).to.be.a('string')",
 											"        pm.expect(response.name).to.be.a('string')",
 											"        pm.expect(response.createdAt).to.be.a('string')",
-											"        pm.expect(response.name).to.eq(iterationData.get('name'))",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
 											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
 											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
 											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
@@ -196,7 +196,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"{{name}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\"\n}"
+									"raw": "{\n    \"name\": \"{{name}}-{{$randomUUID}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups",
@@ -1451,7 +1451,6 @@
 											"    pm.expect(response[0].ssoId).be.a('string')",
 											"    pm.expect(response[0].organizationId).be.a('string')",
 											"    pm.expect(response[0].domain).be.a('string')",
-											"    pm.expect(response[0].createdBy).be.a('string')",
 											"    pm.expect(response[0].createdAt).be.a('string')",
 											"    pm.expect(response[0].updatedBy).be.a('string')",
 											"    pm.expect(response[0].updatedAt).be.a('string')",
@@ -1502,7 +1501,6 @@
 											"    pm.expect(response[0].ssoId).be.a('string')",
 											"    pm.expect(response[0].organizationId).be.a('string')",
 											"    pm.expect(response[0].domain).be.a('string')",
-											"    pm.expect(response[0].createdBy).be.a('string')",
 											"    pm.expect(response[0].createdAt).be.a('string')",
 											"    pm.expect(response[0].updatedBy).be.a('string')",
 											"    pm.expect(response[0].updatedAt).be.a('string')",
@@ -2103,7 +2101,7 @@
 											"        pm.expect(response.name).to.be.a('string')",
 											"        pm.expect(response.createdAt).to.be.a('string')",
 											"        pm.expect(response.createdBy).to.be.a('string')",
-											"        pm.expect(response.groupId).to.eq(pm.environment.get(\"GROUP_ID2\"))",
+											"        pm.expect(response.groupId).to.eq(pm.environment.get(\"GROUP_ID\"))",
 											"        pm.expect(response.memberId).to.eq(pm.environment.get('USER_ID'))",
 											"        pm.expect(response.membershipType).to.eq(iterationData.get('membershipType'))",
 											"    }",
@@ -2138,13 +2136,13 @@
 									"raw": "{\n    \"memberId\": \"{{USER_ID}}\",\n    \"membershipType\": \"{{membershipType}}\"\n}"
 								},
 								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{GROUP_ID2}}",
+										"{{GROUP_ID}}",
 										"members"
 									]
 								}
@@ -2223,6 +2221,7 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"console.log(pm.response.json())",
 											"const iterationData = pm.iterationData",
 											"const httpCode = iterationData.get('httpCode')",
 											"pm.test(`Status code is ${httpCode}`, function () {",
@@ -3543,13 +3542,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members/{{USER_ID}}",
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{USER_ID}}",
 									"host": [
 										"{{URL}}"
 									],
 									"path": [
 										"groups",
-										"{{GROUP_ID2}}",
+										"{{GROUP_ID}}",
 										"members",
 										"{{USER_ID}}"
 									]
@@ -3811,13 +3810,14 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"console.log(pm.response.json())",
 											"const iterationData = pm.iterationData",
 											"const httpCode = iterationData.get('httpCode')",
 											"pm.test(`Status code is ${httpCode}`, function () {",
 											"    pm.response.to.have.status(httpCode);",
 											"    if(httpCode === 200){",
 											"        const response = pm.response.json()",
-											"        pm.expect(response.name).to.eq(iterationData.get('name'))",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
 											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
 											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
 											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
@@ -3855,7 +3855,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"name\": \"{{name}}\",\n  \"description\": \"{{description}}\",\n  \"privateGroup\": {{privateGroup}},\n  \"selfRegister\": {{selfRegister}},\n  \"domain\": \"{{domain}}\",\n  \"ssoId\": \"{{ssoId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"status\": \"{{status}}\"\n}"
+									"raw": "{\n  \"name\": \"{{name}}-{{$randomUUID}}\",\n  \"description\": \"{{description}}\",\n  \"privateGroup\": {{privateGroup}},\n  \"selfRegister\": {{selfRegister}},\n  \"domain\": \"{{domain}}\",\n  \"ssoId\": \"{{ssoId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"status\": \"{{status}}\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
@@ -3884,7 +3884,7 @@
 											"    pm.response.to.have.status(httpCode);",
 											"    if(httpCode === 200){",
 											"        const response = pm.response.json()",
-											"        pm.expect(response.name).to.eq(iterationData.get('name'))",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
 											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
 											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
 											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
@@ -3922,7 +3922,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"name\": \"{{name}}\",\n  \"description\": \"{{description}}\",\n  \"privateGroup\": {{privateGroup}},\n  \"selfRegister\": {{selfRegister}},\n  \"domain\": \"{{domain}}\",\n  \"ssoId\": \"{{ssoId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"status\": \"{{status}}\"\n}"
+									"raw": "{\n  \"name\": \"{{name}}-{{$randomUUID}}\",\n  \"description\": \"{{description}}\",\n  \"privateGroup\": {{privateGroup}},\n  \"selfRegister\": {{selfRegister}},\n  \"domain\": \"{{domain}}\",\n  \"ssoId\": \"{{ssoId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"status\": \"{{status}}\"\n}"
 								},
 								"url": {
 									"raw": "{{URL}}/groups/{{GROUP_ID2}}/subGroup",

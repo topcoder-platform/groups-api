@@ -3,7 +3,7 @@
     "userId": "{{USER_ID}}",
     "required_field_1": "groupId",
     "required_field_2": "role",
-    "groupId": "\"{{GROUP_ID2}}\"",
+    "groupId": "\"{{GROUP_ID}}\"",
     "role": "\"groupManager\"",
     "httpCode": 409
   },

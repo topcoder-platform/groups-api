@@ -1,6 +1,6 @@
 [
   {
-    "groupId": "{{GROUP_ID2}}",
+    "groupId": "{{GROUP_ID}}",
     "required_field_1": "memberId",
     "required_field_2": "membershipType",
     "memberId": "\"{{USER_ID}}\"",
