@@ -9,7 +9,9 @@ const neo4j = require('neo4j-driver')
 const querystring = require('querystring')
 const uuid = require('uuid/v4')
 const validate = require('uuid-validate')
-
+const m2mAuth = require('tc-core-library-js').auth.m2m
+const m2m = m2mAuth(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME', 'AUTH0_PROXY_SERVER_URL']))
+const request = require('superagent')
 const errors = require('./errors')
 const logger = require('./logger')
 const constants = require('../../app-constants')
@@ -385,6 +387,23 @@ async function deleteGroup (tx, group) {
   return groupsToDelete
 }
 
+/**
+ * Uses superagent to proxy post request
+ * @param {String} url the url
+ * @param {Object} data the query parameters, optional
+ * @returns {Object} the response
+ */
+ async function postRequest (url, data) {
+  const m2mToken = await m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
+
+  return request
+    .post(url)
+    .set('Authorization', `Bearer ${m2mToken}`)
+    .set('Content-Type', 'application/json')
+    .set('Accept', 'application/json')
+    .send(data)
+}
+
 module.exports = {
   wrapExpress,
   autoWrapExpress,
@@ -399,6 +418,7 @@ module.exports = {
   hasAdminRole,
   hasGroupRole,
   postBusEvent,
+  postRequest,
   createGroup,
   deleteGroup
 }

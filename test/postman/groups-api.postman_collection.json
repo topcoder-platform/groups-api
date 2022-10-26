@@ -1,0 +1,4995 @@
+{
+	"info": {
+		"_postman_id": "629084f5-72f8-47db-a24b-12fdeb61f4ad",
+		"name": "groups-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "health check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(`Status code is 200`, function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    const response = pm.response.json()\r",
+									"    pm.expect(response.checksRun).be.a('number')\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let admin = pm.environment.get(\"admin_token\").split('.')[1];",
+									"let user = pm.environment.get(\"user_token\").split('.')[1];",
+									"let admin_id = JSON.parse(Buffer.from(admin,'base64').toString()).userId;",
+									"let user_id = JSON.parse(Buffer.from(user, 'base64').toString()).userId;",
+									"pm.environment.set(\"ADMIN_ID\", admin_id);",
+									"pm.environment.set(\"USER_ID\",user_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/groups/health",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"groups",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Groups",
+			"item": [
+				{
+					"name": "create group",
+					"item": [
+						{
+							"name": "create group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200){",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.createdBy).to.be.a('string')",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
+											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
+											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
+											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
+											"        pm.expect(response.status).to.eq(iterationData.get('status'))",
+											"        pm.expect(response.ssoId).to.eq(iterationData.get('ssoId'))",
+											"        pm.expect(response.organizationId).to.eq(iterationData.get('organizationId'))",
+											"        pm.expect(response.domain).to.eq(iterationData.get('domain'))",
+											"        pm.environment.set(\"GROUP_ID\", pm.response.json().id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}-{{$randomUUID}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200){",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
+											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
+											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
+											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
+											"        pm.expect(response.status).to.eq(iterationData.get('status'))",
+											"        pm.expect(response.ssoId).to.eq(iterationData.get('ssoId'))",
+											"        pm.expect(response.organizationId).to.eq(iterationData.get('organizationId'))",
+											"        pm.expect(response.domain).to.eq(iterationData.get('domain'))",
+											"        pm.environment.set(\"GROUP_ID2\", pm.response.json().id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}-{{$randomUUID}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"failure-token\",\n    \"description\": \"desc1\",\n    \"privateGroup\": true,\n    \"selfRegister\": true\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group with all kinds of invalid request body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"{{required_field_1}}\": {{name}},\n    \"description\": {{description}},\n    \"{{required_field_2}}\": {{privateGroup}},\n    \"{{required_field_3}}\": {{selfRegister}},\n    \"domain\": {{domain}},\n    \"ssoId\": {{ssoId}},\n    \"organizationId\": {{organizationId}},\n    \"status\": {{status}}\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update group",
+					"item": [
+						{
+							"name": "update group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200){",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.createdBy).to.be.a('string')",
+											"        pm.expect(response.updatedAt).to.be.a('string')",
+											"        pm.expect(response.updatedBy).to.be.a('string')",
+											"        pm.expect(response.name).to.eq(iterationData.get('name'))",
+											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
+											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
+											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
+											"        pm.expect(response.status).to.eq(iterationData.get('status'))",
+											"        pm.expect(response.ssoId).to.eq(iterationData.get('ssoId'))",
+											"        pm.expect(response.organizationId).to.eq(iterationData.get('organizationId'))",
+											"        pm.expect(response.domain).to.eq(iterationData.get('domain'))",
+											"        pm.expect(response.oldId).to.eq(iterationData.get('oldId'))",
+											"        pm.environment.set(\"GROUP_OLD_ID\", pm.response.json().oldId);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\",\n    \"oldId\": \"{{oldId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200){",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.updatedAt).to.be.a('string')",
+											"        pm.expect(response.name).to.eq(iterationData.get('name'))",
+											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
+											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
+											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
+											"        pm.expect(response.status).to.eq(iterationData.get('status'))",
+											"        pm.expect(response.ssoId).to.eq(iterationData.get('ssoId'))",
+											"        pm.expect(response.organizationId).to.eq(iterationData.get('organizationId'))",
+											"        pm.expect(response.domain).to.eq(iterationData.get('domain'))",
+											"        pm.expect(response.oldId).to.eq(iterationData.get('oldId'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{name}}\",\n    \"description\": \"{{description}}\",\n    \"privateGroup\": {{privateGroup}},\n    \"selfRegister\": {{selfRegister}},\n    \"domain\": \"{{domain}}\",\n    \"ssoId\": \"{{ssoId}}\",\n    \"organizationId\": \"{{organizationId}}\",\n    \"status\": \"{{status}}\",\n    \"oldId\": \"{{oldId}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"group1-updated-1\",\n    \"description\": \"desc1-updated-1\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"domain\": \"new_domain\",\n    \"status\": \"inactive\",\n    \"organizationId\": \"test\",\n    \"oldId\": \"1\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"group1-updated-1\",\n    \"description\": \"desc1-updated-1\",\n    \"privateGroup\": true,\n    \"selfRegister\": false,\n    \"domain\": \"new_domain\",\n    \"status\": \"inactive\",\n    \"organizationId\": \"test\",\n    \"oldId\": \"1\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update group with all kinds of invalid request body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"{{required_field_1}}\": {{name}},\n    \"description\": {{description}},\n    \"{{required_field_2}}\": {{privateGroup}},\n    \"{{required_field_3}}\": {{selfRegister}},\n    \"domain\": {{domain}},\n    \"ssoId\": {{ssoId}},\n    \"organizationId\": {{organizationId}},\n    \"status\": {{status}},\n    \"oldId\": {{oldId}}\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get group",
+					"item": [
+						{
+							"name": "get group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.status).be.a('string')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{groupId}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{groupId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.status).be.a('string')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{groupId}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{groupId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200) {",
+											"        const response = pm.response.json()",
+											"        const allowedFields = iterationData.get('fields').split(',')",
+											"        if (iterationData.get('includeSubGroups')) {",
+											"            pm.expect(response).to.have.property('subGroups')",
+											"        } else if (iterationData.get('includeParentGroup')) {",
+											"            pm.expect(response).to.have.property('parentGroups')",
+											"        }",
+											"",
+											"        for (const field of allowedFields) {",
+											"            pm.expect(response).to.have.property(field)",
+											"        }",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}?includeSubGroups={{includeSubGroups}}&includeParentGroup={{includeParentGroup}}&oneLevel={{oneLevel}}&fields={{fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "{{includeParentGroup}}"
+										},
+										{
+											"key": "oneLevel",
+											"value": "{{oneLevel}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{fields}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with all kinds of invalid parameter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}?includeSubGroups={{includeSubGroups}}&includeParentGroup={{includeParentGroup}}&oneLevel={{oneLevel}}&fields={{fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "{{includeParentGroup}}"
+										},
+										{
+											"key": "oneLevel",
+											"value": "{{oneLevel}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{fields}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get group with old id",
+					"item": [
+						{
+							"name": "get group with old id by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.status).be.a('string')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/{{GROUP_OLD_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"{{GROUP_OLD_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with old id by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.status).be.a('string')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/{{GROUP_OLD_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"{{GROUP_OLD_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with old id by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/{{GROUP_OLD_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"{{GROUP_OLD_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with old id with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200) {",
+											"        const response = pm.response.json()",
+											"        const allowedFields = iterationData.get('fields').split(',')",
+											"        if (iterationData.get('includeSubGroups')) {",
+											"            pm.expect(response).to.have.property('subGroups')",
+											"        } else if (iterationData.get('includeParentGroup')) {",
+											"            pm.expect(response).to.have.property('parentGroups')",
+											"        }",
+											"",
+											"        for (const field of allowedFields) {",
+											"            pm.expect(response).to.have.property(field)",
+											"        }",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/{{GROUP_OLD_ID}}?includeSubGroups={{includeSubGroups}}&includeParentGroup={{includeParentGroup}}&oneLevel={{oneLevel}}&fields={{fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"{{GROUP_OLD_ID}}"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "{{includeParentGroup}}"
+										},
+										{
+											"key": "oneLevel",
+											"value": "{{oneLevel}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{fields}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with old id with all kinds of invalid parameter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/{{GROUP_OLD_ID}}?includeSubGroups={{includeSubGroups}}&includeParentGroup={{includeParentGroup}}&oneLevel={{oneLevel}}&fields={{fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"{{GROUP_OLD_ID}}"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "{{includeParentGroup}}"
+										},
+										{
+											"key": "oneLevel",
+											"value": "{{oneLevel}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{fields}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with old id with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/{{GROUP_OLD_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"{{GROUP_OLD_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group with old id invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/oldId/1000",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"oldId",
+										"1000"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "search group",
+					"item": [
+						{
+							"name": "search group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].id).be.a('string')",
+											"    pm.expect(response[0].name).be.a('string')",
+											"    pm.expect(response[0].description).be.a('string')",
+											"    pm.expect(response[0].privateGroup).be.a('boolean')",
+											"    pm.expect(response[0].selfRegister).be.a('boolean')",
+											"    pm.expect(response[0].status).be.a('string')",
+											"    pm.expect(response[0].ssoId).be.a('string')",
+											"    pm.expect(response[0].organizationId).be.a('string')",
+											"    pm.expect(response[0].domain).be.a('string')",
+											"    pm.expect(response[0].createdAt).be.a('string')",
+											"    pm.expect(response[0].updatedBy).be.a('string')",
+											"    pm.expect(response[0].updatedAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].id).be.a('string')",
+											"    pm.expect(response[0].name).be.a('string')",
+											"    pm.expect(response[0].description).be.a('string')",
+											"    pm.expect(response[0].privateGroup).be.a('boolean')",
+											"    pm.expect(response[0].selfRegister).be.a('boolean')",
+											"    pm.expect(response[0].status).be.a('string')",
+											"    pm.expect(response[0].ssoId).be.a('string')",
+											"    pm.expect(response[0].organizationId).be.a('string')",
+											"    pm.expect(response[0].domain).be.a('string')",
+											"    pm.expect(response[0].createdAt).be.a('string')",
+											"    pm.expect(response[0].updatedBy).be.a('string')",
+											"    pm.expect(response[0].updatedAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].id).be.a('string')",
+											"    pm.expect(response[0].name).be.a('string')",
+											"    pm.expect(response[0].description).be.a('string')",
+											"    pm.expect(response[0].privateGroup).be.a('boolean')",
+											"    pm.expect(response[0].selfRegister).be.a('boolean')",
+											"    pm.expect(response[0].ssoId).be.a('string')",
+											"    pm.expect(response[0].organizationId).be.a('string')",
+											"    pm.expect(response[0].domain).be.a('string')",
+											"    pm.expect(response[0].createdBy).be.a('string')",
+											"    pm.expect(response[0].createdAt).be.a('string')",
+											"    pm.expect(response[0].updatedBy).be.a('string')",
+											"    pm.expect(response[0].updatedAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].id).be.a('string')",
+											"    pm.expect(response[0].name).be.a('string')",
+											"    pm.expect(response[0].description).be.a('string')",
+											"    pm.expect(response[0].privateGroup).be.a('boolean')",
+											"    pm.expect(response[0].selfRegister).be.a('boolean')",
+											"    pm.expect(response[0].status).be.a('string')",
+											"    pm.expect(response[0].ssoId).be.a('string')",
+											"    pm.expect(response[0].organizationId).be.a('string')",
+											"    pm.expect(response[0].domain).be.a('string')",
+											"    pm.expect(response[0].createdBy).be.a('string')",
+											"    pm.expect(response[0].createdAt).be.a('string')",
+											"    pm.expect(response[0].updatedBy).be.a('string')",
+											"    pm.expect(response[0].updatedAt).be.a('string')",
+											"",
+											"    if (iterationData.get('includeSubGroups')) {",
+											"        pm.expect(response[0]).to.have.property('subGroups')",
+											"        pm.expect(response[0].subGroups.length).to.be.gte(0)",
+											"    } ",
+											"    if (iterationData.get('includeParentGroup')) {",
+											"        pm.expect(response[0]).to.have.property('parentGroups')",
+											"        pm.expect(response[0].parentGroups.length).to.be.gte(0)",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups?name={{name}}&page={{page}}&perPage={{perPage}}&oldId={{oldId}}&ssoId={{ssoId}}&organizationId={{organizationId}}&selfRegister={{selfRegister}}&privateGroup={{privateGroup}}&includeSubGroups={{includeSubGroups}}&includeParentGroup={{includeParentGroup}}&oneLevel={{oneLevel}}&status={{status}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "{{name}}"
+										},
+										{
+											"key": "page",
+											"value": "{{page}}"
+										},
+										{
+											"key": "perPage",
+											"value": "{{perPage}}"
+										},
+										{
+											"key": "oldId",
+											"value": "{{oldId}}"
+										},
+										{
+											"key": "ssoId",
+											"value": "{{ssoId}}"
+										},
+										{
+											"key": "organizationId",
+											"value": "{{organizationId}}"
+										},
+										{
+											"key": "selfRegister",
+											"value": "{{selfRegister}}"
+										},
+										{
+											"key": "privateGroup",
+											"value": "{{privateGroup}}"
+										},
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "{{includeParentGroup}}"
+										},
+										{
+											"key": "oneLevel",
+											"value": "{{oneLevel}}"
+										},
+										{
+											"key": "status",
+											"value": "{{status}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group with all kinds of invalid parameter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups?{{memberIdField}}={{memberId}}&{{universalUIDField}}={{universalUID}}&{{membershipTypeField}}={{membershipType}}&name={{name}}&page={{page}}&perPage={{perPage}}&oldId={{oldId}}&ssoId={{ssoId}}&organizationId={{organizationId}}&selfRegister={{selfRegister}}&privateGroup={{privateGroup}}&includeSubGroups={{includeSubGroups}}&includeParentGroup={{includeParentGroup}}&oneLevel={{oneLevel}}&status={{status}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									],
+									"query": [
+										{
+											"key": "{{memberIdField}}",
+											"value": "{{memberId}}"
+										},
+										{
+											"key": "{{universalUIDField}}",
+											"value": "{{universalUID}}"
+										},
+										{
+											"key": "{{membershipTypeField}}",
+											"value": "{{membershipType}}"
+										},
+										{
+											"key": "name",
+											"value": "{{name}}"
+										},
+										{
+											"key": "page",
+											"value": "{{page}}"
+										},
+										{
+											"key": "perPage",
+											"value": "{{perPage}}"
+										},
+										{
+											"key": "oldId",
+											"value": "{{oldId}}"
+										},
+										{
+											"key": "ssoId",
+											"value": "{{ssoId}}"
+										},
+										{
+											"key": "organizationId",
+											"value": "{{organizationId}}"
+										},
+										{
+											"key": "selfRegister",
+											"value": "{{selfRegister}}"
+										},
+										{
+											"key": "privateGroup",
+											"value": "{{privateGroup}}"
+										},
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "includeParentGroup",
+											"value": "{{includeParentGroup}}"
+										},
+										{
+											"key": "oneLevel",
+											"value": "{{oneLevel}}"
+										},
+										{
+											"key": "status",
+											"value": "{{status}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete group",
+					"item": [
+						{
+							"name": "delete group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.status).be.a('string')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).be.a('string')",
+											"    pm.expect(response.name).be.a('string')",
+											"    pm.expect(response.description).be.a('string')",
+											"    pm.expect(response.privateGroup).be.a('boolean')",
+											"    pm.expect(response.selfRegister).be.a('boolean')",
+											"    pm.expect(response.status).be.a('string')",
+											"    pm.expect(response.ssoId).be.a('string')",
+											"    pm.expect(response.organizationId).be.a('string')",
+											"    pm.expect(response.domain).be.a('string')",
+											"    pm.expect(response.createdBy).be.a('string')",
+											"    pm.expect(response.createdAt).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 404`, function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Group Memberships",
+			"item": [
+				{
+					"name": "create group membership",
+					"item": [
+						{
+							"name": "create group membership by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200) {",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.createdBy).to.be.a('string')",
+											"        pm.expect(response.groupId).to.eq(pm.environment.get(\"GROUP_ID\"))",
+											"        pm.expect(response.memberId).to.eq(pm.environment.get('USER_ID'))",
+											"        pm.expect(response.membershipType).to.eq(iterationData.get('membershipType'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"memberId\": \"{{USER_ID}}\",\n    \"membershipType\": \"{{membershipType}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group membership by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200) {",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.groupId).to.eq(pm.environment.get(\"GROUP_ID\"))",
+											"        pm.expect(response.membershipType).to.eq(iterationData.get('membershipType'))",
+											"        pm.expect(response.universalUID).to.eq(iterationData.get('universalUID'))",
+											"        pm.environment.set(\"GROUP_MEMBER_UNIVERSAL_ID\", pm.response.json().universalUID);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"universalUID\": \"{{universalUID}}\",\n    \"membershipType\": \"{{membershipType}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group membership by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"console.log(pm.response.json())",
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200) {",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.createdBy).to.be.a('string')",
+											"        pm.expect(response.groupId).to.eq(pm.environment.get(\"GROUP_ID\"))",
+											"        pm.expect(response.memberId).to.eq(pm.environment.get('USER_ID'))",
+											"        pm.expect(response.membershipType).to.eq(iterationData.get('membershipType'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"memberId\": \"{{USER_ID}}\",\n    \"membershipType\": \"{{membershipType}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group membership (group)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200) {",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.id).to.be.a('string')",
+											"        pm.expect(response.name).to.be.a('string')",
+											"        pm.expect(response.createdAt).to.be.a('string')",
+											"        pm.expect(response.createdBy).to.be.a('string')",
+											"        pm.expect(response.groupId).to.eq(pm.environment.get(\"GROUP_ID\"))",
+											"        pm.expect(response.memberId).to.eq(pm.environment.get('GROUP_ID2'))",
+											"        pm.expect(response.membershipType).to.eq(iterationData.get('membershipType'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"memberId\": \"{{memberId}}\",\n    \"membershipType\": \"{{membershipType}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group membership with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"memberId\": \"{{USER_ID}}\",\n    \"membershipType\": \"user\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group membership with all kinds of invalid request body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"{{required_field_1}}\": {{memberId}},\n    \"{{required_field_2}}\": {{membershipType}}\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{groupId}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{groupId}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get group membership",
+					"item": [
+						{
+							"name": "get group membership by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"",
+											"    pm.expect(response.id).to.be.a('string')",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.createdAt).to.be.a('string')",
+											"    pm.expect(response.createdBy).to.be.a('string')",
+											"    pm.expect(response.memberId).to.be.a('string')",
+											"    pm.expect(response.membershipType).to.be.a('string')",
+											"});",
+											"",
+											"",
+											"    "
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).to.be.a('string')",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.createdAt).to.be.a('string')",
+											"    pm.expect(response.createdBy).to.be.a('string')",
+											"    pm.expect(response.memberId).to.be.a('string')",
+											"    pm.expect(response.membershipType).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.id).to.be.a('string')",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.createdAt).to.be.a('string')",
+											"    pm.expect(response.createdBy).to.be.a('string')",
+											"    pm.expect(response.memberId).to.be.a('string')",
+											"    pm.expect(response.membershipType).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}",
+										"members",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get group member groups",
+					"item": [
+						{
+							"name": "get group member groups by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0]).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group member groups by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0]).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group member groups by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0]).be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get group membership count",
+					"item": [
+						{
+							"name": "get group membership count without parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.count).to.be.a('number')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/membersCount",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"membersCount"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership count with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.count).to.be.a('number')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/membersCount?includeSubGroups={{includeSubGroups}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"membersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership count with invalid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/membersCount?includeSubGroups={{includeSubGroups}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"membersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group membership count invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 404\", function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/fe6d0a58-ce7d-4521-8501-b8132b1c0311/membersCount",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+										"membersCount"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get group members list",
+					"item": [
+						{
+							"name": "get group members list without parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].id).to.be.a('string')",
+											"    pm.expect(response[0].oldId).to.be.a('string')",
+											"    pm.expect(response[0].count).to.be.a('number')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/groupMembersCount",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"groupMembersCount"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group members list with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].id).to.be.a('string')",
+											"    pm.expect(response[0].oldId).to.be.a('string')",
+											"    pm.expect(response[0].count).to.be.a('number')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/groupMembersCount?includeSubGroups={{includeSubGroups}}&organizationId={{organizationId}}&universalUID={{universalUID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"groupMembersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "organizationId",
+											"value": "{{organizationId}}"
+										},
+										{
+											"key": "universalUID",
+											"value": "{{universalUID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get group members list with invalid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/memberGroups/groupMembersCount?includeSubGroups={{includeSubGroups}}&universalUID={{universalUID}}&organizationId={{organizationId}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"memberGroups",
+										"groupMembersCount"
+									],
+									"query": [
+										{
+											"key": "includeSubGroups",
+											"value": "{{includeSubGroups}}"
+										},
+										{
+											"key": "universalUID",
+											"value": "{{universalUID}}"
+										},
+										{
+											"key": "organizationId",
+											"value": "{{organizationId}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "search group membership",
+					"item": [
+						{
+							"name": "search group membership by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"",
+											"    pm.expect(response[0].id).to.be.a('string')",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"    pm.expect(response[0].memberId).to.be.a('string')",
+											"    pm.expect(response[0].membershipType).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group membership by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    ",
+											"    pm.expect(response[0].id).to.be.a('string')",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"    pm.expect(response[0].memberId).to.be.a('string')",
+											"    pm.expect(response[0].membershipType).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group membership by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"",
+											"    pm.expect(response[0].id).to.be.a('string')",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"    pm.expect(response[0].memberId).to.be.a('string')",
+											"    pm.expect(response[0].membershipType).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group membership with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"",
+											"    pm.expect(response[0].id).to.be.a('string')",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"    pm.expect(response[0].memberId).to.be.a('string')",
+											"    pm.expect(response[0].membershipType).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members?page={{page}}&perPage={{perPage}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "{{page}}"
+										},
+										{
+											"key": "perPage",
+											"value": "{{perPage}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group membership with all kinds of invalid parameter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members?page={{page}}&perPage={{perPage}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "{{page}}"
+										},
+										{
+											"key": "perPage",
+											"value": "{{perPage}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group membership with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/members",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}",
+										"members"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete group membership",
+					"item": [
+						{
+							"name": "delete group membership by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.name).to.be.a('string')",
+											"    pm.expect(response).to.have.property('memberId')",
+											"    pm.expect(response).to.have.property('universalUID')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group membership by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.name).to.be.a('string')",
+											"    pm.expect(response).to.have.property('memberId')",
+											"    pm.expect(response).to.have.property('universalUID')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{GROUP_MEMBER_UNIVERSAL_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{GROUP_MEMBER_UNIVERSAL_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group membership by user",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.name).to.be.a('string')",
+											"    pm.expect(response).to.have.property('memberId')",
+											"    pm.expect(response).to.have.property('universalUID')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group membership (group)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.groupId).to.be.a('string')",
+											"    pm.expect(response.name).to.be.a('string')",
+											"    pm.expect(response).to.have.property('universalUID')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{GROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{GROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group member invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 404`, function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group member with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/members/{{GROUP_MEMBER_UNIVERSAL_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"members",
+										"{{GROUP_MEMBER_UNIVERSAL_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Sub Groups",
+			"item": [
+				{
+					"name": "create sub group",
+					"item": [
+						{
+							"name": "create sub group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"console.log(pm.response.json())",
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200){",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
+											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
+											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
+											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
+											"        pm.expect(response.status).to.eq(iterationData.get('status'))",
+											"        pm.expect(response.ssoId).to.eq(iterationData.get('ssoId'))",
+											"        pm.expect(response.organizationId).to.eq(iterationData.get('organizationId'))",
+											"        pm.expect(response.domain).to.eq(iterationData.get('domain'))",
+											"        pm.environment.set(\"SUBGROUP_ID\", pm.response.json().id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}-{{$randomUUID}}\",\n  \"description\": \"{{description}}\",\n  \"privateGroup\": {{privateGroup}},\n  \"selfRegister\": {{selfRegister}},\n  \"domain\": \"{{domain}}\",\n  \"ssoId\": \"{{ssoId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"status\": \"{{status}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create sub group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    if(httpCode === 200){",
+											"        const response = pm.response.json()",
+											"        pm.expect(response.name).to.contain(iterationData.get('name'))",
+											"        pm.expect(response.description).to.eq(iterationData.get('description'))",
+											"        pm.expect(response.privateGroup).to.eq(iterationData.get('privateGroup'))",
+											"        pm.expect(response.selfRegister).to.eq(iterationData.get('selfRegister'))",
+											"        pm.expect(response.status).to.eq(iterationData.get('status'))",
+											"        pm.expect(response.ssoId).to.eq(iterationData.get('ssoId'))",
+											"        pm.expect(response.organizationId).to.eq(iterationData.get('organizationId'))",
+											"        pm.expect(response.domain).to.eq(iterationData.get('domain'))",
+											"        pm.environment.set(\"SUBGROUP_ID2\", pm.response.json().id);",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"{{name}}-{{$randomUUID}}\",\n  \"description\": \"{{description}}\",\n  \"privateGroup\": {{privateGroup}},\n  \"selfRegister\": {{selfRegister}},\n  \"domain\": \"{{domain}}\",\n  \"ssoId\": \"{{ssoId}}\",\n  \"organizationId\": \"{{organizationId}}\",\n  \"status\": \"{{status}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create sub group invalid id 404",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 404`, function () {",
+											"    pm.response.to.have.status(404);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"privateGroup\": true,\n  \"selfRegister\": true,\n  \"domain\": \"string\",\n  \"ssoId\": \"string\",\n  \"organizationId\": \"string\",\n  \"status\": \"active\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/fe6d0a58-ce7d-4521-8501-b8132b1c0311/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"fe6d0a58-ce7d-4521-8501-b8132b1c0311",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create sub group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"privateGroup\": true,\n  \"selfRegister\": true,\n  \"domain\": \"string\",\n  \"ssoId\": \"string\",\n  \"organizationId\": \"string\",\n  \"status\": \"active\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create sub group with all kinds of invalid request body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"{{required_field_1}}\": {{name}},\n    \"description\": {{description}},\n    \"{{required_field_2}}\": {{privateGroup}},\n    \"{{required_field_3}}\": {{selfRegister}},\n    \"domain\": {{domain}},\n    \"ssoId\": {{ssoId}},\n    \"organizationId\": {{organizationId}},\n    \"status\": {{status}}\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete sub group",
+					"item": [
+						{
+							"name": "delete sub group by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 204`, function () {",
+											"    pm.response.to.have.status(204);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup/{{SUBGROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup",
+										"{{SUBGROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete sub group by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 204`, function () {",
+											"    pm.response.to.have.status(204);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID2}}/subGroup/{{SUBGROUP_ID2}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID2}}",
+										"subGroup",
+										"{{SUBGROUP_ID2}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete sub group with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/groups/{{GROUP_ID}}/subGroup/{{SUBGROUP_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"groups",
+										"{{GROUP_ID}}",
+										"subGroup",
+										"{{SUBGROUP_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Group Roles",
+			"item": [
+				{
+					"name": "create group role",
+					"item": [
+						{
+							"name": "create group role by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupId\": \"{{groupId}}\",\n  \"role\": \"{{role}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group role by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupId\": \"{{groupId}}\",\n  \"role\": \"{{role}}\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group role with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupId\": \"{{GROUP_ID}}\",\n  \"role\": \"groupManager\"\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create group role with all kinds of invalid request body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (iterationData.get('message')) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"{{required_field_1}}\": {{groupId}},\n  \"{{required_field_2}}\": {{role}}\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{userId}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{userId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete group role",
+					"item": [
+						{
+							"name": "delete group role by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 204`, function () {",
+											"    pm.response.to.have.status(204);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"groupId\": \"{{groupId}}\",\r\n  \"role\": \"{{role}}\"\r\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group role by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 204`, function () {",
+											"    pm.response.to.have.status(204);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"groupId\": \"{{groupId}}\",\r\n  \"role\": \"{{role}}\"\r\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group role with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"groupId\": \"{{GROUP_ID2}}\",\r\n  \"role\": \"groupAdmin\"\r\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete group role with all kinds of invalid request body",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (iterationData.get('message')) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"{{required_field_1}}\": {{groupId}},\n  \"{{required_field_2}}\": {{role}}\n}"
+								},
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "search group role",
+					"item": [
+						{
+							"name": "search group role by admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].role).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group role by m2m",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].role).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group role with valid parameters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(`Status code is 200`, function () {",
+											"    pm.response.to.have.status(200);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.length).to.be.gte(1)",
+											"    pm.expect(response[0].groupId).to.be.a('string')",
+											"    pm.expect(response[0].role).to.be.a('string')",
+											"    pm.expect(response[0].createdAt).to.be.a('string')",
+											"    pm.expect(response[0].createdBy).to.be.a('string')",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{M2M_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}?page={{page}}&perPage={{perPage}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "{{page}}"
+										},
+										{
+											"key": "perPage",
+											"value": "{{perPage}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group role with all kinds of invalid parameter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}?page={{page}}&perPage={{perPage}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "{{page}}"
+										},
+										{
+											"key": "perPage",
+											"value": "{{perPage}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search group role with all kinds of invalid token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const iterationData = pm.iterationData",
+											"const httpCode = iterationData.get('httpCode')",
+											"pm.test(`Status code is ${httpCode}`, function () {",
+											"    pm.response.to.have.status(httpCode);",
+											"    const response = pm.response.json()",
+											"    if (response.message) {",
+											"        pm.expect(response.message).to.eq(iterationData.get('message'))",
+											"    } else if (response.result) {",
+											"        pm.expect(response.result.content.message).to.eq(iterationData.get('message'))",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"type": "text",
+										"value": "{{jwtToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/group-roles/users/{{USER_ID}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"group-roles",
+										"users",
+										"{{USER_ID}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}

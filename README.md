@@ -49,6 +49,37 @@ The following parameters can be set in config files or in env variables:
 - App will be running at `http://localhost:3000`
 - Application can be run in development mode using the command `npm run dev`
 
+## Running tests
+
+### Configuration
+
+Test configuration is at `config/test.js`. You don't need to change them.
+
+The following test parameters can be set in config file or in env variables:
+
+- AUTH_V2_URL: The auth v2 url
+- AUTH_V2_CLIENT_ID: The auth v2 client id
+- AUTH_V3_URL: The auth v3 url
+- ADMIN_CREDENTIALS_USERNAME: The user's username with admin role
+- ADMIN_CREDENTIALS_PASSWORD: The user's password with admin role
+- USER_CREDENTIALS_USERNAME: The user's username with user role
+- USER_CREDENTIALS_PASSWORD: The user's password with user role
+
+### Prepare
+
+- Start Local Neo4j.
+- Various config parameters should be properly set.
+
+### Running E2E tests with Postman
+
+`Start` the app server before running e2e tests. You may need to set the env variables by calling `source env.sh` before calling `NODE_ENV=test npm start`.
+
+To run postman e2e tests run:
+
+```bash
+npm run test:newman
+```
+
 ## Heroku deployment
 - git init
 - git add .
