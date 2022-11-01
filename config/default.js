@@ -52,5 +52,6 @@ module.exports = {
   MEMBERSHIP_TYPES: {
     Group: 'group',
     User: 'user'
-  }
+  },
+  AWS_XRAY_DAEMON_ADDRESS: process.env.AWS_XRAY_DAEMON_ADDRESS || "172.17.0.1:2000"
 }

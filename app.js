@@ -16,9 +16,13 @@ const swaggerUi = require('swagger-ui-express')
 const YAML = require('yamljs')
 const { closeDB } = require('./src/common/helper')
 
+const AWSXRay = require('aws-xray-sdk')
+
 const swaggerDocument = YAML.load('./docs/swagger.yml')
 // setup express app
 const app = express()
+
+app.use(AWSXRay.express.openSegment('v5-resources-api'))
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -35,6 +39,8 @@ app.use('/groups/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Register routes
 require('./app-routes')(app)
+
+app.use(AWSXRay.express.closeSegment())
 
 // The error handler
 // eslint-disable-next-line no-unused-vars

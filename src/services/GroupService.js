@@ -474,4 +474,9 @@ module.exports = {
   deleteGroup
 }
 
-logger.buildService(module.exports)
+logger.buildService(module.exports, {
+  validators: { enabled: false },
+  logging: { enabled: false },
+  tracing: { enabled: true, annotations: [], metadata: [] }
+})
+
