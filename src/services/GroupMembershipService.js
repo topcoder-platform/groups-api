@@ -438,9 +438,6 @@ getGroupMembers.schema = {
  */
 async function getGroupMemberWithSession (session, groupId, memberId) {
   try {
-    const group = await helper.ensureExists(session, 'Group', groupId)
-    groupId = group.id
-
     const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r'
     const membershipRes = await session.run(query, { groupId, memberId })
     if (membershipRes.records.length === 0) {
@@ -470,6 +467,7 @@ async function getGroupMemberWithSession (session, groupId, memberId) {
  * @returns {Object} the group membership
  */
 async function getGroupMember (currentUser, groupId, memberId) {
+  logger.debug(`Enter in getGroupMember - Group = ${groupId} memberId = ${memberId} Current User = ${currentUser}`)
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   const session = helper.createDBSession()
   try {
@@ -479,12 +477,31 @@ async function getGroupMember (currentUser, groupId, memberId) {
       groupId,
       isAdmin
     )
+
+    groupId = group.id
+  
     if (group.privateGroup && !isAdmin) {
       await helper.ensureGroupMember(session, groupId, currentUser.userId)
     }
-    const membership = await getGroupMemberWithSession(session, groupId, memberId)
 
-    return membership
+    const query = 'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {memberId}}) RETURN r'
+    const membershipRes = await session.run(query, { groupId, memberId })
+    
+    if (membershipRes.records.length === 0) {
+      throw new errors.NotFoundError('The member is not in the group')
+    }
+    
+    const membership = membershipRes.records[0].get(0).properties
+    
+    return {
+      id: membership.id,
+      groupId,
+      groupName: group.name,
+      createdAt: membership.createdAt,
+      createdBy: membership.createdBy,
+      memberId,
+      membershipType: membership.type
+    }
   } catch (error) {
     logger.error(error)
     throw error

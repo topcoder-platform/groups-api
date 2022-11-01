@@ -17,11 +17,7 @@ const constants = require('../../app-constants')
 // Bus API Client
 let busApiClient
 
-const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD), {
-  maxConnectionLifetime: 3 * 60 * 60 * 1000,
-  maxConnectionPoolSize: 75,
-  connectionAcquisitionTimeout: 240000
-})
+const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD))
 
 /**
  * Wrap async function to standard express function
