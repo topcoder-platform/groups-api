@@ -17,11 +17,7 @@ const constants = require('../../app-constants')
 // Bus API Client
 let busApiClient
 
-const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD), {
-  maxConnectionLifetime: 3 * 60 * 60 * 1000,
-  maxConnectionPoolSize: 75,
-  connectionAcquisitionTimeout: 240000
-})
+const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD))
 
 /**
  * Wrap async function to standard express function
@@ -60,7 +56,9 @@ function autoWrapExpress (obj) {
  * @returns {Object} new db session
  */
 function createDBSession () {
-  return driver.session()
+  return driver.session({
+    ...{ database: config.GRAPH_DB_DATABASE }
+  })
 }
 
 /**
@@ -79,20 +77,21 @@ async function closeDB () {
  */
 async function ensureExists (tx, model, id, isAdmin = false) {
   let res
+
   if (model === 'Group') {
     if (validate(id, 4)) {
       if (!isAdmin) {
-        res = await tx.run(`MATCH (e:${model} {id: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, { id })
+        res = await tx.run(`MATCH (e:${model} {id: $id, status: '${constants.GroupStatus.Active}'}) RETURN e`, { id })
       } else {
-        res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, { id })
+        res = await tx.run(`MATCH (e:${model} {id: $id}) RETURN e`, { id })
       }
     } else {
       if (!isAdmin) {
-        res = await tx.run(`MATCH (e:${model} {oldId: {id}, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
+        res = await tx.run(`MATCH (e:${model} {oldId: $id, status: '${constants.GroupStatus.Active}'}) RETURN e`, {
           id
         })
       } else {
-        res = await tx.run(`MATCH (e:${model} {oldId: {id}}) RETURN e`, { id })
+        res = await tx.run(`MATCH (e:${model} {oldId: $id}) RETURN e`, { id })
       }
     }
 
@@ -101,13 +100,13 @@ async function ensureExists (tx, model, id, isAdmin = false) {
     }
   } else if (model === 'User') {
     if (validate(id, 4)) {
-      res = await tx.run(`MATCH (e:${model} {universalUID: {id}}) RETURN e`, { id })
+      res = await tx.run(`MATCH (e:${model} {universalUID: $id}) RETURN e`, { id })
 
       if (res && res.records.length === 0) {
         res = await tx.run('CREATE (user:User {id: \'00000000\', universalUID: {id}}) RETURN user', { id })
       }
     } else {
-      res = await tx.run(`MATCH (e:${model} {id: {id}}) RETURN e`, { id })
+      res = await tx.run(`MATCH (e:${model} {id: $id}) RETURN e`, { id })
 
       if (res && res.records.length === 0) {
         res = await tx.run('CREATE (user:User {id: {id}, universalUID: \'00000000\'}) RETURN user', { id })
@@ -126,7 +125,7 @@ async function ensureExists (tx, model, id, isAdmin = false) {
  */
 async function ensureGroupMember (session, groupId, userId) {
   const memberCheckRes = await session.run(
-    'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
+    'MATCH (g:Group {id: $groupId})-[r:GroupContains {type: $membershipType}]->(u:User {id: $userId}) RETURN r',
     { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
   )
   if (memberCheckRes.records.length === 0) {
@@ -144,7 +143,7 @@ async function ensureGroupMember (session, groupId, userId) {
  */
 async function hasGroupRole (session, groupId, userId, roles) {
   const memberCheckRes = await session.run(
-    'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
+    'MATCH (g:Group {id: $groupId})-[r:GroupContains {type: $membershipType}]->(u:User {id: $userId}) RETURN r',
     { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
   )
   if (memberCheckRes.records.length === 0) {
@@ -162,8 +161,7 @@ async function hasGroupRole (session, groupId, userId, roles) {
  */
 async function getChildGroups (session, groupId) {
   const res = await session.run(
-    'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId',
-    { groupId }
+    'MATCH (g:Group {id: $groupId})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId', { groupId }
   )
   return _.map(res.records, (record) => record.get(0).properties)
 }
@@ -176,8 +174,7 @@ async function getChildGroups (session, groupId) {
  */
 async function getParentGroups (session, groupId) {
   const res = await session.run(
-    'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
-    { groupId }
+    'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: $groupId}) RETURN g ORDER BY g.oldId', { groupId }
   )
   return _.map(res.records, (record) => record.get(0).properties)
 }
@@ -320,7 +317,7 @@ async function postBusEvent (topic, payload) {
 
 async function createGroup (tx, data, currentUser) {
   // check whether group name is already used
-  const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
+  const nameCheckRes = await tx.run('MATCH (g:Group {name: $name}) RETURN g LIMIT 1', {
     name: data.name
   })
   if (nameCheckRes.records.length > 0) {
@@ -339,7 +336,7 @@ async function createGroup (tx, data, currentUser) {
   groupData.organizationId = groupData.organizationId ? groupData.organizationId : ''
 
   const createRes = await tx.run(
-    'CREATE (group:Group {id: {id}, name: {name}, description: {description}, privateGroup: {privateGroup}, selfRegister: {selfRegister}, createdAt: {createdAt}, createdBy: {createdBy}, domain: {domain}, ssoId: {ssoId}, organizationId: {organizationId}, status: {status}}) RETURN group',
+    'CREATE (group:Group {id: $id, name: $name, description: $description, privateGroup: $privateGroup, selfRegister: $selfRegister, createdAt: $createdAt, createdBy: $createdBy, domain: $domain, ssoId: $ssoId, organizationId: $organizationId, status: $status}) RETURN group',
     groupData
   )
 
@@ -373,12 +370,12 @@ async function deleteGroup (tx, group) {
   for (let i = 0; i < groupsToDelete.length; i += 1) {
     const id = groupsToDelete[i].id
     // delete group's relationships
-    await tx.run('MATCH (g:Group {id: {groupId}})-[r]-() DELETE r', {
+    await tx.run('MATCH (g:Group {id: $groupId})-[r]-() DELETE r', {
       groupId: id
     })
 
     // delete group
-    await tx.run('MATCH (g:Group {id: {groupId}}) DELETE g', {
+    await tx.run('MATCH (g:Group {id: $groupId}) DELETE g', {
       groupId: id
     })
   }

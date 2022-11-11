@@ -16,98 +16,71 @@ const constants = require('../../app-constants')
  * @returns {Object} the search result
  */
 async function searchGroups (criteria, isAdmin) {
-  logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
+  logger.debug(`START: searchGroups - Criteria - ${JSON.stringify(criteria)}`)
 
-  if ((criteria.memberId || criteria.universalUID) && !criteria.membershipType) {
+  if (criteria.memberId && !criteria.membershipType) {
     throw new errors.BadRequestError('The membershipType parameter should be provided if memberId is provided.')
   }
-  if (!(criteria.memberId || criteria.universalUID) && criteria.membershipType) {
-    throw new errors.BadRequestError('The memberId or universalUID parameter should be provided if membershipType is provided.')
+  if (!criteria.memberId && criteria.membershipType) {
+    throw new errors.BadRequestError('The memberId parameter should be provided if membershipType is provided.')
   }
 
   const session = helper.createDBSession()
+
   try {
     let matchClause
 
     if (criteria.memberId) {
       matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {id: "${criteria.memberId}"})`
-    } else if (criteria.universalUID) {
-      matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${criteria.membershipType}"}]->(o {universalUID: "${criteria.universalUID}"})`
     } else {
       matchClause = 'MATCH (g:Group)'
     }
 
-    let whereClause = ''
+    const filterCriterias = []
+
+    filterCriterias.push('exists(g.oldId)')
+
     if (criteria.oldId) {
-      whereClause = ` WHERE g.oldId = "${criteria.oldId}"`
+      filterCriterias.push(`g.oldId = "${criteria.oldId}"`)
     }
 
     if (criteria.name) {
-      if (whereClause === '') {
-        whereClause = ` WHERE LOWER(g.name) CONTAINS "${criteria.name.toLowerCase()}"`
-      } else {
-        whereClause = whereClause.concat(` AND LOWER(g.name) CONTAINS "${criteria.name.toLowerCase()}"`)
-      }
+      filterCriterias.push(`toLower(g.name) CONTAINS "${criteria.name.toLowerCase()}"`)
     }
 
     if (criteria.ssoId) {
-      if (whereClause === '') {
-        whereClause = ` WHERE LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`
-      } else {
-        whereClause = whereClause.concat(` AND LOWER(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
-      }
+      filterCriterias.push(`toLower(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
     }
 
     if (criteria.organizationId) {
-      if (whereClause === '') {
-        whereClause = ` WHERE LOWER(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`
-      } else {
-        whereClause = whereClause.concat(` AND LOWER(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`)
-      }
+      filterCriterias.push(`toLower(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`)
     }
 
     if (criteria.selfRegister !== undefined) {
-      if (whereClause === '') {
-        whereClause = ` WHERE g.selfRegister = ${criteria.selfRegister}`
-      } else {
-        whereClause = whereClause.concat(` AND g.selfRegister = ${criteria.selfRegister}`)
-      }
+      filterCriterias.push(`g.selfRegister = ${criteria.selfRegister}`)
     }
 
     if (criteria.privateGroup !== undefined) {
-      if (whereClause === '') {
-        whereClause = ` WHERE g.privateGroup = ${criteria.privateGroup}`
-      } else {
-        whereClause = whereClause.concat(` AND g.privateGroup = ${criteria.privateGroup}`)
-      }
-    }
-
-    if (whereClause === '') {
-      whereClause = ' WHERE exists(g.oldId)'
-    } else {
-      whereClause = whereClause.concat(' AND exists(g.oldId)')
+      filterCriterias.push(`g.privateGroup = ${criteria.privateGroup}`)
     }
 
     if (!isAdmin) {
-      if (whereClause === '') {
-        whereClause = ` WHERE g.status = '${constants.GroupStatus.Active}'`
-      } else {
-        whereClause = whereClause.concat(` AND g.status = '${constants.GroupStatus.Active}'`)
-      }
+      filterCriterias.push(`g.status = ${constants.GroupStatus.Active}`)
     }
 
+    const whereClause = filterCriterias.join(' AND ')
+
     // query total record count
-    const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
+    const totalRes = await session.run(`${matchClause} WHERE ${whereClause} RETURN COUNT(g)`)
     const total = totalRes.records[0].get(0).low || 0
 
-    console.log(`${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} 
-    LIMIT ${criteria.perPage}`)
+    console.log(`${matchClause} WHERE ${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`)
 
     // query page of records
     let result = []
     if (criteria.page <= Math.ceil(total / criteria.perPage)) {
       const pageRes = await session.run(
-        `${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
+        `${matchClause} WHERE ${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
           criteria.perPage
         }`
       )
@@ -180,14 +153,13 @@ searchGroups.schema = {
  * @returns {Object} the created group
  */
 async function createGroup (currentUser, data) {
+  logger.debug(`START: createGroup - data - ${JSON.stringify(data)}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
-    logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
-
     const group = await helper.createGroup(tx, data, currentUser)
 
-    logger.debug(`Group = ${JSON.stringify(group)}`)
+    logger.debug(`Group Created = ${JSON.stringify(group)}`)
 
     // post bus event
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group)
@@ -230,10 +202,10 @@ createGroup.schema = {
  * @returns {Object} the updated group
  */
 async function updateGroup (currentUser, groupId, data) {
+  logger.debug(`START: updateGroup - data - ${JSON.stringify(data)}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
-    logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(
       tx,
       'Group',
@@ -253,19 +225,19 @@ async function updateGroup (currentUser, groupId, data) {
     let updateRes
     if (groupData.status) {
       updateRes = await tx.run(
-        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId}, g.status={status} RETURN g',
+        'MATCH (g:Group {id: $id}) SET g.name=$name, g.description=$description, g.privateGroup=$privateGroup, g.selfRegister=$selfRegister, g.updatedAt=$updatedAt, g.updatedBy=$updatedBy, g.domain=$domain, g.ssoId=$ssoId, g.organizationId=$organizationId, g.oldId=$oldId, g.status=$status RETURN g',
         groupData
       )
     } else {
       updateRes = await tx.run(
-        'MATCH (g:Group {id: {id}}) SET g.name={name}, g.description={description}, g.privateGroup={privateGroup}, g.selfRegister={selfRegister}, g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.domain={domain}, g.ssoId={ssoId}, g.organizationId={organizationId}, g.oldId={oldId} RETURN g',
+        'MATCH (g:Group {id: $id}) SET g.name=$name, g.description=$description, g.privateGroup=$privateGroup, g.selfRegister=$selfRegister, g.updatedAt=$updatedAt, g.updatedBy=$updatedBy, g.domain=$domain, g.ssoId=$ssoId, g.organizationId=$organizationId, g.oldId=$oldId RETURN g',
         groupData
       )
     }
 
     const updatedGroup = updateRes.records[0].get(0).properties
     updatedGroup.oldName = group.name
-    logger.debug(`Group = ${JSON.stringify(updatedGroup)}`)
+    logger.debug(`Group Updated = ${JSON.stringify(updatedGroup)}`)
 
     await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup)
     await tx.commit()
@@ -298,12 +270,8 @@ updateGroup.schema = {
  * @returns {Object} the group
  */
 async function getGroup (currentUser, groupId, criteria) {
+  logger.debug(`START: getGroup - groupId - ${groupId} , criteria - ${JSON.stringify(criteria)}`)
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
-  logger.debug(
-    `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
-      criteria
-    )}`
-  )
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
@@ -437,10 +405,10 @@ getGroup.schema = {
  * @returns {Object} the deleted group
  */
 async function deleteGroup (groupId, isAdmin) {
+  logger.debug(`START: deleteGroup - ${groupId}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
-    logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
 
     const groupsToDelete = await helper.deleteGroup(tx, group)
