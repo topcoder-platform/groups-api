@@ -72,6 +72,7 @@ workflows:
               only:
                 - develop
                 - plat-1226-bulk-apis
+                - refactor-neo4j-448
       - "build-prod":
           context : org-global
           filters:
