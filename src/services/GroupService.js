@@ -41,19 +41,19 @@ async function searchGroups (criteria, isAdmin) {
     filterCriterias.push('exists(g.oldId)')
 
     if (criteria.oldId) {
-      filterCriterias.push(`g.oldId = "${criteria.oldId}"`)
+      filterCriterias.push(`g.oldId = '${criteria.oldId}'`)
     }
 
     if (criteria.name) {
-      filterCriterias.push(`toLower(g.name) CONTAINS "${criteria.name.toLowerCase()}"`)
+      filterCriterias.push(`toLower(g.name) CONTAINS '${criteria.name.toLowerCase()}'`)
     }
 
     if (criteria.ssoId) {
-      filterCriterias.push(`toLower(g.ssoId) = "${criteria.ssoId.toLowerCase()}"`)
+      filterCriterias.push(`toLower(g.ssoId) = '${criteria.ssoId.toLowerCase()}'`)
     }
 
     if (criteria.organizationId) {
-      filterCriterias.push(`toLower(g.organizationId) = "${criteria.organizationId.toLowerCase()}"`)
+      filterCriterias.push(`toLower(g.organizationId) = '${criteria.organizationId.toLowerCase()}'`)
     }
 
     if (criteria.selfRegister !== undefined) {
@@ -65,7 +65,7 @@ async function searchGroups (criteria, isAdmin) {
     }
 
     if (!isAdmin) {
-      filterCriterias.push(`g.status = ${constants.GroupStatus.Active}`)
+      filterCriterias.push(`g.status = '${constants.GroupStatus.Active}'`)
     }
 
     const whereClause = filterCriterias.join(' AND ')
