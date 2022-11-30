@@ -44,6 +44,16 @@ async function updateGroup (req, res) {
 }
 
 /**
+ * Patch group
+ * @param req the request
+ * @param res the response
+ */
+ async function patchGroup (req, res) {
+  const result = await service.patchGroup(req.authUser.isMachine ? 'M2M' : req.authUser, req.params.groupId, req.body)
+  res.send(result)
+}
+
+/**
  * Get group
  * @param req the request
  * @param res the response
@@ -85,6 +95,7 @@ module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
+  patchGroup,
   getGroup,
   deleteGroup,
   getGroupByOldId

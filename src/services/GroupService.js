@@ -45,7 +45,7 @@ async function searchGroups (criteria, isAdmin) {
     }
 
     if (criteria.name) {
-      filterCriterias.push(`toLower(g.name) CONTAINS ${criteria.name.toLowerCase()}`)
+      filterCriterias.push(`toLower(g.name) CONTAINS '${criteria.name.toLowerCase()}'`)
     }
 
     if (criteria.ssoId) {
@@ -263,6 +263,49 @@ updateGroup.schema = {
 }
 
 /**
+ * Patch group
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to update
+ * @param {Object} data the data to update group
+ * @returns {Object} the updated group
+ */
+ async function patchGroup (currentUser, groupId, data) {
+  logger.debug(`START: patchGroup ${groupId} - data - ${JSON.stringify(data)}`)
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
+  try {
+    await helper.ensureExists(tx, 'Group', groupId, currentUser === 'M2M' || helper.hasAdminRole(currentUser))
+    
+    data.id = groupId
+    
+    const patchRes = await tx.run('MATCH (g:Group {id: $id}) SET g.oldId=$oldId RETURN g', data)
+    const patchedGroup = patchRes.records[0].get(0).properties
+    
+    logger.debug(`Group Updated = ${JSON.stringify(patchedGroup)}`)
+
+    await tx.commit()
+    return patchedGroup
+  } catch (error) {
+    logger.error(error)
+    logger.debug('Transaction Rollback')
+    await tx.rollback()
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
+}
+
+patchGroup.schema = {
+  currentUser: Joi.any(),
+  groupId: Joi.string(), // defined in app-bootstrap
+  data: Joi.object()
+    .keys({
+      oldId: Joi.string(),
+    })
+}
+
+/**
  * Get group.
  * @param {Object} currentUser the current user
  * @param {String} groupId the id of group to get
@@ -438,6 +481,7 @@ module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
+  patchGroup,
   getGroup,
   deleteGroup
 }
