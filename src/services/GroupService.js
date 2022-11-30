@@ -45,7 +45,7 @@ async function searchGroups (criteria, isAdmin) {
     }
 
     if (criteria.name) {
-      filterCriterias.push(`toLower(g.name) CONTAINS '${criteria.name.toLowerCase()}'`)
+      filterCriterias.push(`toLower(g.name) CONTAINS ${criteria.name.toLowerCase()}`)
     }
 
     if (criteria.ssoId) {
