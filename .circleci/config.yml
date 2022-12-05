@@ -127,6 +127,7 @@ workflows:
             branches:
               only:
                 - develop
+                - plat-1226-bulk-apis
       - "build-prod":
           context : org-global
           filters:
