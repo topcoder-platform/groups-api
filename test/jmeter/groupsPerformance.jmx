@@ -243,10 +243,10 @@ ${__setProperty(refresh_token, ${refresh_token})};</stringProp>
       <hashTree>
         <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname=" Fetch groups Data " enabled="true"/>
         <hashTree>
-          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Fetch members for single-add" enabled="true">
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Fetch groups for single-add" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename">${basedir}JsonSample.groovy</stringProp>
-            <stringProp name="parameters">/data/groups/groups-to-add-small.json groups</stringProp>
+            <stringProp name="parameters">/data/groups/groups-to-addl.json groups</stringProp>
             <stringProp name="script"></stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223Sampler>
@@ -269,7 +269,7 @@ data.entrySet().each {
             <stringProp name="BeanShellAssertion.query">${__setProperty(name, ${name})};
 ${__setProperty(description, ${description})};
 ${__setProperty(private_group, ${privateGroup})};
-${__setProperty(self-register, ${selfRegister})};</stringProp>
+${__setProperty(self_register, ${selfRegister})};</stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
             <stringProp name="BeanShellAssertion.parameters"></stringProp>
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
@@ -284,8 +284,8 @@ ${__setProperty(self-register, ${selfRegister})};</stringProp>
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
 	&quot;name&quot;: &quot;${__property(name)}&quot;,&#xd;
-	&quot;description&quot;: &quot;${__property(description)}&quot;&#xd;
-	&quot;privateGroup&quot;: &quot;${__property(private_group)}&quot;&#xd;
+	&quot;description&quot;: &quot;${__property(description)}&quot;,&#xd;
+	&quot;privateGroup&quot;: &quot;${__property(private_group)}&quot;,&#xd;
 	&quot;selfRegister&quot;: &quot;${__property(self_register)}&quot;&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -294,7 +294,7 @@ ${__setProperty(self-register, ${selfRegister})};</stringProp>
           </elementProp>
           <stringProp name="HTTPSampler.domain">api.topcoder-dev.com</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/v5/groups</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -484,7 +484,7 @@ ${__setProperty(membership_type, ${membershipType})};
           </elementProp>
           <stringProp name="HTTPSampler.domain">api.topcoder-dev.com</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/v5/groups/${__property(group_id)}/members/</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -612,7 +612,7 @@ ${__setProperty(membership_type, ${membershipType})};
           <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Fetch members for single-add" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename">${basedir}JsonSample.groovy</stringProp>
-            <stringProp name="parameters">/data/groups/groups-to-add-small.json groups</stringProp>
+            <stringProp name="parameters">/data/groups/groups-to-add.json groups</stringProp>
             <stringProp name="script"></stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223Sampler>
@@ -645,7 +645,7 @@ data.entrySet().each {
           </elementProp>
           <stringProp name="HTTPSampler.domain">api.topcoder-dev.com</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/v5/groups?name=${__property(name)}</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -792,7 +792,7 @@ data.entrySet().each {
           </elementProp>
           <stringProp name="HTTPSampler.domain">api.topcoder-dev.com</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/v5/groups/${__property(group_id)}</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
