@@ -1,0 +1,14 @@
+[
+  {
+    "name": "jmeter_6dec2022_group1",
+    "description": "jmeter_6dec2022_group1",
+    "privateGroup": false,
+    "selfRegister": true
+  },
+  {
+    "name": "jmeter_6dec2022_group2",
+    "description": "jmeter_6dec2022_group2",
+    "privateGroup": false,
+    "selfRegister": true
+  }
+]
