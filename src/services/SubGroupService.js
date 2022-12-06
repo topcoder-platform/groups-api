@@ -17,7 +17,7 @@ const constants = require('../../app-constants')
  * @returns {Object} the created group
  */
 async function createSubGroup (currentUser, groupId, data) {
-  logger.debug(`Create Sub Group - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(data)}`)
+  logger.debug(`START: createSubGroup - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(data)}`)
 
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
@@ -43,7 +43,7 @@ async function createSubGroup (currentUser, groupId, data) {
 
     const membershipId = uuid()
 
-    await tx.run('MATCH (g:Group {id: {groupId}}) MATCH (o:Group {id: {subGroupId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r',
+    await tx.run('MATCH (g:Group {id: $groupId}) MATCH (o:Group {id: $subGroupId}) CREATE (g)-[r:GroupContains {id: $membershipId, type: $membershipType, createdAt: $createdAt, createdBy: $createdBy}]->(o) RETURN r',
       { groupId, subGroupId: subGroup.id, membershipId, membershipType: config.MEMBERSHIP_TYPES.Group, createdAt: new Date().toISOString(), createdBy: currentUser === 'M2M' ? '00000000' : currentUser.userId })
 
     const result = {
@@ -94,7 +94,7 @@ createSubGroup.schema = {
  * @returns {Object} the deleted group
  */
 async function deleteSubGroup (currentUser, groupId, subGroupId) {
-  logger.debug(`Delete Sub Group - ${groupId}, Sub Group - ${subGroupId}`)
+  logger.debug(`START: deleteSubGroup Group - ${groupId}, Sub Group - ${subGroupId}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
@@ -115,7 +115,7 @@ async function deleteSubGroup (currentUser, groupId, subGroupId) {
     }
 
     // delete relationship
-    await tx.run('MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(o {id: {subGroupId}}) DELETE r', { groupId, subGroupId })
+    await tx.run('MATCH (g:Group {id: $groupId})-[r:GroupContains]->(o {id: $subGroupId}) DELETE r', { groupId, subGroupId })
 
     // delete sub group
     const groupsToDelete = await helper.deleteGroup(tx, subGroup)

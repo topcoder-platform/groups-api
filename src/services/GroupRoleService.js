@@ -16,7 +16,7 @@ const constants = require('../../app-constants')
  * @returns {Object} an object contains an array of objects, where the object has two properties: the groupId and the role
  */
 async function getGroupRole (userId, criteria) {
-  logger.debug(`Get Group Role - UserId - ${userId} , Criteria - ${JSON.stringify(criteria)}`)
+  logger.debug(`START: getGroupRole - UserId - ${userId} , Criteria - ${JSON.stringify(criteria)}`)
   const session = helper.createDBSession()
   try {
     const matchClause = `MATCH (g:Group)-[r:GroupContains {type: "${config.MEMBERSHIP_TYPES.User}"}]->(o {id: "${userId}"}) UNWIND r.roles as role`
@@ -57,7 +57,7 @@ getGroupRole.schema = {
  * @returns {Object} the added role
  */
 async function addGroupRole (currentUser, userId, groupId, role) {
-  logger.debug(`Add Group Role - user - ${userId} , group - ${groupId}, role - ${role}`)
+  logger.debug(`START: addGroupRole - user - ${userId} , group - ${groupId}, role - ${role}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
@@ -85,7 +85,7 @@ async function addGroupRole (currentUser, userId, groupId, role) {
 
     logger.debug(`Membership ${JSON.stringify(membership)} to add role ${role}`)
 
-    await tx.run('MATCH (:Group)-[r:GroupContains {type: {type}, id: {id}}]-> () SET r.roles={roles} RETURN r', { type: config.MEMBERSHIP_TYPES.User, id: membership.id, roles })
+    await tx.run('MATCH (:Group)-[r:GroupContains {type: $type, id: $id}]-> () SET r.roles=$roles RETURN r', { type: config.MEMBERSHIP_TYPES.User, id: membership.id, roles })
 
     await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ROLE_ADD_TOPIC, { id: membership.id, userId, groupId, role })
     await tx.commit()
@@ -121,6 +121,7 @@ addGroupRole.schema = {
  * @returns {Object} the deleted group role
  */
 async function deleteGroupRole (userId, groupId, role, isAdmin) {
+  logger.debug(`START: deleteGroupRole - user - ${userId} , group - ${groupId}, role - ${role}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
@@ -143,7 +144,7 @@ async function deleteGroupRole (userId, groupId, role, isAdmin) {
 
     logger.debug(`Membership ${JSON.stringify(membership)} to delete role ${role}`)
 
-    await tx.run('MATCH (:Group)-[r:GroupContains {type: {type}, id: {id}}]-> () SET r.roles={roles} RETURN r', { type: config.MEMBERSHIP_TYPES.User, id: membership.id, roles })
+    await tx.run('MATCH (:Group)-[r:GroupContains {type: $type, id: $id}]-> () SET r.roles=$roles RETURN r', { type: config.MEMBERSHIP_TYPES.User, id: membership.id, roles })
 
     await helper.postBusEvent(config.KAFKA_GROUP_MEMBER_ROLE_DELETE_TOPIC, { id: membership.id, userId, groupId, role })
     await tx.commit()
