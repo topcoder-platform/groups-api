@@ -375,7 +375,7 @@ ${__setProperty(self-register, ${selfRegister})};</stringProp>
           </JSONPostProcessor>
           <hashTree/>
           <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="BeanShell Assertion - ${group_Id}" enabled="true">
-            <stringProp name="BeanShellAssertion.query">${__setProperty(group_Id, ${group_Id})};</stringProp>
+            <stringProp name="BeanShellAssertion.query">${__setProperty(group_id, ${group_id})};</stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
             <stringProp name="BeanShellAssertion.parameters"></stringProp>
             <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
@@ -459,7 +459,7 @@ data.entrySet().each {
           </JSR223PostProcessor>
           <hashTree/>
           <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="Def Members_data" enabled="true">
-            <stringProp name="BeanShellAssertion.query">${__setProperty(member_Id, ${memberId})};
+            <stringProp name="BeanShellAssertion.query">${__setProperty(member_id, ${memberId})};
 ${__setProperty(membership_type, ${membershipType})};
 </stringProp>
             <stringProp name="BeanShellAssertion.filename"></stringProp>
@@ -475,7 +475,7 @@ ${__setProperty(membership_type, ${membershipType})};
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-	&quot;memberId&quot;: &quot;${__property(member_Id)}&quot;,&#xd;
+	&quot;memberId&quot;: &quot;${__property(member_id)}&quot;,&#xd;
 	&quot;membershipType&quot;: &quot;${__property(membership_type)}&quot;&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -773,13 +773,28 @@ data.entrySet().each {
       <hashTree>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get single group" enabled="true">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-            <collectionProp name="Arguments.arguments"/>
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="oneLevel" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">false</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">oneLevel</stringProp>
+              </elementProp>
+              <elementProp name="includeSubGroups" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">true</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">includeSubGroups</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
           <stringProp name="HTTPSampler.domain">api.topcoder-dev.com</stringProp>
           <stringProp name="HTTPSampler.port"></stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/v5/groups/${__property(group_id)}?oneLevel=false&amp;includeSubGroups=true</stringProp>
+          <stringProp name="HTTPSampler.path">/v5/groups/${__property(group_id)}</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
