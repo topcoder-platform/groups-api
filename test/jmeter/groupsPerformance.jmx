@@ -246,7 +246,7 @@ ${__setProperty(refresh_token, ${refresh_token})};</stringProp>
           <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Fetch groups for single-add" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename">${basedir}JsonSample.groovy</stringProp>
-            <stringProp name="parameters">/data/groups/groups-to-addl.json groups</stringProp>
+            <stringProp name="parameters">/data/groups/groups-to-add.json groups</stringProp>
             <stringProp name="script"></stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223Sampler>
