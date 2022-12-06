@@ -15,7 +15,7 @@ const constants = require('../../app-constants')
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups (criteria, isAdmin) {
+async function searchGroups(criteria, isAdmin) {
   logger.debug(`START: searchGroups - Criteria - ${JSON.stringify(criteria)}`)
 
   if (criteria.memberId && !criteria.membershipType) {
@@ -74,15 +74,19 @@ async function searchGroups (criteria, isAdmin) {
     const totalRes = await session.run(`${matchClause} WHERE ${whereClause} RETURN COUNT(g)`)
     const total = totalRes.records[0].get(0).low || 0
 
-    console.log(`${matchClause} WHERE ${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage}`)
+    console.log(
+      `${matchClause} WHERE ${whereClause} RETURN g ORDER BY g.oldId SKIP ${
+        (criteria.page - 1) * criteria.perPage
+      } LIMIT ${criteria.perPage}`
+    )
 
     // query page of records
     let result = []
     if (criteria.page <= Math.ceil(total / criteria.perPage)) {
       const pageRes = await session.run(
-        `${matchClause} WHERE ${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
-          criteria.perPage
-        }`
+        `${matchClause} WHERE ${whereClause} RETURN g ORDER BY g.oldId SKIP ${
+          (criteria.page - 1) * criteria.perPage
+        } LIMIT ${criteria.perPage}`
       )
       result = _.map(pageRes.records, (record) => record.get(0).properties)
 
@@ -152,7 +156,7 @@ searchGroups.schema = {
  * @param {Object} data the data to create group
  * @returns {Object} the created group
  */
-async function createGroup (currentUser, data) {
+async function createGroup(currentUser, data) {
   logger.debug(`START: createGroup - data - ${JSON.stringify(data)}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
@@ -201,7 +205,7 @@ createGroup.schema = {
  * @param {Object} data the data to update group
  * @returns {Object} the updated group
  */
-async function updateGroup (currentUser, groupId, data) {
+async function updateGroup(currentUser, groupId, data) {
   logger.debug(`START: updateGroup - data - ${JSON.stringify(data)}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
@@ -269,18 +273,18 @@ updateGroup.schema = {
  * @param {Object} data the data to update group
  * @returns {Object} the updated group
  */
- async function patchGroup (currentUser, groupId, data) {
+async function patchGroup(currentUser, groupId, data) {
   logger.debug(`START: patchGroup ${groupId} - data - ${JSON.stringify(data)}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
     await helper.ensureExists(tx, 'Group', groupId, currentUser === 'M2M' || helper.hasAdminRole(currentUser))
-    
+
     data.id = groupId
-    
+
     const patchRes = await tx.run('MATCH (g:Group {id: $id}) SET g.oldId=$oldId RETURN g', data)
     const patchedGroup = patchRes.records[0].get(0).properties
-    
+
     logger.debug(`Group Updated = ${JSON.stringify(patchedGroup)}`)
 
     await tx.commit()
@@ -299,10 +303,9 @@ updateGroup.schema = {
 patchGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
-  data: Joi.object()
-    .keys({
-      oldId: Joi.string(),
-    })
+  data: Joi.object().keys({
+    oldId: Joi.string()
+  })
 }
 
 /**
@@ -312,7 +315,7 @@ patchGroup.schema = {
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup (currentUser, groupId, criteria) {
+async function getGroup(currentUser, groupId, criteria) {
   logger.debug(`START: getGroup - groupId - ${groupId} , criteria - ${JSON.stringify(criteria)}`)
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
 
@@ -447,7 +450,7 @@ getGroup.schema = {
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the deleted group
  */
-async function deleteGroup (groupId, isAdmin) {
+async function deleteGroup(groupId, isAdmin) {
   logger.debug(`START: deleteGroup - ${groupId}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
