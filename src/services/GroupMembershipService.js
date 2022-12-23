@@ -117,12 +117,6 @@ async function addGroupMember(currentUser, groupId, data) {
       createdBy: currentUser === 'M2M' ? '00000000' : currentUser.userId
     }
 
-    // set the cache
-    const cache = helper.getCacheInstance()
-    const cachedMembers = cache.get(`${groupId}-members`)
-    cachedMembers.push(memberId)
-    cache.set(`${groupId}-members`, cachedMembers)
-
     logger.debug(`quey for adding membership ${query} with params ${JSON.stringify(params)}`)
     await tx.run(query, params)
 
@@ -281,12 +275,6 @@ async function deleteGroupMember(currentUser, groupId, memberId, query) {
       const getMember = await helper.ensureExists(tx, 'Group', memberId)
       memberId = getMember.oldId
     }
-
-    // set the cache
-    const cache = helper.getCacheInstance()
-    const cachedMembers = cache.get(`${groupId}-members`)
-    const updateMebers = _.remove(cachedMembers, memberId)
-    cache.set(`${groupId}-members`, updateMebers)
 
     const result = {
       groupId,

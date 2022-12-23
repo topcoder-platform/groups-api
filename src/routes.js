@@ -27,6 +27,14 @@ module.exports = {
       method: 'checkHealth'
     }
   },
+  '/groups/flushCache': {
+    get: {
+      controller: 'GroupController',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      method: 'flushCache'
+    }
+  },
   '/groups/:groupId': {
     get: {
       controller: 'GroupController',
