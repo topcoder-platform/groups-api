@@ -6,6 +6,7 @@ const _ = require('lodash')
 const busApi = require('tc-bus-api-wrapper')
 const config = require('config')
 const neo4j = require('neo4j-driver')
+const nodeCache = require('node-cache')
 const querystring = require('querystring')
 const uuid = require('uuid/v4')
 const validate = require('uuid-validate')
@@ -16,6 +17,9 @@ const constants = require('../../app-constants')
 
 // Bus API Client
 let busApiClient
+
+// cache instance
+let cache = null
 
 const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD), {
   maxConnectionLifetime: 3 * 60 * 60 * 1000,
@@ -28,7 +32,7 @@ const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_D
  * @param {Function} fn the async function
  * @returns {Function} the wrapped function
  */
-function wrapExpress (fn) {
+function wrapExpress(fn) {
   return function (req, res, next) {
     fn(req, res, next).catch(next)
   }
@@ -39,7 +43,7 @@ function wrapExpress (fn) {
  * @param obj the object (controller exports)
  * @returns {Object|Array} the wrapped object
  */
-function autoWrapExpress (obj) {
+function autoWrapExpress(obj) {
   if (_.isArray(obj)) {
     return obj.map(autoWrapExpress)
   }
@@ -59,14 +63,14 @@ function autoWrapExpress (obj) {
  * Create DB session.
  * @returns {Object} new db session
  */
-function createDBSession () {
+function createDBSession() {
   return driver.session()
 }
 
 /**
  * Close driver connection once the app exit
  */
-async function closeDB () {
+async function closeDB() {
   await driver.close()
 }
 
@@ -77,7 +81,7 @@ async function closeDB () {
  * @param {String} id the entity id
  * @returns {Object} the found entity
  */
-async function ensureExists (tx, model, id, isAdmin = false) {
+async function ensureExists(tx, model, id, isAdmin = false) {
   let res
   if (model === 'Group') {
     if (validate(id, 4)) {
@@ -124,7 +128,7 @@ async function ensureExists (tx, model, id, isAdmin = false) {
  * @param {String} groupId the group id
  * @param {String} userId the user id
  */
-async function ensureGroupMember (session, groupId, userId) {
+async function ensureGroupMember(session, groupId, userId) {
   const memberCheckRes = await session.run(
     'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
     { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
@@ -142,7 +146,7 @@ async function ensureGroupMember (session, groupId, userId) {
  * @param {Array} roles an array of group roles
  * @returns {Boolean} true if user has one of the group roles
  */
-async function hasGroupRole (session, groupId, userId, roles) {
+async function hasGroupRole(session, groupId, userId, roles) {
   const memberCheckRes = await session.run(
     'MATCH (g:Group {id: {groupId}})-[r:GroupContains {type: {membershipType}}]->(u:User {id: {userId}}) RETURN r',
     { groupId, membershipType: config.MEMBERSHIP_TYPES.User, userId }
@@ -160,7 +164,7 @@ async function hasGroupRole (session, groupId, userId, roles) {
  * @param {String} groupId the group id
  * @returns {Array} the child groups
  */
-async function getChildGroups (session, groupId) {
+async function getChildGroups(session, groupId) {
   const res = await session.run(
     'MATCH (g:Group {id: {groupId}})-[r:GroupContains]->(c:Group) RETURN c ORDER BY c.oldId',
     { groupId }
@@ -174,7 +178,7 @@ async function getChildGroups (session, groupId) {
  * @param {String} groupId the group id
  * @returns {Array} the parent groups
  */
-async function getParentGroups (session, groupId) {
+async function getParentGroups(session, groupId) {
   const res = await session.run(
     'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
     { groupId }
@@ -188,7 +192,7 @@ async function getParentGroups (session, groupId) {
  * @param {Number} page the page number
  * @returns {String} link for the page
  */
-function getPageLink (req, page) {
+function getPageLink(req, page) {
   const q = _.assignIn({}, req.query, { page })
   return `${req.protocol}://${req.get('Host')}${req.baseUrl}${req.path}?${querystring.stringify(q)}`
 }
@@ -199,7 +203,7 @@ function getPageLink (req, page) {
  * @param {Object} res the HTTP response
  * @param {Object} result the operation result
  */
-function setResHeaders (req, res, result) {
+function setResHeaders(req, res, result) {
   const totalPages = Math.ceil(result.total / result.perPage)
   if (result.page > 1) {
     res.set('X-Prev-Page', result.page - 1)
@@ -239,7 +243,7 @@ function setResHeaders (req, res, result) {
  * @param {Array} source the array in which to search for the term
  * @param {Array | String} term the term to search
  */
-function checkIfExists (source, term) {
+function checkIfExists(source, term) {
   let terms
 
   if (!_.isArray(source)) {
@@ -269,7 +273,7 @@ function checkIfExists (source, term) {
  * Check if the user has admin role
  * @param {Object} authUser the user
  */
-function hasAdminRole (authUser) {
+function hasAdminRole(authUser) {
   for (let i = 0; i < authUser.roles.length; i++) {
     if (authUser.roles[i].toLowerCase() === config.USER_ROLES.Admin.toLowerCase()) {
       return true
@@ -282,7 +286,7 @@ function hasAdminRole (authUser) {
  * Get Bus API Client
  * @return {Object} Bus API Client Instance
  */
-function getBusApiClient () {
+function getBusApiClient() {
   // if there is no bus API client instance, then create a new instance
   if (!busApiClient) {
     busApiClient = busApi(
@@ -307,7 +311,7 @@ function getBusApiClient () {
  * @param {String} topic the event topic
  * @param {Object} payload the event payload
  */
-async function postBusEvent (topic, payload) {
+async function postBusEvent(topic, payload) {
   const client = getBusApiClient()
   await client.postEvent({
     topic,
@@ -318,7 +322,7 @@ async function postBusEvent (topic, payload) {
   })
 }
 
-async function createGroup (tx, data, currentUser) {
+async function createGroup(tx, data, currentUser) {
   // check whether group name is already used
   const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
     name: data.name
@@ -346,7 +350,7 @@ async function createGroup (tx, data, currentUser) {
   return createRes.records[0]._fields[0].properties
 }
 
-async function deleteGroup (tx, group) {
+async function deleteGroup(tx, group) {
   const groupsToDelete = [group]
   let index = 0
   while (index < groupsToDelete.length) {
@@ -385,6 +389,17 @@ async function deleteGroup (tx, group) {
   return groupsToDelete
 }
 
+async function initiateCache() {
+  cache = new NodeCache({
+    stdTTL: 432000,
+    checkperiod: 518400
+  });
+}
+
+async function getCacheInstance() {
+  return cache
+}
+
 module.exports = {
   wrapExpress,
   autoWrapExpress,
@@ -400,5 +415,7 @@ module.exports = {
   hasGroupRole,
   postBusEvent,
   createGroup,
-  deleteGroup
+  deleteGroup,
+  initiateCache,
+  getCacheInstance
 }
