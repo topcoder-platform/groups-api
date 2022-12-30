@@ -22,7 +22,7 @@
     "express": "^4.17.1",
     "get-parameter-names": "^0.3.0",
     "http-status-codes": "^2.2.0",
-    "joi": "^17.7.0",
+    "joi": "^14.0.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.19",
     "morgan": "^1.7.0",

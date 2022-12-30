@@ -8,7 +8,7 @@ const config = require('config')
 const neo4j = require('neo4j-driver')
 const nodeCache = require('node-cache')
 const querystring = require('querystring')
-const uuid = require('uuid/v4')
+const uuid = require('uuid')
 const validate = require('uuid-validate')
 
 const errors = require('./errors')
@@ -335,7 +335,7 @@ async function createGroup(tx, data, currentUser) {
   const groupData = data
 
   // generate next group id
-  groupData.id = uuid()
+  groupData.id = uuid.v4()
   groupData.createdAt = new Date().toISOString()
   groupData.createdBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
   groupData.domain = groupData.domain ? groupData.domain : ''
@@ -390,7 +390,7 @@ async function deleteGroup(tx, group) {
 }
 
 async function initiateCache() {
-  cache = new NodeCache({
+  cache = new nodeCache({
     stdTTL: 432000,
     checkperiod: 518400
   });

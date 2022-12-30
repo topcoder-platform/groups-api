@@ -3,7 +3,7 @@
  */
 const config = require('config')
 const Joi = require('joi')
-const uuid = require('uuid/v4')
+const uuid = require('uuid')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
@@ -16,7 +16,7 @@ const constants = require('../../app-constants')
  * @param {Object} data the sub group data to create group
  * @returns {Object} the created group
  */
-async function createSubGroup (currentUser, groupId, data) {
+async function createSubGroup(currentUser, groupId, data) {
   logger.debug(`Create Sub Group - user - ${currentUser} , groupId - ${groupId} , data -  ${JSON.stringify(data)}`)
 
   const session = helper.createDBSession()
@@ -41,7 +41,7 @@ async function createSubGroup (currentUser, groupId, data) {
 
     logger.debug(`SubGroup = ${JSON.stringify(subGroup)}`)
 
-    const membershipId = uuid()
+    const membershipId = uuid.v4()
 
     await tx.run('MATCH (g:Group {id: {groupId}}) MATCH (o:Group {id: {subGroupId}}) CREATE (g)-[r:GroupContains {id: {membershipId}, type: {membershipType}, createdAt: {createdAt}, createdBy: {createdBy}}]->(o) RETURN r',
       { groupId, subGroupId: subGroup.id, membershipId, membershipType: config.MEMBERSHIP_TYPES.Group, createdAt: new Date().toISOString(), createdBy: currentUser === 'M2M' ? '00000000' : currentUser.userId })
@@ -93,7 +93,7 @@ createSubGroup.schema = {
  * @param {String} subGroupId the sub group id
  * @returns {Object} the deleted group
  */
-async function deleteSubGroup (currentUser, groupId, subGroupId) {
+async function deleteSubGroup(currentUser, groupId, subGroupId) {
   logger.debug(`Delete Sub Group - ${groupId}, Sub Group - ${subGroupId}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()

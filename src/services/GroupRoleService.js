@@ -15,7 +15,7 @@ const constants = require('../../app-constants')
  * @param {Object} criteria the pagination properties
  * @returns {Object} an object contains an array of objects, where the object has two properties: the groupId and the role
  */
-async function getGroupRole (userId, criteria) {
+async function getGroupRole(userId, criteria) {
   logger.debug(`Get Group Role - UserId - ${userId} , Criteria - ${JSON.stringify(criteria)}`)
   const session = helper.createDBSession()
   try {
@@ -24,8 +24,7 @@ async function getGroupRole (userId, criteria) {
     const total = totalRes.records[0].get(0).low || 0
 
     const pageRes = await session.run(
-       `${matchClause} RETURN g.id, role ORDER BY g.id, role SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
-        criteria.perPage
+      `${matchClause} RETURN g.id, role ORDER BY g.id, role SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage
       }`
     )
 
@@ -56,7 +55,7 @@ getGroupRole.schema = {
  * @param {String} role the name of role to add
  * @returns {Object} the added role
  */
-async function addGroupRole (currentUser, userId, groupId, role) {
+async function addGroupRole(currentUser, userId, groupId, role) {
   logger.debug(`Add Group Role - user - ${userId} , group - ${groupId}, role - ${role}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
@@ -120,7 +119,7 @@ addGroupRole.schema = {
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the deleted group role
  */
-async function deleteGroupRole (userId, groupId, role, isAdmin) {
+async function deleteGroupRole(userId, groupId, role, isAdmin) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {

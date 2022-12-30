@@ -193,7 +193,7 @@ async function createGroup(currentUser, data) {
     await tx.commit()
 
     // set the cache
-    const cache = helper.getCacheInstance()
+    const cache = await helper.getCacheInstance()
     cache.set(group.id, group)
     cache.set(`${group.id}-members`, [])
 
@@ -276,7 +276,7 @@ async function updateGroup(currentUser, groupId, data) {
     await tx.commit()
 
     // update the cache
-    const cache = helper.getCacheInstance()
+    const cache = await helper.getCacheInstance()
     cache.set(group.id, updateGroup)
 
     return updatedGroup
@@ -350,7 +350,6 @@ async function getGroup(currentUser, groupId, criteria) {
       'oldId'
     ]
 
-
     if (_.uniq(fieldNames).length !== fieldNames.length) {
       throw new errors.BadRequestError(`duplicate field names are not allowed`)
     }
@@ -367,110 +366,110 @@ async function getGroup(currentUser, groupId, criteria) {
     }
   }
 
-  let session = undefined;
+  const session = helper.createDBSession()
+  const cache = await helper.getCacheInstance()
 
-  const cache = helper.getCacheInstance()
-  const flattenGroupIdTree = []
+  let groupToReturn
 
   try {
-    let cachedGroup
     if (criteria.isCache) {
       // check for the availibility of the group in cache
-      cachedGroup = cache.get(groupId)
+      groupToReturn = cache.get(groupId)
     }
 
-    if (criteria.isCache && cachedGroup) {
-      if (!isAdmin) delete cachedGroup.status
+    if (criteria.isCache && groupToReturn) {
+      if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
-      if (cachedGroup.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
         const cachedGroupMembers = cache.get(`${groupId}-members`)
-        if (!cachedGroupMembers) {
-          session = helper.createDBSession()
+
+        if (!_.includes(cachedGroupMembers, currentUser.userId)) {
           await helper.ensureGroupMember(session, group.id, currentUser.userId)
 
           cachedGroupMembers.push(currentUser.userId)
+          cache.set(`${groupId}-members`, cachedGroupMembers)
         }
       }
-      if (fieldNames) {
-        fieldNames.push('subGroups')
-        fieldNames.push('parentGroups')
-        fieldNames.push('flattenGroupIdTree')
-        cachedGroup = _.pick(cachedGroup, fieldNames)
-      }
-      return cachedGroup
     } else {
-      const session = helper.createDBSession()
+      groupToReturn = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+      cache.set(groupId, groupToReturn)
 
-      let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
-
-      if (!isAdmin) delete group.status
+      if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
-      if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-        await helper.ensureGroupMember(session, group.id, currentUser.userId)
+      if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+        await helper.ensureGroupMember(session, groupToReturn.id, currentUser.userId)
+
+        cache.set(`${groupId}-members`, [currentUser.userId])
       }
+    }
 
-      // get parent or sub groups using breadth first search algorithm,
-      // this is equivalent to recursive algorithm, but more efficient than latter,
-      // see https://en.wikipedia.org/wiki/Breadth-first_search
-      // handled group will be reused, won't be handled duplicately
+    // get parent or sub groups using breadth first search algorithm,
+    // this is equivalent to recursive algorithm, but more efficient than latter,
+    // see https://en.wikipedia.org/wiki/Breadth-first_search
+    // handled group will be reused, won't be handled duplicately
 
-      // pending group to expand
-      const pending = []
-      const expanded = []
-      if (criteria.includeSubGroups || criteria.includeParentGroup) {
-        pending.push(group)
-        while (pending.length > 0) {
-          const groupToExpand = pending.shift()
-          const found = _.find(expanded, (g) => g.id === groupToExpand.id)
-          if (found) {
-            // this group was already expanded, so re-use the fields
-            groupToExpand.subGroups = found.subGroups
-            groupToExpand.parentGroups = found.parentGroups
-            continue
-          }
-          expanded.push(groupToExpand)
-          if (criteria.includeSubGroups) {
-            // find child groups
-            groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
+    // pending group to expand
+    const pending = []
+    const expanded = []
+    if (criteria.includeSubGroups || criteria.includeParentGroup || criteria.flattenGroupIdTree) {
+      pending.push(groupToReturn)
+      while (pending.length > 0) {
+        const groupToExpand = pending.shift()
+        const found = _.find(expanded, (g) => g.id === groupToExpand.id)
+        if (found) {
+          // this group was already expanded, so re-use the fields
+          groupToExpand.subGroups = found.subGroups
+          groupToExpand.parentGroups = found.parentGroups
+          continue
+        }
+        expanded.push(groupToExpand)
+        if ((criteria.includeSubGroups && !groupToReturn.subGroups) || (criteria.flattenGroupIdTree && !groupToReturn.flattenGroupIdTree)) {
+          const flattenGroupIdTree = []
+
+          // find child groups
+          groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
+          // add child groups to pending if needed
+          if (!criteria.oneLevel) {
             _.forEach(groupToExpand.subGroups, (g) => {
               pending.push(g)
               flattenGroupIdTree.push(g.id)
             })
-            // add child groups to pending if needed
-            // if (!criteria.oneLevel) {
-            //   _.forEach(groupToExpand.subGroups, (g) => pending.push(g))
-            // }
-          } else {
-            // find parent groups
-            groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id)
+
+            groupToReturn.flattenGroupIdTree = flattenGroupIdTree
+            cache.set(groupId, groupToReturn)
+          }
+        } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
+          // find parent groups
+          groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id)
+          // add parent groups to pending if needed
+          if (!criteria.oneLevel) {
             _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
-            // add parent groups to pending if needed
-            // if (!criteria.oneLevel) {
-            //   _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
-            // }
           }
         }
       }
-      if (fieldNames) {
-        fieldNames.push('subGroups')
-        fieldNames.push('parentGroups')
-        group = _.pick(group, fieldNames)
-      }
-
-      group.flattenGroupIdTree = flattenGroupIdTree
-
-      cache.set(groupId, group)
-      return group
     }
+
+
+    if (fieldNames) {
+      fieldNames.push('subGroups')
+      fieldNames.push('parentGroups')
+
+      groupToReturn = _.pick(groupToReturn, fieldNames)
+    }
+
+    if (!criteria.includeSubGroups) delete groupToReturn.subGroups
+    if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
+    if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
+
+    return groupToReturn
   } catch (error) {
     logger.error(error)
     throw error
   } finally {
     logger.debug('Session Close')
-    if (session)
-      await session.close()
+    await session.close()
   }
 }
 
@@ -480,6 +479,7 @@ getGroup.schema = {
   criteria: Joi.object().keys({
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
+    flattenGroupIdTree: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
   })
@@ -506,7 +506,7 @@ async function deleteGroup(groupId, isAdmin) {
     await tx.commit()
 
     // delete the cache
-    const cache = helper.getCacheInstance()
+    const cache = await helper.getCacheInstance()
     cache.del(group.id)
     cache.del(`${group.id}-members`)
 

@@ -4,7 +4,7 @@
 const _ = require('lodash')
 const config = require('config')
 const Joi = require('joi')
-const uuid = require('uuid/v4')
+const uuid = require('uuid')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
@@ -61,6 +61,13 @@ async function addGroupMember(currentUser, groupId, data) {
       if (group.privateGroup && !childGroup.privateGroup) {
         throw new errors.ConflictError('Parent group is private, the child group must be private too.')
       }
+
+      // update the cache
+      const cache = await helper.getCacheInstance()
+      const cachedGroup = cache.get(group.id)
+      cachedGroup.subGroups.push(childGroup)
+      cachedGroup.flattenGroupIdTree.push(childGroup.id)
+      cache.set(group.id, cachedGroup)
     } else {
       logger.debug(`Check for memberId ${memberId} exist or not`)
       await helper.ensureExists(tx, 'User', memberId)
@@ -98,7 +105,7 @@ async function addGroupMember(currentUser, groupId, data) {
     }
 
     // add membership
-    const membershipId = uuid()
+    const membershipId = uuid.v4()
     const createdAt = new Date().toISOString()
 
     let query

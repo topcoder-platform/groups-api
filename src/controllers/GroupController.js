@@ -87,7 +87,7 @@ async function getGroupByOldId(req, res) {
  * @param res the response
  */
 async function flushCache(req, res) {
-  const cachedData = helper.getCacheInstance()
+  const cachedData = await helper.getCacheInstance()
   cachedData.flushAll()
 
   res.send({
