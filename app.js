@@ -4,17 +4,18 @@
 
 require('./app-bootstrap')
 
-const config = require('config')
-const express = require('express')
 const bodyParser = require('body-parser')
-const _ = require('lodash')
+const config = require('config')
 const cors = require('cors')
-const logger = require('./src/common/logger')
+const express = require('express')
+const _ = require('lodash')
 const HttpStatus = require('http-status-codes')
 const morgan = require('morgan')
 const swaggerUi = require('swagger-ui-express')
 const YAML = require('yamljs')
-const { closeDB } = require('./src/common/helper')
+
+const helper = require('./src/common/helper')
+const logger = require('./src/common/logger')
 
 const swaggerDocument = YAML.load('./docs/swagger.yml')
 // setup express app
@@ -69,10 +70,11 @@ app.use((err, req, res, next) => {
 
 const server = app.listen(app.get('port'), () => {
   logger.info(`Express server listening on port ${app.get('port')}`)
+  helper.initiateCache()
 })
 
 server.on('close', async (error) => {
-  await closeDB()
+  await helper.closeDB()
   logger.info('server closed')
   process.exit(error ? 1 : 0)
 })

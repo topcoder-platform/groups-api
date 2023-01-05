@@ -4,7 +4,7 @@
 const _ = require('lodash')
 const config = require('config')
 const Joi = require('joi')
-const uuid = require('uuid/v4')
+const uuid = require('uuid')
 const helper = require('../common/helper')
 const logger = require('../common/logger')
 const errors = require('../common/errors')
@@ -18,7 +18,7 @@ const constants = require('../../app-constants')
  * @param {Object} data the data to add member
  * @returns {Object} the added group membership
  */
-async function addGroupMember (currentUser, groupId, data) {
+async function addGroupMember(currentUser, groupId, data) {
   logger.debug(`Enter in addGroupMember - Group = ${groupId} Criteria = ${data}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
@@ -61,6 +61,13 @@ async function addGroupMember (currentUser, groupId, data) {
       if (group.privateGroup && !childGroup.privateGroup) {
         throw new errors.ConflictError('Parent group is private, the child group must be private too.')
       }
+
+      // update the cache
+      const cache = await helper.getCacheInstance()
+      const cachedGroup = cache.get(group.id)
+      cachedGroup.subGroups.push(childGroup)
+      cachedGroup.flattenGroupIdTree.push(childGroup.id)
+      cache.set(group.id, cachedGroup)
     } else {
       logger.debug(`Check for memberId ${memberId} exist or not`)
       await helper.ensureExists(tx, 'User', memberId)
@@ -98,7 +105,7 @@ async function addGroupMember (currentUser, groupId, data) {
     }
 
     // add membership
-    const membershipId = uuid()
+    const membershipId = uuid.v4()
     const createdAt = new Date().toISOString()
 
     let query
@@ -179,7 +186,7 @@ addGroupMember.schema = Joi.alternatives().try(
  * @param {Array} data the data for members to add
  * @returns {Object} the added group membership
  */
-async function addGroupMemberBulk (currentUser, groupId, data) {
+async function addGroupMemberBulk(currentUser, groupId, data) {
   logger.debug(`Enter in addGroupMemberBulk - Group = ${groupId} Data = ${JSON.stringify(data)}`)
 
   const membersAddRes = await Promise.allSettled(data.members.map(member => addGroupMember(currentUser, groupId, member)))
@@ -229,7 +236,7 @@ addGroupMemberBulk.schema = Joi.object().keys({
  * @param {String} memberId the member id
  * @returns {Object} the deleted group membership
  */
-async function deleteGroupMember (currentUser, groupId, memberId, query) {
+async function deleteGroupMember(currentUser, groupId, memberId, query) {
   logger.debug(`Enter in deleteGroupMember - Group = ${groupId} memberId = ${memberId}`)
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
@@ -314,7 +321,7 @@ deleteGroupMember.schema = {
  * @param {Array} data the data for members to delete
  * @returns {Object} the deleted group membership
  */
-async function deleteGroupMemberBulk (currentUser, groupId, data) {
+async function deleteGroupMemberBulk(currentUser, groupId, data) {
   logger.debug(`Enter in deleteGroupMemberBulk - Group = ${groupId} Data = ${JSON.stringify(data)}`)
 
   const membersAddRes = await Promise.allSettled(data.members.map(member => deleteGroupMember(currentUser, groupId, member)))
@@ -358,7 +365,7 @@ deleteGroupMemberBulk.schema = Joi.object().keys({
  * @param {Object} criteria the search criteria
  * @returns {Object} the search result
  */
-async function getGroupMembers (currentUser, groupId, criteria) {
+async function getGroupMembers(currentUser, groupId, criteria) {
   const session = helper.createDBSession()
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
 
@@ -436,7 +443,7 @@ getGroupMembers.schema = {
  * @param {String} memberId the member id
  * @returns {Object} the group membership
  */
-async function getGroupMemberWithSession (session, groupId, memberId) {
+async function getGroupMemberWithSession(session, groupId, memberId) {
   try {
     const group = await helper.ensureExists(session, 'Group', groupId)
     groupId = group.id
@@ -469,7 +476,7 @@ async function getGroupMemberWithSession (session, groupId, memberId) {
  * @param {String} memberId the member id
  * @returns {Object} the group membership
  */
-async function getGroupMember (currentUser, groupId, memberId) {
+async function getGroupMember(currentUser, groupId, memberId) {
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   const session = helper.createDBSession()
   try {
@@ -506,7 +513,7 @@ getGroupMember.schema = {
  * @param {Object} query the query parameters
  * @returns {Object} the group members count data
  */
-async function getGroupMembersCount (groupId, query) {
+async function getGroupMembersCount(groupId, query) {
   const session = helper.createDBSession()
   try {
     const group = await helper.ensureExists(session, 'Group', groupId)
@@ -543,7 +550,7 @@ getGroupMembersCount.schema = {
  * @param {Object} query the query parameters
  * @returns {Object} list of groupId and memberCount mapping
  */
-async function listGroupsMemberCount (query) {
+async function listGroupsMemberCount(query) {
   const session = helper.createDBSession()
   try {
     let queryToExecute = ''
@@ -634,7 +641,7 @@ listGroupsMemberCount.schema = {
  * @param {Object} query the search criteria
  * @returns {Object} the search result
  */
-async function getMemberGroups (memberId, query) {
+async function getMemberGroups(memberId, query) {
   const session = helper.createDBSession()
   try {
     const returnUuid = query.uuid
@@ -659,7 +666,7 @@ getMemberGroups.schema = {
   })
 }
 
-async function groupValidityCheck (memberId, groupId) {
+async function groupValidityCheck(memberId, groupId) {
   const session = helper.createDBSession()
   try {
     const res = await session.run(
