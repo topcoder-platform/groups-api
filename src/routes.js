@@ -50,6 +50,13 @@ module.exports = {
       access: [constants.UserRoles.Admin],
       scopes: ['write:groups', 'all:groups']
     },
+    patch: {
+      controller: 'GroupController',
+      method: 'patchGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    },
     delete: {
       controller: 'GroupController',
       method: 'deleteGroup',

@@ -301,6 +301,66 @@ updateGroup.schema = {
 }
 
 /**
+ * Patch group
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to update
+ * @param {Object} data the data to update group
+ * @returns {Object} the updated group
+ */
+async function patchGroup(currentUser, groupId, data) {
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
+  try {
+    logger.debug(`Patch Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
+    const group = await helper.ensureExists(
+      tx,
+      'Group',
+      groupId,
+      currentUser === 'M2M' || helper.hasAdminRole(currentUser)
+    )
+
+    const groupData = data
+    groupData.id = groupId
+    groupData.updatedAt = new Date().toISOString()
+    groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
+    groupData.oldId = data.oldId ? data.oldId : ''
+
+    const updateRes = await tx.run(
+      'MATCH (g:Group {id: {id}}) SET g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.oldId={oldId} RETURN g',
+      groupData
+    )
+
+    const updatedGroup = updateRes.records[0].get(0).properties
+    logger.debug(`Group = ${JSON.stringify(updatedGroup)}`)
+
+    await tx.commit()
+
+    // update the cache
+    const cache = await helper.getCacheInstance()
+    cache.set(group.id, updatedGroup)
+
+    return updatedGroup
+  } catch (error) {
+    logger.error(error)
+    logger.debug('Transaction Rollback')
+    await tx.rollback()
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
+}
+
+patchGroup.schema = {
+  currentUser: Joi.any(),
+  groupId: Joi.string(), // defined in app-bootstrap
+  data: Joi.object()
+    .keys({
+      oldId: Joi.string(),
+    })
+}
+
+/**
  * Get group.
  * @param {Object} currentUser the current user
  * @param {String} groupId the id of group to get
@@ -532,6 +592,7 @@ module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
+  patchGroup,
   getGroup,
   deleteGroup
 }
