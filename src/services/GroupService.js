@@ -315,8 +315,8 @@ async function getGroup(currentUser, groupId, criteria) {
     )}`
   )
 
-  if (!_.has(criteria, 'isCache')) {
-    criteria.isCache = true
+  if (_.has(criteria, 'skipCache')) {
+    criteria.skipCache = false
   }
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
@@ -372,12 +372,12 @@ async function getGroup(currentUser, groupId, criteria) {
   let groupToReturn
 
   try {
-    if (criteria.isCache) {
+    if (!criteria.skipCache) {
       // check for the availibility of the group in cache
       groupToReturn = cache.get(groupId)
     }
 
-    if (criteria.isCache && groupToReturn) {
+    if (!criteria.skipCache && groupToReturn) {
       if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
@@ -480,6 +480,7 @@ getGroup.schema = {
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
     flattenGroupIdTree: Joi.boolean().default(false),
+    skipCache: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
   })
