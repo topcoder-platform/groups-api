@@ -15,7 +15,7 @@ install_dependency: &install_dependency
 install_deploysuite: &install_deploysuite
           name: Installation of install_deploysuite.
           command: |
-            git clone --branch v1.4 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
+            git clone --branch v1.4.14 https://github.com/topcoder-platform/tc-deploy-scripts ../buildscript
             cp ./../buildscript/master_deploy.sh .
             cp ./../buildscript/buildenv.sh .
             cp ./../buildscript/awsconfiguration.sh .
@@ -55,6 +55,15 @@ jobs:
       APP_ENV: "dev"      
     steps: *builddeploy_steps
 
+
+  # Build & Deploy against qa backend
+  "build-qa":
+    <<: *defaults
+    environment:
+      DEPLOY_ENV: "QA"
+      APP_ENV: "qa"      
+    steps: *builddeploy_steps
+
   # Build & Deploy against production backend
   "build-prod":
     <<: *defaults
@@ -75,6 +84,12 @@ workflows:
               only:
                 - develop
                 - plat-1226-bulk-apis
+      - "build-qa":
+          context : org-global
+          filters:
+            branches:
+              only:
+                - qa             
       - "build-prod":
           context : org-global
           filters:
