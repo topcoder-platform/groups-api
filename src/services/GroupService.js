@@ -15,7 +15,7 @@ const constants = require('../../app-constants')
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the search result
  */
-async function searchGroups (criteria, isAdmin) {
+async function searchGroups(criteria, isAdmin) {
   logger.debug(`Search Group - Criteria - ${JSON.stringify(criteria)}`)
 
   if ((criteria.memberId || criteria.universalUID) && !criteria.membershipType) {
@@ -107,8 +107,7 @@ async function searchGroups (criteria, isAdmin) {
     let result = []
     if (criteria.page <= Math.ceil(total / criteria.perPage)) {
       const pageRes = await session.run(
-        `${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${
-          criteria.perPage
+        `${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} LIMIT ${criteria.perPage
         }`
       )
       result = _.map(pageRes.records, (record) => record.get(0).properties)
@@ -179,7 +178,7 @@ searchGroups.schema = {
  * @param {Object} data the data to create group
  * @returns {Object} the created group
  */
-async function createGroup (currentUser, data) {
+async function createGroup(currentUser, data) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
@@ -192,6 +191,12 @@ async function createGroup (currentUser, data) {
     // post bus event
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group)
     await tx.commit()
+
+    // set the cache
+    const cache = await helper.getCacheInstance()
+    cache.set(group.id, group)
+    cache.set(`${group.id}-members`, [])
+
     return group
   } catch (error) {
     logger.error(error)
@@ -229,7 +234,7 @@ createGroup.schema = {
  * @param {Object} data the data to update group
  * @returns {Object} the updated group
  */
-async function updateGroup (currentUser, groupId, data) {
+async function updateGroup(currentUser, groupId, data) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
@@ -269,6 +274,11 @@ async function updateGroup (currentUser, groupId, data) {
 
     await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup)
     await tx.commit()
+
+    // update the cache
+    const cache = await helper.getCacheInstance()
+    cache.set(group.id, updateGroup)
+
     return updatedGroup
   } catch (error) {
     logger.error(error)
@@ -291,19 +301,83 @@ updateGroup.schema = {
 }
 
 /**
+ * Patch group
+ * @param {Object} currentUser the current user
+ * @param {String} groupId the id of group to update
+ * @param {Object} data the data to update group
+ * @returns {Object} the updated group
+ */
+async function patchGroup(currentUser, groupId, data) {
+  const session = helper.createDBSession()
+  const tx = session.beginTransaction()
+  try {
+    logger.debug(`Patch Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
+    const group = await helper.ensureExists(
+      tx,
+      'Group',
+      groupId,
+      currentUser === 'M2M' || helper.hasAdminRole(currentUser)
+    )
+
+    const groupData = data
+    groupData.id = groupId
+    groupData.updatedAt = new Date().toISOString()
+    groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
+    groupData.oldId = data.oldId ? data.oldId : ''
+
+    const updateRes = await tx.run(
+      'MATCH (g:Group {id: {id}}) SET g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.oldId={oldId} RETURN g',
+      groupData
+    )
+
+    const updatedGroup = updateRes.records[0].get(0).properties
+    logger.debug(`Group = ${JSON.stringify(updatedGroup)}`)
+
+    await tx.commit()
+
+    // update the cache
+    const cache = await helper.getCacheInstance()
+    cache.set(group.id, updatedGroup)
+
+    return updatedGroup
+  } catch (error) {
+    logger.error(error)
+    logger.debug('Transaction Rollback')
+    await tx.rollback()
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    await session.close()
+  }
+}
+
+patchGroup.schema = {
+  currentUser: Joi.any(),
+  groupId: Joi.string(), // defined in app-bootstrap
+  data: Joi.object()
+    .keys({
+      oldId: Joi.string(),
+    })
+}
+
+/**
  * Get group.
  * @param {Object} currentUser the current user
  * @param {String} groupId the id of group to get
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup (currentUser, groupId, criteria) {
+async function getGroup(currentUser, groupId, criteria) {
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   logger.debug(
     `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
       criteria
     )}`
   )
+
+  if (_.has(criteria, 'skipCache')) {
+    criteria.skipCache = false
+  }
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
@@ -336,34 +410,59 @@ async function getGroup (currentUser, groupId, criteria) {
       'oldId'
     ]
 
-    for (let i = 0; i < fieldNames.length; i += 1) {
-      if (!_.includes(allowedFieldNames, fieldNames[i])) {
-        throw new errors.BadRequestError(
-          `Field name ${fieldNames[i]} is not allowed, allowed field names: ${JSON.stringify(
-            allowedFieldNames,
-            null,
-            4
-          )}`
-        )
-      }
-      for (let j = i + 1; j < fieldNames.length; j += 1) {
-        if (fieldNames[i] === fieldNames[j]) {
-          throw new errors.BadRequestError(`There are duplicate field names: ${fieldNames[i]}`)
-        }
-      }
+    if (_.uniq(fieldNames).length !== fieldNames.length) {
+      throw new errors.BadRequestError(`duplicate field names are not allowed`)
+    }
+
+    const extraFields = _.difference(fieldNames, allowedFieldNames)
+    if (extraFields.length > 0) {
+      throw new errors.BadRequestError(
+        `${_.toString(extraFields)} is/are not allowed, allowed field names: ${JSON.stringify(
+          allowedFieldNames,
+          null,
+          4
+        )}`
+      )
     }
   }
 
   const session = helper.createDBSession()
+  const cache = await helper.getCacheInstance()
+
+  let groupToReturn
 
   try {
-    let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+    if (!criteria.skipCache) {
+      // check for the availibility of the group in cache
+      groupToReturn = cache.get(groupId)
+    }
 
-    if (!isAdmin) delete group.status
+    if (!criteria.skipCache && groupToReturn) {
+      if (!isAdmin) delete groupToReturn.status
 
-    // if the group is private, the user needs to be a member of the group, or an admin
-    if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-      await helper.ensureGroupMember(session, group.id, currentUser.userId)
+      // if the group is private, the user needs to be a member of the group, or an admin
+      if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+        const cachedGroupMembers = cache.get(`${groupId}-members`)
+
+        if (!_.includes(cachedGroupMembers, currentUser.userId)) {
+          await helper.ensureGroupMember(session, group.id, currentUser.userId)
+
+          cachedGroupMembers.push(currentUser.userId)
+          cache.set(`${groupId}-members`, cachedGroupMembers)
+        }
+      }
+    } else {
+      groupToReturn = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+      cache.set(groupId, groupToReturn)
+
+      if (!isAdmin) delete groupToReturn.status
+
+      // if the group is private, the user needs to be a member of the group, or an admin
+      if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+        await helper.ensureGroupMember(session, groupToReturn.id, currentUser.userId)
+
+        cache.set(`${groupId}-members`, [currentUser.userId])
+      }
     }
 
     // get parent or sub groups using breadth first search algorithm,
@@ -374,8 +473,8 @@ async function getGroup (currentUser, groupId, criteria) {
     // pending group to expand
     const pending = []
     const expanded = []
-    if (criteria.includeSubGroups || criteria.includeParentGroup) {
-      pending.push(group)
+    if (criteria.includeSubGroups || criteria.includeParentGroup || criteria.flattenGroupIdTree) {
+      pending.push(groupToReturn)
       while (pending.length > 0) {
         const groupToExpand = pending.shift()
         const found = _.find(expanded, (g) => g.id === groupToExpand.id)
@@ -386,14 +485,22 @@ async function getGroup (currentUser, groupId, criteria) {
           continue
         }
         expanded.push(groupToExpand)
-        if (criteria.includeSubGroups) {
+        if ((criteria.includeSubGroups && !groupToReturn.subGroups) || (criteria.flattenGroupIdTree && !groupToReturn.flattenGroupIdTree)) {
+          const flattenGroupIdTree = []
+
           // find child groups
           groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
           // add child groups to pending if needed
           if (!criteria.oneLevel) {
-            _.forEach(groupToExpand.subGroups, (g) => pending.push(g))
+            _.forEach(groupToExpand.subGroups, (g) => {
+              pending.push(g)
+              flattenGroupIdTree.push(g.id)
+            })
+
+            groupToReturn.flattenGroupIdTree = flattenGroupIdTree
+            cache.set(groupId, groupToReturn)
           }
-        } else {
+        } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
           // find parent groups
           groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id)
           // add parent groups to pending if needed
@@ -404,12 +511,19 @@ async function getGroup (currentUser, groupId, criteria) {
       }
     }
 
+
     if (fieldNames) {
       fieldNames.push('subGroups')
       fieldNames.push('parentGroups')
-      group = _.pick(group, fieldNames)
+
+      groupToReturn = _.pick(groupToReturn, fieldNames)
     }
-    return group
+
+    if (!criteria.includeSubGroups) delete groupToReturn.subGroups
+    if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
+    if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
+
+    return groupToReturn
   } catch (error) {
     logger.error(error)
     throw error
@@ -425,6 +539,8 @@ getGroup.schema = {
   criteria: Joi.object().keys({
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
+    flattenGroupIdTree: Joi.boolean().default(false),
+    skipCache: Joi.boolean().default(false),
     oneLevel: Joi.boolean(),
     fields: Joi.string()
   })
@@ -436,7 +552,7 @@ getGroup.schema = {
  * @param {Boolean} isAdmin flag indicating whether the current user is an admin or not
  * @returns {Object} the deleted group
  */
-async function deleteGroup (groupId, isAdmin) {
+async function deleteGroup(groupId, isAdmin) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
@@ -449,6 +565,12 @@ async function deleteGroup (groupId, isAdmin) {
     kafkaPayload.groups = groupsToDelete
     await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, kafkaPayload)
     await tx.commit()
+
+    // delete the cache
+    const cache = await helper.getCacheInstance()
+    cache.del(group.id)
+    cache.del(`${group.id}-members`)
+
     return group
   } catch (error) {
     logger.error(error)
@@ -470,6 +592,7 @@ module.exports = {
   searchGroups,
   createGroup,
   updateGroup,
+  patchGroup,
   getGroup,
   deleteGroup
 }

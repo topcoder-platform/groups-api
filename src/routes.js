@@ -27,6 +27,14 @@ module.exports = {
       method: 'checkHealth'
     }
   },
+  '/groups/flushCache': {
+    get: {
+      controller: 'GroupController',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      method: 'flushCache'
+    }
+  },
   '/groups/:groupId': {
     get: {
       controller: 'GroupController',
@@ -38,6 +46,13 @@ module.exports = {
     put: {
       controller: 'GroupController',
       method: 'updateGroup',
+      auth: 'jwt',
+      access: [constants.UserRoles.Admin],
+      scopes: ['write:groups', 'all:groups']
+    },
+    patch: {
+      controller: 'GroupController',
+      method: 'patchGroup',
       auth: 'jwt',
       access: [constants.UserRoles.Admin],
       scopes: ['write:groups', 'all:groups']
