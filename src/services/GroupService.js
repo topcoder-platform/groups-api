@@ -277,7 +277,7 @@ async function updateGroup(currentUser, groupId, data) {
 
     // update the cache
     const cache = await helper.getCacheInstance()
-    cache.set(group.id, updateGroup)
+    cache.set(group.id, updatedGroup)
 
     return updatedGroup
   } catch (error) {
