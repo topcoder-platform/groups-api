@@ -431,7 +431,6 @@ async function getGroup(currentUser, groupId, criteria) {
     if (!session) {
       session = helper.createDBSession()
     }
-    console.log('im using db instead cache')
     return session
   }
   const cache = await helper.getCacheInstance()
