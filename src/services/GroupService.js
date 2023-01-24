@@ -375,7 +375,7 @@ async function getGroup(currentUser, groupId, criteria) {
     )}`
   )
 
-  if (_.has(criteria, 'skipCache')) {
+  if (!_.has(criteria, 'skipCache')) {
     criteria.skipCache = false
   }
 
@@ -425,8 +425,15 @@ async function getGroup(currentUser, groupId, criteria) {
       )
     }
   }
-
-  const session = helper.createDBSession()
+  
+  let session
+  const getSession = () => {
+    if (!session) {
+      session = helper.createDBSession()
+    }
+    console.log('im using db instead cache')
+    return session
+  }
   const cache = await helper.getCacheInstance()
 
   let groupToReturn
@@ -445,21 +452,21 @@ async function getGroup(currentUser, groupId, criteria) {
         const cachedGroupMembers = cache.get(`${groupId}-members`)
 
         if (!_.includes(cachedGroupMembers, currentUser.userId)) {
-          await helper.ensureGroupMember(session, group.id, currentUser.userId)
+          await helper.ensureGroupMember(getSession(), group.id, currentUser.userId)
 
           cachedGroupMembers.push(currentUser.userId)
           cache.set(`${groupId}-members`, cachedGroupMembers)
         }
       }
     } else {
-      groupToReturn = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+      groupToReturn = await helper.ensureExists(getSession(), 'Group', groupId, isAdmin)
       cache.set(groupId, groupToReturn)
 
       if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
       if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-        await helper.ensureGroupMember(session, groupToReturn.id, currentUser.userId)
+        await helper.ensureGroupMember(getSession(), groupToReturn.id, currentUser.userId)
 
         cache.set(`${groupId}-members`, [currentUser.userId])
       }
@@ -489,7 +496,7 @@ async function getGroup(currentUser, groupId, criteria) {
           const flattenGroupIdTree = []
 
           // find child groups
-          groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
+          groupToExpand.subGroups = await helper.getChildGroups(getSession(), groupToExpand.id)
           // add child groups to pending if needed
           if (!criteria.oneLevel) {
             _.forEach(groupToExpand.subGroups, (g) => {
@@ -502,7 +509,7 @@ async function getGroup(currentUser, groupId, criteria) {
           }
         } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
           // find parent groups
-          groupToExpand.parentGroups = await helper.getParentGroups(session, groupToExpand.id)
+          groupToExpand.parentGroups = await helper.getParentGroups(getSession(), groupToExpand.id)
           // add parent groups to pending if needed
           if (!criteria.oneLevel) {
             _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
@@ -529,7 +536,9 @@ async function getGroup(currentUser, groupId, criteria) {
     throw error
   } finally {
     logger.debug('Session Close')
-    await session.close()
+    if (session) {
+      await session.close()
+    }
   }
 }
 
