@@ -451,7 +451,7 @@ async function getGroup(currentUser, groupId, criteria) {
         const cachedGroupMembers = cache.get(`${groupId}-members`)
 
         if (!_.includes(cachedGroupMembers, currentUser.userId)) {
-          await helper.ensureGroupMember(getSession(), group.id, currentUser.userId)
+          await helper.ensureGroupMember(getSession(), groupId, currentUser.userId)
 
           cachedGroupMembers.push(currentUser.userId)
           cache.set(`${groupId}-members`, cachedGroupMembers)
