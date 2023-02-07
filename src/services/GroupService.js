@@ -308,9 +308,6 @@ updateGroup.schema = {
  * @returns {Object} the updated group
  */
 async function patchGroup(currentUser, groupId, data) {
-  if (!data.oldId) {
-    throw new errors.BadRequestError('Can not Patch without oldId')
-  }
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
   try {
@@ -357,9 +354,9 @@ async function patchGroup(currentUser, groupId, data) {
 patchGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
-  data: Joi.object()
+  data: Joi.object().required()
     .keys({
-      oldId: Joi.string(),
+      oldId: Joi.string().required(),
     })
 }
 
