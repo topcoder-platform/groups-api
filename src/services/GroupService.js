@@ -354,9 +354,9 @@ async function patchGroup(currentUser, groupId, data) {
 patchGroup.schema = {
   currentUser: Joi.any(),
   groupId: Joi.string(), // defined in app-bootstrap
-  data: Joi.object()
+  data: Joi.object().required()
     .keys({
-      oldId: Joi.string(),
+      oldId: Joi.string().required(),
     })
 }
 
