@@ -192,10 +192,10 @@ async function createGroup(currentUser, data) {
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group)
     await tx.commit()
 
-    // set the cache
-    const cache = await helper.getCacheInstance()
-    cache.set(group.id, group)
-    cache.set(`${group.id}-members`, [])
+    // do not set the cache as while creating the groups is not having the `oldId`
+    // const cache = await helper.getCacheInstance()
+    // cache.set(group.id, group)
+    // cache.set(`${group.id}-members`, [])
 
     return group
   } catch (error) {
@@ -275,9 +275,9 @@ async function updateGroup(currentUser, groupId, data) {
     await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup)
     await tx.commit()
 
-    // update the cache
+    // update the cache only if the group has the `oldId`
     const cache = await helper.getCacheInstance()
-    cache.set(group.id, updatedGroup)
+    if (updateGroup.oldId.length > 0) cache.set(group.id, updatedGroup)
 
     return updatedGroup
   } catch (error) {
@@ -425,7 +425,7 @@ async function getGroup(currentUser, groupId, criteria) {
       )
     }
   }
-  
+
   let session
   const getSession = () => {
     if (!session) {
@@ -459,7 +459,9 @@ async function getGroup(currentUser, groupId, criteria) {
       }
     } else {
       groupToReturn = await helper.ensureExists(getSession(), 'Group', groupId, isAdmin)
-      cache.set(groupId, groupToReturn)
+
+      // set the group in cache only if it is having the `oldId`
+      if (groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
 
       if (!isAdmin) delete groupToReturn.status
 
@@ -504,7 +506,9 @@ async function getGroup(currentUser, groupId, criteria) {
             })
 
             groupToReturn.flattenGroupIdTree = flattenGroupIdTree
-            cache.set(groupId, groupToReturn)
+
+            // set the group in cache only if it is having the `oldId`
+            if (groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
           }
         } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
           // find parent groups
