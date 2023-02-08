@@ -192,11 +192,6 @@ async function createGroup(currentUser, data) {
     await helper.postBusEvent(config.KAFKA_GROUP_CREATE_TOPIC, group)
     await tx.commit()
 
-    // do not set the cache as while creating the groups is not having the `oldId`
-    // const cache = await helper.getCacheInstance()
-    // cache.set(group.id, group)
-    // cache.set(`${group.id}-members`, [])
-
     return group
   } catch (error) {
     logger.error(error)
