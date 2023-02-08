@@ -277,7 +277,7 @@ async function updateGroup(currentUser, groupId, data) {
 
     // update the cache only if the group has the `oldId`
     const cache = await helper.getCacheInstance()
-    if (updateGroup.oldId.length > 0) cache.set(group.id, updatedGroup)
+    if (updateGroup.oldId && updateGroup.oldId.length > 0) cache.set(group.id, updatedGroup)
 
     return updatedGroup
   } catch (error) {
@@ -461,7 +461,7 @@ async function getGroup(currentUser, groupId, criteria) {
       groupToReturn = await helper.ensureExists(getSession(), 'Group', groupId, isAdmin)
 
       // set the group in cache only if it is having the `oldId`
-      if (groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
+      if (groupToReturn.oldId && groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
 
       if (!isAdmin) delete groupToReturn.status
 
@@ -508,7 +508,7 @@ async function getGroup(currentUser, groupId, criteria) {
             groupToReturn.flattenGroupIdTree = flattenGroupIdTree
 
             // set the group in cache only if it is having the `oldId`
-            if (groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
+            if (groupToReturn.oldId && groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
           }
         } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
           // find parent groups
