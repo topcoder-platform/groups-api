@@ -52,5 +52,8 @@ module.exports = {
   MEMBERSHIP_TYPES: {
     Group: 'group',
     User: 'user'
-  }
+  },
+
+  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+  CACHE_TTL: process.env.CACHE_TTL || 3600
 }

@@ -8,6 +8,7 @@ const config = require('config')
 const neo4j = require('neo4j-driver')
 const nodeCache = require('node-cache')
 const querystring = require('querystring')
+const redis = require('redis')
 const uuid = require('uuid')
 const validate = require('uuid-validate')
 
@@ -15,11 +16,9 @@ const errors = require('./errors')
 const logger = require('./logger')
 const constants = require('../../app-constants')
 
-// Bus API Client
-let busApiClient
 
-// cache instance
-let cache = null
+let busApiClient        // Bus API Client
+let redisClient = null  // redis client
 
 const driver = neo4j.driver(config.GRAPH_DB_URI, neo4j.auth.basic(config.GRAPH_DB_USER, config.GRAPH_DB_PASSWORD), {
   maxConnectionLifetime: 3 * 60 * 60 * 1000,
@@ -389,15 +388,25 @@ async function deleteGroup(tx, group) {
   return groupsToDelete
 }
 
-async function initiateCache() {
-  cache = new nodeCache({
-    stdTTL: 432000,
-    checkperiod: 518400
-  });
+async function acquireRedisClient() {
+  if (redisClient == null) {
+    logger.debug("Creating new redis client")
+    return createRedisClient()
+  } else {
+    const pong = await redisClient.ping()
+    if (!pong) {
+      logger.debug("Redis connection lost, creating new redis client")
+      return createRedisClient()
+    }
+  }
 }
 
-async function getCacheInstance() {
-  return cache
+async function createRedisClient() {
+  const con = redis.createClient({ url: config.REDIS_URL })
+  con.on("error", function (err) {
+    logger.error(err)
+  })
+  return con
 }
 
 module.exports = {
@@ -416,6 +425,5 @@ module.exports = {
   postBusEvent,
   createGroup,
   deleteGroup,
-  initiateCache,
-  getCacheInstance
+  acquireRedisClient
 }
