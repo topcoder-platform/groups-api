@@ -273,9 +273,7 @@ async function updateGroup(currentUser, groupId, data) {
 
     // update the cache only if the group has the `oldId`
     if (updatedGroup.oldId && updatedGroup.oldId.length > 0) {
-      await redisClient.connect()
-      await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL, NX: true })
-      await redisClient.disconnect()
+      await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
     }
 
     return updatedGroup
@@ -336,8 +334,7 @@ async function patchGroup(currentUser, groupId, data) {
     await tx.commit()
 
     // update the cache
-    await redisClient.connect()
-    await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL, NX: true })
+    await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
 
     return updatedGroup
   } catch (error) {
@@ -348,7 +345,6 @@ async function patchGroup(currentUser, groupId, data) {
   } finally {
     logger.debug('Session Close')
     await session.close()
-    await redisClient.disconnect()
   }
 }
 
@@ -436,7 +432,6 @@ async function getGroup(currentUser, groupId, criteria) {
   }
 
   const redisClient = await helper.acquireRedisClient()
-  await redisClient.connect()
 
   let groupToReturn
 
@@ -457,7 +452,7 @@ async function getGroup(currentUser, groupId, criteria) {
         if (!_.includes(cachedGroupMembers, currentUser.userId)) {
           await helper.ensureGroupMember(getSession(), groupId, currentUser.userId)
           cachedGroupMembers.push(currentUser.userId)
-          await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify(cachedGroupMembers), { EX: config.CACHE_TTL, NX: true })
+          await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify(cachedGroupMembers), { EX: config.CACHE_TTL })
         }
       }
     } else {
@@ -467,7 +462,7 @@ async function getGroup(currentUser, groupId, criteria) {
       // set the group in cache only if it is having the `oldId`
       if (groupToReturn.oldId && groupToReturn.oldId.length > 0) {
         logger.debug('saving group in cache')
-        await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL, NX: true })
+        await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
       }
 
 
@@ -476,7 +471,7 @@ async function getGroup(currentUser, groupId, criteria) {
       // if the group is private, the user needs to be a member of the group, or an admin
       if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
         await helper.ensureGroupMember(getSession(), groupToReturn.id, currentUser.userId)
-        await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify([currentUser.userId]), { EX: config.CACHE_TTL, NX: true })
+        await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify([currentUser.userId]), { EX: config.CACHE_TTL })
       }
     }
 
@@ -516,7 +511,7 @@ async function getGroup(currentUser, groupId, criteria) {
 
             // set the group in cache only if it is having the `oldId`
             if (groupToReturn.oldId && groupToReturn.oldId.length > 0)
-              await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL, NX: true })
+              await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
           }
         } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
           // find parent groups
@@ -550,7 +545,6 @@ async function getGroup(currentUser, groupId, criteria) {
     if (session) {
       await session.close()
     }
-    await redisClient.disconnect()
   }
 }
 
@@ -589,7 +583,6 @@ async function deleteGroup(groupId, isAdmin) {
     await tx.commit()
 
     // delete the cache
-    await redisClient.connect()
     await redisClient.del(`Group:${group.id}`)
     await redisClient.del(`GroupMembers:${group.id}`)
 
@@ -602,7 +595,6 @@ async function deleteGroup(groupId, isAdmin) {
   } finally {
     logger.debug('Session Close')
     await session.close()
-    await redisClient.disconnect()
   }
 }
 

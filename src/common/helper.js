@@ -389,24 +389,20 @@ async function deleteGroup(tx, group) {
 }
 
 async function acquireRedisClient() {
-  if (redisClient == null) {
-    logger.debug("Creating new redis client")
-    return createRedisClient()
-  } else {
-    const pong = await redisClient.ping()
-    if (!pong) {
-      logger.debug("Redis connection lost, creating new redis client")
-      return createRedisClient()
-    }
-  }
-}
 
-async function createRedisClient() {
-  const con = redis.createClient({ url: config.REDIS_URL })
-  con.on("error", function (err) {
-    logger.error(err)
-  })
-  return con
+
+  if (redisClient == null) {
+    logger.debug("creating new redis client")
+    redisClient = redis.createClient({ url: config.REDIS_URL })
+
+    redisClient.on('connect', () => logger.debug('redis client connected'));
+    redisClient.on('error', err => logger.error(new Date(), 'client error', err.message));
+    redisClient.on('reconnecting', () => logger.debug('reconnecting'));
+
+    await redisClient.connect()
+  }
+
+  return redisClient
 }
 
 module.exports = {

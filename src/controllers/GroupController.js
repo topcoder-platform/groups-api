@@ -98,9 +98,7 @@ async function getGroupByOldId(req, res) {
  */
 async function flushCache(req, res) {
   const redisClient = await helper.acquireRedisClient()
-  await redisClient.connect()
   await redisClient.FLUSHALL()
-  await redisClient.disconnect()
 
   res.send({
     message: 'all cached data has been removed'
