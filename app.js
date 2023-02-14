@@ -70,7 +70,6 @@ app.use((err, req, res, next) => {
 
 const server = app.listen(app.get('port'), () => {
   logger.info(`Express server listening on port ${app.get('port')}`)
-  helper.initiateCache()
 })
 
 server.on('close', async (error) => {

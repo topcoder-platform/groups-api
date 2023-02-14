@@ -100,7 +100,7 @@ async function searchGroups(criteria, isAdmin) {
     const totalRes = await session.run(`${matchClause}${whereClause} RETURN COUNT(g)`)
     const total = totalRes.records[0].get(0).low || 0
 
-    console.log(`${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} 
+    logger.debug(`${matchClause}${whereClause} RETURN g ORDER BY g.oldId SKIP ${(criteria.page - 1) * criteria.perPage} 
     LIMIT ${criteria.perPage}`)
 
     // query page of records
@@ -232,6 +232,7 @@ createGroup.schema = {
 async function updateGroup(currentUser, groupId, data) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
+  const redisClient = await helper.acquireRedisClient()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(
@@ -271,8 +272,9 @@ async function updateGroup(currentUser, groupId, data) {
     await tx.commit()
 
     // update the cache only if the group has the `oldId`
-    const cache = await helper.getCacheInstance()
-    if (updateGroup.oldId && updateGroup.oldId.length > 0) cache.set(group.id, updatedGroup)
+    if (updatedGroup.oldId && updatedGroup.oldId.length > 0) {
+      await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
+    }
 
     return updatedGroup
   } catch (error) {
@@ -305,6 +307,7 @@ updateGroup.schema = {
 async function patchGroup(currentUser, groupId, data) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
+  const redisClient = await helper.acquireRedisClient()
   try {
     logger.debug(`Patch Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(
@@ -331,8 +334,7 @@ async function patchGroup(currentUser, groupId, data) {
     await tx.commit()
 
     // update the cache
-    const cache = await helper.getCacheInstance()
-    cache.set(group.id, updatedGroup)
+    await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
 
     return updatedGroup
   } catch (error) {
@@ -428,43 +430,48 @@ async function getGroup(currentUser, groupId, criteria) {
     }
     return session
   }
-  const cache = await helper.getCacheInstance()
+
+  const redisClient = await helper.acquireRedisClient()
 
   let groupToReturn
 
   try {
     if (!criteria.skipCache) {
       // check for the availibility of the group in cache
-      groupToReturn = cache.get(groupId)
+      groupToReturn = JSON.parse(await redisClient.get(`Group:${groupId}`))
     }
 
     if (!criteria.skipCache && groupToReturn) {
+      logger.debug('group found in cache')
       if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
       if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-        const cachedGroupMembers = cache.get(`${groupId}-members`)
+        const cachedGroupMembers = JSON.parse(await redisClient.get(`GroupMembers:${groupId}`))
 
         if (!_.includes(cachedGroupMembers, currentUser.userId)) {
           await helper.ensureGroupMember(getSession(), groupId, currentUser.userId)
-
           cachedGroupMembers.push(currentUser.userId)
-          cache.set(`${groupId}-members`, cachedGroupMembers)
+          await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify(cachedGroupMembers), { EX: config.CACHE_TTL })
         }
       }
     } else {
+      logger.debug('group not found in cache, getting from DB')
       groupToReturn = await helper.ensureExists(getSession(), 'Group', groupId, isAdmin)
 
       // set the group in cache only if it is having the `oldId`
-      if (groupToReturn.oldId && groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
+      if (groupToReturn.oldId && groupToReturn.oldId.length > 0) {
+        logger.debug('saving group in cache')
+        await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
+      }
+
 
       if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
       if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
         await helper.ensureGroupMember(getSession(), groupToReturn.id, currentUser.userId)
-
-        cache.set(`${groupId}-members`, [currentUser.userId])
+        await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify([currentUser.userId]), { EX: config.CACHE_TTL })
       }
     }
 
@@ -503,7 +510,8 @@ async function getGroup(currentUser, groupId, criteria) {
             groupToReturn.flattenGroupIdTree = flattenGroupIdTree
 
             // set the group in cache only if it is having the `oldId`
-            if (groupToReturn.oldId && groupToReturn.oldId.length > 0) cache.set(groupId, groupToReturn)
+            if (groupToReturn.oldId && groupToReturn.oldId.length > 0)
+              await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
           }
         } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
           // find parent groups
@@ -562,6 +570,7 @@ getGroup.schema = {
 async function deleteGroup(groupId, isAdmin) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
+  const redisClient = await helper.acquireRedisClient()
   try {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
@@ -574,9 +583,7 @@ async function deleteGroup(groupId, isAdmin) {
     await tx.commit()
 
     // delete the cache
-    const cache = await helper.getCacheInstance()
-    cache.del(group.id)
-    cache.del(`${group.id}-members`)
+    await Promise.all([redisClient.del(`Group:${group.id}`), redisClient.del(`GroupMembers:${group.id}`)])
 
     return group
   } catch (error) {
