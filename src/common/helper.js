@@ -391,7 +391,7 @@ async function deleteGroup(tx, group) {
 async function acquireRedisClient() {
 
 
-  if (redisClient == null) {
+  if (!redisClient) {
     logger.debug("creating new redis client")
     redisClient = redis.createClient({ url: config.REDIS_URL })
 

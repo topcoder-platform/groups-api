@@ -583,8 +583,7 @@ async function deleteGroup(groupId, isAdmin) {
     await tx.commit()
 
     // delete the cache
-    await redisClient.del(`Group:${group.id}`)
-    await redisClient.del(`GroupMembers:${group.id}`)
+    await Promise.all([redisClient.del(`Group:${group.id}`), redisClient.del(`GroupMembers:${group.id}`)])
 
     return group
   } catch (error) {
