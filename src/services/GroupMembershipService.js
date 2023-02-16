@@ -11,6 +11,8 @@ const errors = require('../common/errors')
 const validate = require('uuid-validate')
 const constants = require('../../app-constants')
 
+const GroupService = require('./GroupService')
+
 /**
  * Add group member.
  * @param {Object} currentUser the current user
@@ -63,11 +65,17 @@ async function addGroupMember(currentUser, groupId, data) {
       }
 
       // update the cache
-      const cache = await helper.getCacheInstance()
-      const cachedGroup = cache.get(group.id)
+      const redisClient = await helper.acquireRedisClient()
+      let cachedGroup = JSON.parse(await redisClient.get(`Group:${group.id}`))
+
+      if (!cachedGroup) {
+        await GroupService.getGroup(currentUser, group.id, { includeSubGroups: true })
+        cachedGroup = JSON.parse(await redisClient.get(`Group:${group.id}`))
+      }
+
       cachedGroup.subGroups.push(childGroup)
       cachedGroup.flattenGroupIdTree.push(childGroup.id)
-      cache.set(group.id, cachedGroup)
+      await redisClient.set(`Group:${group.id}`, JSON.stringify(cachedGroup), { EX: config.CACHE_TTL })
     } else {
       logger.debug(`Check for memberId ${memberId} exist or not`)
       await helper.ensureExists(tx, 'User', memberId)
