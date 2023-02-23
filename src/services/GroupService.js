@@ -323,14 +323,12 @@ async function patchGroup(currentUser, groupId, data) {
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.oldId = data.oldId ? data.oldId : ''
 
-    const updateRes = await tx.run(
+    await tx.run(
       'MATCH (g:Group {id: {id}}) SET g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.oldId={oldId} RETURN g',
       groupData
     )
 
-    const updatedGroup = updateRes.records[0].get(0).properties
-    logger.debug(`Group = ${JSON.stringify(updatedGroup)}`)
-
+    const updatedGroup = getGroup(currentUser, groupId, { includeSubGroups: true })
     await tx.commit()
 
     // update the cache
@@ -465,7 +463,6 @@ async function getGroup(currentUser, groupId, criteria) {
         await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
       }
 
-
       if (!isAdmin) delete groupToReturn.status
 
       // if the group is private, the user needs to be a member of the group, or an admin
@@ -513,39 +510,40 @@ async function getGroup(currentUser, groupId, criteria) {
             if (groupToReturn.oldId && groupToReturn.oldId.length > 0)
               await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
           }
-        } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
-          // find parent groups
-          groupToExpand.parentGroups = await helper.getParentGroups(getSession(), groupToExpand.id)
-          // add parent groups to pending if needed
-          if (!criteria.oneLevel) {
-            _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
-          }
+        }
+      } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
+        // find parent groups
+        groupToExpand.parentGroups = await helper.getParentGroups(getSession(), groupToExpand.id)
+        // add parent groups to pending if needed
+        if (!criteria.oneLevel) {
+          _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
         }
       }
     }
+  }
 
 
     if (fieldNames) {
-      fieldNames.push('subGroups')
-      fieldNames.push('parentGroups')
+    fieldNames.push('subGroups')
+    fieldNames.push('parentGroups')
 
-      groupToReturn = _.pick(groupToReturn, fieldNames)
-    }
-
-    if (!criteria.includeSubGroups) delete groupToReturn.subGroups
-    if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
-    if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
-
-    return groupToReturn
-  } catch (error) {
-    logger.error(error)
-    throw error
-  } finally {
-    logger.debug('Session Close')
-    if (session) {
-      await session.close()
-    }
+    groupToReturn = _.pick(groupToReturn, fieldNames)
   }
+
+  if (!criteria.includeSubGroups) delete groupToReturn.subGroups
+  if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
+  if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
+
+  return groupToReturn
+} catch (error) {
+  logger.error(error)
+  throw error
+} finally {
+  logger.debug('Session Close')
+  if (session) {
+    await session.close()
+  }
+}
 }
 
 getGroup.schema = {
