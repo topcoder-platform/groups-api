@@ -34,8 +34,13 @@ async function addGroupMember(currentUser, groupId, data) {
       groupId,
       currentUser !== 'M2M' && helper.hasAdminRole(currentUser)
     )
+
     data.oldId = group.oldId
     groupId = group.id
+
+    if (!group.oldId || group.oldId.length <= 0) {
+      throw new errors.ForbiddenError('Parent group is not ready yet, try after sometime')
+    }
 
     const memberId = data.memberId ? data.memberId : data.universalUID
 
