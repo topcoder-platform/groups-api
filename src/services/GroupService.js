@@ -511,39 +511,39 @@ async function getGroup(currentUser, groupId, criteria) {
               await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
           }
         }
-      } else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
-        // find parent groups
-        groupToExpand.parentGroups = await helper.getParentGroups(getSession(), groupToExpand.id)
-        // add parent groups to pending if needed
-        if (!criteria.oneLevel) {
-          _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
+        else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
+          // find parent groups
+          groupToExpand.parentGroups = await helper.getParentGroups(getSession(), groupToExpand.id)
+          // add parent groups to pending if needed
+          if (!criteria.oneLevel) {
+            _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
+          }
         }
       }
     }
-  }
 
 
     if (fieldNames) {
-    fieldNames.push('subGroups')
-    fieldNames.push('parentGroups')
+      fieldNames.push('subGroups')
+      fieldNames.push('parentGroups')
 
-    groupToReturn = _.pick(groupToReturn, fieldNames)
+      groupToReturn = _.pick(groupToReturn, fieldNames)
+    }
+
+    if (!criteria.includeSubGroups) delete groupToReturn.subGroups
+    if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
+    if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
+
+    return groupToReturn
+  } catch (error) {
+    logger.error(error)
+    throw error
+  } finally {
+    logger.debug('Session Close')
+    if (session) {
+      await session.close()
+    }
   }
-
-  if (!criteria.includeSubGroups) delete groupToReturn.subGroups
-  if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
-  if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
-
-  return groupToReturn
-} catch (error) {
-  logger.error(error)
-  throw error
-} finally {
-  logger.debug('Session Close')
-  if (session) {
-    await session.close()
-  }
-}
 }
 
 getGroup.schema = {
