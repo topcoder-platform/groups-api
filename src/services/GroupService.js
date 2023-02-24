@@ -331,10 +331,6 @@ async function patchGroup(currentUser, groupId, data) {
     const updatedGroup = await getGroup(currentUser, groupId, { includeSubGroups: true })
     await tx.commit()
 
-    logger.debug('*****')
-    logger.debug(JSON.stringify(updateGroup))
-    logger.debug('*****')
-
     // update the cache
     await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
 
