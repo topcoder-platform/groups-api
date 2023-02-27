@@ -278,7 +278,6 @@ async function updateGroup(currentUser, groupId, data) {
 
     return updatedGroup
   } catch (error) {
-    logger.error(error)
     logger.debug('Transaction Rollback')
     await tx.rollback()
     throw error
@@ -327,9 +326,9 @@ async function patchGroup(currentUser, groupId, data) {
       'MATCH (g:Group {id: {id}}) SET g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.oldId={oldId} RETURN g',
       groupData
     )
+    await tx.commit()
 
     const updatedGroup = await getGroup(currentUser, groupId, { includeSubGroups: true })
-    await tx.commit()
 
     // update the cache
     await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
