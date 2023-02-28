@@ -328,7 +328,7 @@ async function patchGroup(currentUser, groupId, data) {
     )
     await tx.commit()
 
-    const updatedGroup = await getGroup(currentUser, groupId, { includeSubGroups: true, skipCache: true })
+    const updatedGroup = await getGroup(currentUser, groupId, { includeSubGroups: true, flattenGroupIdTree: true, skipCache: true })
 
     // update the cache
     await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
