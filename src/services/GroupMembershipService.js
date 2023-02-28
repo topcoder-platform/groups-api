@@ -74,7 +74,8 @@ async function addGroupMember(currentUser, groupId, data) {
       let cachedGroup = JSON.parse(await redisClient.get(`Group:${group.id}`))
 
       if (!cachedGroup) {
-        await GroupService.getGroup(currentUser, group.id, { includeSubGroups: true })
+        logger.debug('inside getting group from DB')
+        await GroupService.getGroup(currentUser, group.id, { includeSubGroups: true, flattenGroupIdTree: true })
         cachedGroup = JSON.parse(await redisClient.get(`Group:${group.id}`))
       }
 
