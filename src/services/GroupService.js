@@ -444,7 +444,7 @@ async function getGroup(currentUser, groupId, criteria) {
 
       // if the group is private, the user needs to be a member of the group, or an admin
       if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-        const cachedGroupMembers = JSON.parse(await redisClient.get(`GroupMembers:${groupId}`))
+        const cachedGroupMembers = JSON.parse(await redisClient.get(`GroupMembers:${groupId}`)) || []
 
         if (!_.includes(cachedGroupMembers, currentUser.userId)) {
           await helper.ensureGroupMember(getSession(), groupId, currentUser.userId)
