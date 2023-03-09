@@ -69,19 +69,7 @@ async function addGroupMember(currentUser, groupId, data) {
         throw new errors.ConflictError('Parent group is private, the child group must be private too.')
       }
 
-      // update the cache
-      const redisClient = await helper.acquireRedisClient()
-      let cachedGroup = JSON.parse(await redisClient.get(`Group:${group.id}`))
-
-      if (!cachedGroup) {
-        logger.debug('inside getting group from DB')
-        await GroupService.getGroup(currentUser, group.id, { includeSubGroups: true, flattenGroupIdTree: true })
-        cachedGroup = JSON.parse(await redisClient.get(`Group:${group.id}`))
-      }
-
-      cachedGroup.subGroups.push(childGroup)
-      cachedGroup.flattenGroupIdTree.push(childGroup.id)
-      await redisClient.set(`Group:${group.id}`, JSON.stringify(cachedGroup), { EX: config.CACHE_TTL })
+      await helper.invalidateCache(group)
     } else {
       logger.debug(`Check for memberId ${memberId} exist or not`)
       await helper.ensureExists(tx, 'User', memberId)
