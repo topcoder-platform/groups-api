@@ -123,7 +123,7 @@ async function searchGroups(criteria, isAdmin) {
       if (criteria.includeParentGroup) {
         for (let i = 0; i < result.length; i += 1) {
           const group = result[i]
-          group.parentGroups = await helper.getParentGroups(session, group.id)
+          group.parentGroups = await helper.getParentGroups(group.id)
         }
       }
 
@@ -232,7 +232,6 @@ createGroup.schema = {
 async function updateGroup(currentUser, groupId, data) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
-  const redisClient = await helper.acquireRedisClient()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(
@@ -271,10 +270,7 @@ async function updateGroup(currentUser, groupId, data) {
     await helper.postBusEvent(config.KAFKA_GROUP_UPDATE_TOPIC, updatedGroup)
     await tx.commit()
 
-    // update the cache only if the group has the `oldId`
-    if (updatedGroup.oldId && updatedGroup.oldId.length > 0) {
-      await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
-    }
+    await helper.invalidateCache(updatedGroup)
 
     return updatedGroup
   } catch (error) {
@@ -306,7 +302,6 @@ updateGroup.schema = {
 async function patchGroup(currentUser, groupId, data) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
-  const redisClient = await helper.acquireRedisClient()
   try {
     logger.debug(`Patch Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
     const group = await helper.ensureExists(
@@ -331,7 +326,7 @@ async function patchGroup(currentUser, groupId, data) {
     const updatedGroup = await getGroup(currentUser, groupId, { includeSubGroups: true, flattenGroupIdTree: true, skipCache: true })
 
     // update the cache
-    await redisClient.set(`Group:${group.id}`, JSON.stringify(updatedGroup), { EX: config.CACHE_TTL })
+    await helper.invalidateCache(updateGroup)
 
     return updatedGroup
   } catch (error) {
@@ -361,17 +356,14 @@ patchGroup.schema = {
  * @param {Object} criteria the query criteria
  * @returns {Object} the group
  */
-async function getGroup(currentUser, groupId, criteria) {
+
+async function getGroup (currentUser, groupId, criteria) {
   const isAdmin = currentUser === 'M2M' || helper.hasAdminRole(currentUser)
   logger.debug(
     `Get Group - admin - ${isAdmin} - user - ${currentUser} , groupId - ${groupId} , criteria -  ${JSON.stringify(
       criteria
     )}`
   )
-
-  if (!_.has(criteria, 'skipCache')) {
-    criteria.skipCache = false
-  }
 
   if (criteria.includeSubGroups && criteria.includeParentGroup) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
@@ -404,71 +396,45 @@ async function getGroup(currentUser, groupId, criteria) {
       'oldId'
     ]
 
-    if (_.uniq(fieldNames).length !== fieldNames.length) {
-      throw new errors.BadRequestError(`duplicate field names are not allowed`)
-    }
-
-    const extraFields = _.difference(fieldNames, allowedFieldNames)
-    if (extraFields.length > 0) {
-      throw new errors.BadRequestError(
-        `${_.toString(extraFields)} is/are not allowed, allowed field names: ${JSON.stringify(
-          allowedFieldNames,
-          null,
-          4
-        )}`
-      )
-    }
-  }
-
-  let session
-  const getSession = () => {
-    if (!session) {
-      session = helper.createDBSession()
-    }
-    return session
-  }
-
-  const redisClient = await helper.acquireRedisClient()
-
-  let groupToReturn
-
-  try {
-    if (!criteria.skipCache) {
-      // check for the availibility of the group in cache
-      groupToReturn = JSON.parse(await redisClient.get(`Group:${groupId}`))
-    }
-
-    if (!criteria.skipCache && groupToReturn) {
-      logger.debug('group found in cache')
-      if (!isAdmin) delete groupToReturn.status
-
-      // if the group is private, the user needs to be a member of the group, or an admin
-      if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-        const cachedGroupMembers = JSON.parse(await redisClient.get(`GroupMembers:${groupId}`)) || []
-
-        if (!_.includes(cachedGroupMembers, currentUser.userId)) {
-          await helper.ensureGroupMember(getSession(), groupId, currentUser.userId)
-          cachedGroupMembers.push(currentUser.userId)
-          await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify(cachedGroupMembers), { EX: config.CACHE_TTL })
+    for (let i = 0; i < fieldNames.length; i += 1) {
+      if (!_.includes(allowedFieldNames, fieldNames[i])) {
+        throw new errors.BadRequestError(
+          `Field name ${fieldNames[i]} is not allowed, allowed field names: ${JSON.stringify(
+            allowedFieldNames,
+            null,
+            4
+          )}`
+        )
+      }
+      for (let j = i + 1; j < fieldNames.length; j += 1) {
+        if (fieldNames[i] === fieldNames[j]) {
+          throw new errors.BadRequestError(`There are duplicate field names: ${fieldNames[i]}`)
         }
       }
-    } else {
-      logger.debug('group not found in cache, getting from DB')
-      groupToReturn = await helper.ensureExists(getSession(), 'Group', groupId, isAdmin)
+    }
+  }
 
-      // set the group in cache only if it is having the `oldId`
-      if (groupToReturn.oldId && groupToReturn.oldId.length > 0) {
-        logger.debug('saving group in cache')
-        await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
-      }
+  const session = helper.createDBSession()
+  const redisClient = await helper.acquireRedisClient()
 
-      if (!isAdmin) delete groupToReturn.status
+  try {
+    const cacheCriteria = await helper.getCacheKey(criteria)
+    const cacheKey = `group:${groupId}:${cacheCriteria}`
 
-      // if the group is private, the user needs to be a member of the group, or an admin
-      if (groupToReturn.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
-        await helper.ensureGroupMember(getSession(), groupToReturn.id, currentUser.userId)
-        await redisClient.set(`GroupMembers:${groupId}`, JSON.stringify([currentUser.userId]), { EX: config.CACHE_TTL })
-      }
+    // logger.debug(redisClient.exists(cacheKey))
+    if (!criteria.skipCache && await redisClient.exists(cacheKey)) {
+      logger.debug('returning from cache')
+      // check for the availibility of the group in cache
+      return JSON.parse(await redisClient.get(cacheKey))
+    }
+
+    let group = await helper.ensureExists(session, 'Group', groupId, isAdmin)
+
+    if (!isAdmin) delete group.status
+
+    // if the group is private, the user needs to be a member of the group, or an admin
+    if (group.privateGroup && currentUser !== 'M2M' && !helper.hasAdminRole(currentUser)) {
+      await helper.ensureGroupMember(session, group.id, currentUser.userId)
     }
 
     // get parent or sub groups using breadth first search algorithm,
@@ -480,8 +446,11 @@ async function getGroup(currentUser, groupId, criteria) {
     const pending = []
     const expanded = []
     if (criteria.includeSubGroups || criteria.includeParentGroup || criteria.flattenGroupIdTree) {
-      pending.push(groupToReturn)
+      pending.push(group)
+
+      let flattenGroupIdTree = []
       while (pending.length > 0) {
+        const groupIdTree = []
         const groupToExpand = pending.shift()
         const found = _.find(expanded, (g) => g.id === groupToExpand.id)
         if (found) {
@@ -491,57 +460,50 @@ async function getGroup(currentUser, groupId, criteria) {
           continue
         }
         expanded.push(groupToExpand)
-        if ((criteria.includeSubGroups && !groupToReturn.subGroups) || (criteria.flattenGroupIdTree && !groupToReturn.flattenGroupIdTree)) {
-          const flattenGroupIdTree = []
-
+        if (criteria.includeSubGroups) {
           // find child groups
-          groupToExpand.subGroups = await helper.getChildGroups(getSession(), groupToExpand.id)
+          groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
+          _.forEach(groupToExpand.subGroups, (g) => groupIdTree.push(g.id))
+          groupToExpand.flattenGroupIdTree = groupIdTree
           // add child groups to pending if needed
           if (!criteria.oneLevel) {
-            _.forEach(groupToExpand.subGroups, (g) => {
-              pending.push(g)
-              flattenGroupIdTree.push(g.id)
-            })
-
-            groupToReturn.flattenGroupIdTree = flattenGroupIdTree
-
-            // set the group in cache only if it is having the `oldId`
-            if (groupToReturn.oldId && groupToReturn.oldId.length > 0)
-              await redisClient.set(`Group:${groupId}`, JSON.stringify(groupToReturn), { EX: config.CACHE_TTL })
+            _.forEach(groupToExpand.subGroups, (g) => pending.push(g))
           }
-        }
-        else if (criteria.includeParentGroup && !groupToReturn.parentGroups) {
+        } else {
           // find parent groups
-          groupToExpand.parentGroups = await helper.getParentGroups(getSession(), groupToExpand.id)
+          groupToExpand.parentGroups = await helper.getParentGroups(groupToExpand.id)
           // add parent groups to pending if needed
           if (!criteria.oneLevel) {
             _.forEach(groupToExpand.parentGroups, (g) => pending.push(g))
           }
         }
-      }
-    }
 
+        flattenGroupIdTree = flattenGroupIdTree.concat(groupIdTree)
+      }
+      group.flattenGroupIdTree = flattenGroupIdTree
+    }
 
     if (fieldNames) {
       fieldNames.push('subGroups')
       fieldNames.push('parentGroups')
-
-      groupToReturn = _.pick(groupToReturn, fieldNames)
+      
+      group = _.pick(group, fieldNames)
     }
 
-    if (!criteria.includeSubGroups) delete groupToReturn.subGroups
-    if (!criteria.includeParentGroup) delete groupToReturn.parentGroups
-    if (!criteria.flattenGroupIdTree) delete groupToReturn.flattenGroupIdTree
+    // set the value in redis with UUID
+    await redisClient.set(`group:${group.id}:${cacheCriteria}`, JSON.stringify(group), { EX: config.CACHE_TTL })
+    
+    // set the value in redis with OldID
+    if (group.oldId)
+      await redisClient.set(`group:${group.oldId}:${cacheCriteria}`, JSON.stringify(group), { EX: config.CACHE_TTL })
 
-    return groupToReturn
+    return group
   } catch (error) {
     logger.error(error)
     throw error
   } finally {
     logger.debug('Session Close')
-    if (session) {
-      await session.close()
-    }
+    await session.close()
   }
 }
 
@@ -567,7 +529,6 @@ getGroup.schema = {
 async function deleteGroup(groupId, isAdmin) {
   const session = helper.createDBSession()
   const tx = session.beginTransaction()
-  const redisClient = await helper.acquireRedisClient()
   try {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
@@ -579,8 +540,7 @@ async function deleteGroup(groupId, isAdmin) {
     await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, kafkaPayload)
     await tx.commit()
 
-    // delete the cache
-    await Promise.all([redisClient.del(`Group:${group.id}`), redisClient.del(`GroupMembers:${group.id}`)])
+    groupsToDelete.forEach(async group => await helper.invalidateCache(group))
 
     return group
   } catch (error) {
