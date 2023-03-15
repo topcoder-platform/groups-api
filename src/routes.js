@@ -17,7 +17,7 @@ module.exports = {
       controller: 'GroupController',
       method: 'createGroup',
       auth: 'jwt',
-      access: [constants.UserRoles.Admin],
+      access: [constants.UserRoles.Admin, constants.UserRoles.TGAdmin],
       scopes: ['write:groups', 'all:groups']
     }
   },
