@@ -170,7 +170,7 @@ module.exports = {
       controller: 'GroupRoleController',
       method: 'addGroupRole',
       auth: 'jwt',
-      access: [constants.UserRoles.Admin],
+      access: [constants.UserRoles.Admin, constants.UserRoles.TGAdmin],
       scopes: ['write:groups', 'all:groups']
     },
     delete: {
