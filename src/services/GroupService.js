@@ -460,7 +460,7 @@ async function getGroup (currentUser, groupId, criteria) {
           continue
         }
         expanded.push(groupToExpand)
-        if (criteria.includeSubGroups) {
+        if (criteria.includeSubGroups || criteria.flattenGroupIdTree) {
           // find child groups
           groupToExpand.subGroups = await helper.getChildGroups(session, groupToExpand.id)
           _.forEach(groupToExpand.subGroups, (g) => groupIdTree.push(g.id))
