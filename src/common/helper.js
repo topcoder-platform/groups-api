@@ -410,19 +410,29 @@ async function getCacheKey(criteria) {
   Object.keys(criteria).forEach(c => {
     if (c != 'skipCache') criteriaStr = criteriaStr + c + '=' + criteria[c] + ','
   })
-  return criteriaStr.replace(/,\s*$/, "")
+
+  return criteriaStr.replace(/,\s*$/, "").replace(/,/g, '|').replace(/=/g, '-')
 }
 
 async function invalidateCache(group) {
-  const redisClient = await acquireRedisClient()
   const parentGroups = await getParentGroups(group.id)
   parentGroups.forEach(async g => {
-    await redisClient.del(`group:${g.id}:*`)
-    await redisClient.del(`group:${g.oldId}:*`)
+    await deleteKeys(`group:${g.id}:*`)
+    await deleteKeys(`group:${g.oldId}:*`)
   })
 
-  await redisClient.del(`group:${group.id}:*`)
-  await redisClient.del(`group:${group.oldId}:*`)
+  await deleteKeys(`group:${group.id}:*`)
+  await deleteKeys(`group:${group.oldId}:*`)
+}
+
+async function deleteKeys(key) {
+  const redisClient = await acquireRedisClient()
+  const keys = await redisClient.keys(key)
+
+  keys.forEach(async (key) => {
+    const test = await redisClient.del(key)
+    logger.debug(test)
+  })
 }
 
 module.exports = {

@@ -317,18 +317,17 @@ async function patchGroup(currentUser, groupId, data) {
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
     groupData.oldId = data.oldId ? data.oldId : ''
 
-    await tx.run(
+    const patchRes = await tx.run(
       'MATCH (g:Group {id: {id}}) SET g.updatedAt={updatedAt}, g.updatedBy={updatedBy}, g.oldId={oldId} RETURN g',
       groupData
     )
     await tx.commit()
 
-    const updatedGroup = await getGroup(currentUser, groupId, { includeSubGroups: true, flattenGroupIdTree: true, skipCache: true })
-
+    const patchedGroup = patchRes.records[0].get(0).properties
     // update the cache
-    await helper.invalidateCache(updateGroup)
+    await helper.invalidateCache(patchedGroup)
 
-    return updatedGroup
+    return patchedGroup
   } catch (error) {
     logger.error(error)
     logger.debug('Transaction Rollback')
@@ -491,6 +490,7 @@ async function getGroup (currentUser, groupId, criteria) {
     }
 
     // set the value in redis with UUID
+    logger.debug(`adding group:${group.id}:${cacheCriteria} key in cache`)
     await redisClient.set(`group:${group.id}:${cacheCriteria}`, JSON.stringify(group), { EX: config.CACHE_TTL })
     
     // set the value in redis with OldID
@@ -532,15 +532,15 @@ async function deleteGroup(groupId, isAdmin) {
   try {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
-
+    
+    await helper.invalidateCache(group)
+    
     const groupsToDelete = await helper.deleteGroup(tx, group)
 
     const kafkaPayload = {}
     kafkaPayload.groups = groupsToDelete
     await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, kafkaPayload)
     await tx.commit()
-
-    groupsToDelete.forEach(async group => await helper.invalidateCache(group))
 
     return group
   } catch (error) {
