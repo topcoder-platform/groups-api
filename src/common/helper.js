@@ -430,8 +430,7 @@ async function deleteKeys(key) {
   const keys = await redisClient.keys(key)
 
   keys.forEach(async (key) => {
-    const test = await redisClient.del(key)
-    logger.debug(test)
+    await redisClient.del(key)
   })
 }
 
