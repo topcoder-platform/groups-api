@@ -414,7 +414,7 @@ async function getCacheKey(criteria) {
 }
 
 async function invalidateCache(group) {
-  const redisClient = await helper.acquireRedisClient()
+  const redisClient = await acquireRedisClient()
   const parentGroups = await getParentGroups(group.id)
   parentGroups.forEach(async g => {
     await redisClient.del(`group:${g.id}:*`)
