@@ -234,21 +234,21 @@ async function updateGroup(currentUser, groupId, data) {
   const tx = session.beginTransaction()
   try {
     logger.debug(`Update Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
-    const group = await helper.ensureExists(
-      tx,
-      'Group',
-      groupId,
-      currentUser === 'M2M' || helper.hasAdminRole(currentUser)
-    )
+    const group = await helper.ensureExists(tx, 'Group', groupId, currentUser === 'M2M' || helper.hasAdminRole(currentUser))
 
-    const groupData = data
+    const groupData = {}
     groupData.id = groupId
+    groupData.name = data.name ? data.name : group.name
+    groupData.description = data.description ? data.description : group.description
+    groupData.privateGroup = data.privateGroup ? data.privateGroup : group.privateGroup
+    groupData.selfRegister = data.selfRegister ? data.selfRegister : group.selfRegister
+    groupData.status = data.status ? data.status : group.status
     groupData.updatedAt = new Date().toISOString()
     groupData.updatedBy = currentUser === 'M2M' ? '00000000' : currentUser.userId
-    groupData.domain = data.domain ? data.domain : ''
-    groupData.ssoId = data.ssoId ? data.ssoId : ''
-    groupData.organizationId = data.organizationId ? data.organizationId : ''
-    groupData.oldId = data.oldId ? data.oldId : ''
+    groupData.domain = data.domain ? data.domain : group.domain
+    groupData.ssoId = data.ssoId ? data.ssoId : group.ssoId
+    groupData.organizationId = data.organizationId ? data.organizationId : group.organizationId
+    groupData.oldId = data.oldId ? data.oldId : group.oldId    
 
     let updateRes
     if (groupData.status) {
