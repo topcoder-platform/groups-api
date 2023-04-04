@@ -172,15 +172,18 @@ async function getChildGroups(session, groupId) {
 
 /**
  * Get parent groups.
- * @param {Object} session the db session
  * @param {String} groupId the group id
  * @returns {Array} the parent groups
  */
-async function getParentGroups(session, groupId) {
+async function getParentGroups(groupId) {
+  const session = createDBSession()
+
   const res = await session.run(
     'MATCH (g:Group)-[r:GroupContains]->(c:Group {id: {groupId}}) RETURN g ORDER BY g.oldId',
     { groupId }
   )
+
+  await session.close()
   return _.map(res.records, (record) => record.get(0).properties)
 }
 
@@ -363,7 +366,7 @@ async function deleteGroup(tx, group) {
         continue
       }
       // delete child if it doesn't belong to other group
-      const parents = await getParentGroups(tx, child.id)
+      const parents = await getParentGroups(child.id)
       if (parents.length <= 1) {
         groupsToDelete.push(child)
       }
@@ -388,8 +391,6 @@ async function deleteGroup(tx, group) {
 }
 
 async function acquireRedisClient() {
-
-
   if (!redisClient) {
     logger.debug("creating new redis client")
     redisClient = redis.createClient({ url: config.REDIS_URL })
@@ -402,6 +403,35 @@ async function acquireRedisClient() {
   }
 
   return redisClient
+}
+
+async function getCacheKey(criteria) {
+  let criteriaStr = ''
+  Object.keys(criteria).forEach(c => {
+    if (c != 'skipCache') criteriaStr = criteriaStr + c + '=' + criteria[c] + ','
+  })
+
+  return criteriaStr.replace(/,\s*$/, "").replace(/,/g, '|').replace(/=/g, '-')
+}
+
+async function invalidateCache(group) {
+  const parentGroups = await getParentGroups(group.id)
+  parentGroups.forEach(async g => {
+    await deleteKeys(`group:${g.id}:*`)
+    await deleteKeys(`group:${g.oldId}:*`)
+  })
+
+  await deleteKeys(`group:${group.id}:*`)
+  await deleteKeys(`group:${group.oldId}:*`)
+}
+
+async function deleteKeys(key) {
+  const redisClient = await acquireRedisClient()
+  const keys = await redisClient.keys(key)
+
+  keys.forEach(async (key) => {
+    await redisClient.del(key)
+  })
 }
 
 module.exports = {
@@ -420,5 +450,7 @@ module.exports = {
   postBusEvent,
   createGroup,
   deleteGroup,
-  acquireRedisClient
+  acquireRedisClient,
+  getCacheKey,
+  invalidateCache
 }
