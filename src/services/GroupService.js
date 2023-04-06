@@ -165,7 +165,7 @@ searchGroups.schema = {
     privateGroup: Joi.boolean(),
     includeSubGroups: Joi.boolean().default(false),
     includeParentGroup: Joi.boolean().default(false),
-    oneLevel: Joi.boolean(),
+    oneLevel: Joi.boolean().default(true),
     status: Joi.string()
       .valid([constants.GroupStatus.Active, constants.GroupStatus.InActive])
       .default(constants.GroupStatus.Active)
@@ -368,14 +368,6 @@ async function getGroup (currentUser, groupId, criteria) {
     throw new errors.BadRequestError('includeSubGroups and includeParentGroup can not be both true')
   }
 
-  if (_.isNil(criteria.oneLevel)) {
-    if (criteria.includeSubGroups) {
-      criteria.oneLevel = false
-    } else if (criteria.includeParentGroup) {
-      criteria.oneLevel = true
-    }
-  }
-
   let fieldNames = null
   if (criteria.fields) {
     fieldNames = criteria.fields.split(',')
@@ -515,7 +507,7 @@ getGroup.schema = {
     includeParentGroup: Joi.boolean().default(false),
     flattenGroupIdTree: Joi.boolean().default(false),
     skipCache: Joi.boolean().default(false),
-    oneLevel: Joi.boolean(),
+    oneLevel: Joi.boolean().default(true),
     fields: Joi.string()
   })
 }
