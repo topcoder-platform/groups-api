@@ -28,6 +28,9 @@ module.exports = {
   BUSAPI_URL: process.env.BUSAPI_URL || 'https://api.topcoder-dev.com/v5',
   KAFKA_ERROR_TOPIC: process.env.KAFKA_ERROR_TOPIC || 'common.error.reporting',
 
+  // challenge api
+  CHALLENGE_API: process.env.CHALLENGE_API || 'https://api.topcoder-dev.com/v5/challenges/',
+
   // health check timeout in milliseconds
   HEALTH_CHECK_TIMEOUT: process.env.HEALTH_CHECK_TIMEOUT || 60000,
 
