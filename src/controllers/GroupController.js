@@ -74,7 +74,7 @@ async function deleteGroup(req, res) {
     req.params.groupId,
     req.authUser.isMachine || helper.hasAdminRole(req.authUser)
   )
-  res.send(result)
+  result.statusCode ? res.status(result.statusCode).send(result.data) : res.send(result)
 }
 
 /**

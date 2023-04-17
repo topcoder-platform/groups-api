@@ -2,6 +2,7 @@
  * This service provides operations of groups
  */
 const _ = require('lodash')
+const axios = require('axios')
 const config = require('config')
 const Joi = require('joi')
 const helper = require('../common/helper')
@@ -524,13 +525,32 @@ async function deleteGroup(groupId, isAdmin) {
   try {
     logger.debug(`Delete Group - ${groupId}`)
     const group = await helper.ensureExists(tx, 'Group', groupId, isAdmin)
+
+    //check if group is associated with challenges or not; if yes, don't delete the group else delete
+    const token = await helper.getM2Mtoken()
+    const challengeFilterURL = config.CHALLENGE_API + `?groups=["${groupId}"]`
+    const challenges = await axios.get(challengeFilterURL, {
+      headers: {
+        'User-Agent': 'Request-Promise',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (challenges.data.length > 0) {
+      return {
+        statusCode: 406,
+        data: {
+          message: `group ${groupId} is associated with challenges and can not be deleted`
+        }
+      }
+    }
     
     await helper.invalidateCache(group)
     
-    const groupsToDelete = await helper.deleteGroup(tx, group)
-
+    const deletedGroups = await helper.deleteGroup(tx, group)
     const kafkaPayload = {}
-    kafkaPayload.groups = groupsToDelete
+    kafkaPayload.groups = deletedGroups
     await helper.postBusEvent(config.KAFKA_GROUP_DELETE_TOPIC, kafkaPayload)
     await tx.commit()
 
