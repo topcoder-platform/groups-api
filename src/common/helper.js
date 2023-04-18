@@ -7,6 +7,8 @@ const busApi = require('tc-bus-api-wrapper')
 const config = require('config')
 const neo4j = require('neo4j-driver')
 const querystring = require('querystring')
+const m2mAuth = require('tc-core-library-js').auth
+const m2m = m2mAuth.m2m(_.pick(config, ['AUTH0_URL', 'AUTH0_AUDIENCE', 'TOKEN_CACHE_TIME', 'AUTH0_PROXY_SERVER_URL']))
 const redis = require('redis')
 const uuid = require('uuid')
 const validate = require('uuid-validate')
@@ -434,6 +436,13 @@ async function deleteKeys(key) {
   })
 }
 
+/* Function to get M2M token
+ * @returns m2m token
+ */
+async function getM2Mtoken() {
+  return m2m.getMachineToken(config.AUTH0_CLIENT_ID, config.AUTH0_CLIENT_SECRET)
+}
+
 module.exports = {
   wrapExpress,
   autoWrapExpress,
@@ -452,5 +461,6 @@ module.exports = {
   deleteGroup,
   acquireRedisClient,
   getCacheKey,
-  invalidateCache
+  invalidateCache,
+  getM2Mtoken
 }
