@@ -327,7 +327,7 @@ async function postBusEvent(topic, payload) {
 
 async function createGroup(tx, data, currentUser) {
   // check whether group name is already used
-  const nameCheckRes = await tx.run('MATCH (g:Group {name: {name}}) RETURN g LIMIT 1', {
+  const nameCheckRes = await tx.run('MATCH (g:Group) WHERE tolower(g.name) = tolower($name) RETURN g LIMIT 1', {
     name: data.name
   })
   if (nameCheckRes.records.length > 0) {
