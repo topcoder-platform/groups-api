@@ -747,7 +747,7 @@ data.entrySet().each {
           <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Fetch members for single-add" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename">${basedir}JsonSample.groovy</stringProp>
-            <stringProp name="parameters">/data/mambers-to-add.json members</stringProp>
+            <stringProp name="parameters">/data/memberships.json members</stringProp>
             <stringProp name="script"></stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223Sampler>
@@ -794,7 +794,7 @@ ${__setProperty(membership_type, ${membershipType})};
           <stringProp name="HTTPSampler.port"></stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/v5/groups/${__property(group_id)}/members/</stringProp>
+          <stringProp name="HTTPSampler.path">/v5/groups/${__property(group_id)}/members</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
