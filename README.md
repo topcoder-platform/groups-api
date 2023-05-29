@@ -2,6 +2,7 @@
 
 ## Prerequisites
 
+
 - NodeJS (v8+)
 - Neo4j Desktop (v1.1.13) https://neo4j.com/download/, it includes Neo4j 3.5
 - git
