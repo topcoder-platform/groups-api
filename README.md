@@ -8,7 +8,6 @@
 - git
 - Heroku CLI
 - Heroku account
-
 ## Configuration
 
 Configuration for the application is at `config/default.js` and `config/production.js`.
