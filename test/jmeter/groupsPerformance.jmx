@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.5">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Verify Groups Api to support bulk operations" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="groupsPerformance" enabled="true">
       <stringProp name="TestPlan.comments">Check the end point for Bulk add and Bulk delete members</stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
@@ -747,7 +747,7 @@ data.entrySet().each {
           <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Fetch members for single-add" enabled="true">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename">${basedir}JsonSample.groovy</stringProp>
-            <stringProp name="parameters">/data/memberships.json members</stringProp>
+            <stringProp name="parameters">/data/mambers-to-add.json members</stringProp>
             <stringProp name="script"></stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223Sampler>
@@ -900,10 +900,6 @@ ${__setProperty(membership_type, ${membershipType})};
           </ResultCollector>
           <hashTree/>
         </hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
-          <stringProp name="ConstantTimer.delay">120000</stringProp>
-        </ConstantTimer>
-        <hashTree/>
       </hashTree>
       <ResultCollector guiclass="AssertionVisualizer" testclass="ResultCollector" testname="Assertion Results" enabled="true">
         <boolProp name="ResultCollector.error_logging">false</boolProp>
