@@ -592,6 +592,10 @@ ${__setProperty(membership_type, ${membershipType})};
           </ResultCollector>
           <hashTree/>
         </hashTree>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">120000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
       </hashTree>
       <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Search Groups" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
