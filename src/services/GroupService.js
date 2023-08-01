@@ -185,8 +185,6 @@ async function createGroup(currentUser, data) {
   try {
     logger.debug(`Create Group - user - ${currentUser} , data -  ${JSON.stringify(data)}`)
 
-    data.name = data.name.trim()
-
     const group = await helper.createGroup(tx, data, currentUser)
 
     logger.debug(`Group = ${JSON.stringify(group)}`)
@@ -211,7 +209,7 @@ createGroup.schema = {
   currentUser: Joi.any(),
   data: Joi.object()
     .keys({
-      name: Joi.string().min(3).max(150).required(),
+      name: Joi.string().trim().min(3).max(150).required(),
       description: Joi.string().min(3).max(2048),
       privateGroup: Joi.boolean().required(),
       selfRegister: Joi.boolean().required(),
@@ -240,7 +238,7 @@ async function updateGroup(currentUser, groupId, data) {
     const group = await helper.ensureExists(tx, 'Group', groupId, currentUser === 'M2M' || helper.hasAdminRole(currentUser))
 
     const nameCheckRes = await tx.run('MATCH (g:Group) WHERE tolower(g.name) = tolower($name) RETURN g LIMIT 1', {
-      name: data.name.trim()
+      name: data.name
     })
     if (nameCheckRes.records.length > 0) {
       throw new errors.ConflictError(`The group name ${data.name} is already used`)
