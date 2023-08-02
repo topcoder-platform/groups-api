@@ -209,7 +209,7 @@ createGroup.schema = {
   currentUser: Joi.any(),
   data: Joi.object()
     .keys({
-      name: Joi.string().min(3).max(150).required(),
+      name: Joi.string().trim().min(3).max(150).required(),
       description: Joi.string().min(3).max(2048),
       privateGroup: Joi.boolean().required(),
       selfRegister: Joi.boolean().required(),
