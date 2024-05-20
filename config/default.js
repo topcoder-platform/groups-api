@@ -26,6 +26,7 @@ module.exports = {
 
   // bus API config params
   BUSAPI_URL: process.env.BUSAPI_URL || 'https://api.topcoder-dev.com/v5',
+  MOCK_BUSAPI_POST_EVENT: (process.env.MOCK_BUSAPI_POST_EVENT || 'false') === 'true',
   KAFKA_ERROR_TOPIC: process.env.KAFKA_ERROR_TOPIC || 'common.error.reporting',
 
   // challenge api

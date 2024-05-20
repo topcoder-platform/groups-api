@@ -315,6 +315,10 @@ function getBusApiClient() {
  * @param {Object} payload the event payload
  */
 async function postBusEvent(topic, payload) {
+  if (config.MOCK_BUSAPI_POST_EVENT) {
+    logger.debug(`Mock bus api post event ${payload} to topic ${topic}.`)
+    return
+  }
   const client = getBusApiClient()
   await client.postEvent({
     topic,

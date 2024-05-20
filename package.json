@@ -7,7 +7,9 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "lint": "standard",
-    "lint:fix": "standard --fix"
+    "lint:fix": "standard --fix",
+    "server-for-perf-test": "NODE_ENV=perftest node app.js",
+    "perf-test": "NODE_ENV=perftest node perf-test.js"
   },
   "author": "Topcoder",
   "devDependencies": {
