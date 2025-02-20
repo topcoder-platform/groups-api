@@ -44,7 +44,7 @@ builddeploy_steps: &builddeploy_steps
             source awsenvconf
             ./buildenv.sh -e $DEPLOY_ENV -b ${DEPLOY_ENV}-groups-api-deployvar
             source buildenvvar
-            ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${APP_ENV}-global-appvar,${DEPLOY_ENV}-groups-api-appvar -i groups-api
+            ./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s ${APP_ENV}-global-appvar,${DEPLOY_ENV}-groups-api-appvar -i groups-api -p FARGATE
             #./master_deploy.sh -d ECS -e $DEPLOY_ENV -t latest -s groups-api -i groups-api
 
 jobs:
